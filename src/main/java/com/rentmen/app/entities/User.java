@@ -37,14 +37,16 @@ public class User implements UserDetails {
 	private String password;
 	private String about;
 	private int depId;
-
+	private Boolean active;
+	private Boolean status;	
+	private String city; 
+	
 	@ManyToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
 	@JoinTable(name = "user_role", joinColumns = {
 			@JoinColumn(name = "user_id", referencedColumnName = "id") }, inverseJoinColumns = {
 					@JoinColumn(name = "role_id", referencedColumnName = "id") })
 	private Set<Role> roles = new HashSet<>();
 
-	private Boolean active;
 
 	public long getId() {
 		return this.id;
@@ -134,5 +136,21 @@ public class User implements UserDetails {
 
 	public boolean isEnabled() {
 		return true;
+	}
+
+	public Boolean getStatus() {
+		return status;
+	}
+
+	public void setStatus(Boolean status) {
+		this.status = status;
+	}
+
+	public String getCity() {
+		return city;
+	}
+
+	public void setCity(String city) {
+		this.city = city;
 	}
 }

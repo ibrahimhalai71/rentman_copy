@@ -4,6 +4,9 @@ import com.rentmen.app.DTO.ApiResponse;
 import com.rentmen.app.DTO.UserDto;
 import com.rentmen.app.configurations.CustomUserDetailService;
 import com.rentmen.app.services.UserService;
+
+import java.util.List;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -96,4 +99,21 @@ public class UserController {
         System.out.println(SecurityContextHolder.getContext());
         System.out.println("being called");
     }
+    
+    @GetMapping({"/getAllClients"})
+    public ResponseEntity<List<UserDto>> getAllClients(){
+    	return ResponseEntity.ok(this.userService.getAllClients());
+    }
+    
+    @GetMapping({"/getAllServiceProviders/{minRating}"})
+    public ResponseEntity<List<UserDto>> getAllServiceProviders(Float minRating){
+    	return ResponseEntity.ok(this.userService.getAllServiceProviders(minRating));
+    } 
+    
+    
+    
+    
+    
+    
+    
 }
