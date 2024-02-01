@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import com.rentmen.app.entities.ServiceProvider;
 
 public interface ServiceProviderRepo extends JpaRepository<ServiceProvider, Long> {
-	@Query("SELECT u.* FROM user u WHERE u.rating >= :minRating")
+	@Query(value = "SELECT u.* FROM users u WHERE u.rating >= :minRating", nativeQuery = true)
 	    List<ServiceProvider> findByRatingGreaterThanOrEqual(Float minRating);
 
 }

@@ -1,11 +1,14 @@
 package com.rentmen.app.controllers;
 
 import com.rentmen.app.DTO.ApiResponse;
+import com.rentmen.app.DTO.SkillDto;
 import com.rentmen.app.DTO.UserDto;
 import com.rentmen.app.configurations.CustomUserDetailService;
+import com.rentmen.app.services.SkillService;
 import com.rentmen.app.services.UserService;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -45,6 +48,9 @@ public class UserController {
 
     @Autowired
     private CustomUserDetailService userDetailsService;
+    
+    @Autowired
+    private SkillService skillService;
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping({"/admin/usermanagement"})
@@ -105,10 +111,20 @@ public class UserController {
     	return ResponseEntity.ok(this.userService.getAllClients());
     }
     
-    @GetMapping({"/getAllServiceProviders/{minRating}"})
-    public ResponseEntity<List<UserDto>> getAllServiceProviders(Float minRating){
+    @GetMapping({"/getAllServiceProviders/{minRating}","/getAllServiceProviders"})
+    public ResponseEntity<List<UserDto>> getAllServiceProviders(@PathVariable( required = false) Float minRating){
     	return ResponseEntity.ok(this.userService.getAllServiceProviders(minRating));
     } 
+    
+    @GetMapping({"/getAllSkills"})
+    public ResponseEntity<Set<SkillDto>> getAllSkills(){
+    	return ResponseEntity.ok(this.skillService.getAllSkills());
+    }
+    
+    @PostMapping({"/createSkill"})
+    public ResponseEntity<?> createSkill(@RequestBody SkillDto skillDto){
+    	return ResponseEntity.ok(this.skillService.createSkill(skillDto));
+    }
     
     
     

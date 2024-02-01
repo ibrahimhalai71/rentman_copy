@@ -42,6 +42,7 @@ public class UserDto {
 	private String description;
 	private Integer age;	
 	private String contact;
+	private Set<SkillDto> skills = new HashSet<>(); 
 	
 	public long getId() {
 		return this.id;
@@ -187,6 +188,14 @@ public class UserDto {
 
 	public void setContact(String contact) {
 		this.contact = contact;
+	}
+
+	public Set<SkillDto> getSkills() {
+		return skills;
+	}
+
+	public void setSkills(Set<SkillDto> skills) {
+		this.skills = skills;
 	}
 
 }

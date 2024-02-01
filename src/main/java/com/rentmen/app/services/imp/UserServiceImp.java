@@ -5,20 +5,28 @@ import com.rentmen.app.entities.Client;
 import com.rentmen.app.entities.Moderator;
 import com.rentmen.app.entities.Role;
 import com.rentmen.app.entities.ServiceProvider;
+import com.rentmen.app.entities.Skill;
 import com.rentmen.app.entities.User;
 import com.rentmen.app.exceptions.ResourceNotFoundException;
 import com.rentmen.app.repositories.ClientRepo;
 import com.rentmen.app.repositories.ModeratorRepo;
 import com.rentmen.app.repositories.RoleRepo;
 import com.rentmen.app.repositories.ServiceProviderRepo;
+import com.rentmen.app.repositories.SkillRepo;
 import com.rentmen.app.repositories.UserRepo;
 import com.rentmen.app.services.UserService;
 
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
+
+import org.modelmapper.Converter;
+import org.modelmapper.AbstractConverter;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeMap;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -47,6 +55,9 @@ public class UserServiceImp implements UserService {
 
     @Autowired
     private RoleRepo roleRepo;
+    
+    @Autowired
+    private SkillRepo skillRepo;
 
     public UserDto createUser(UserDto userDto) {
         User user = dtoToUser(userDto);
@@ -110,22 +121,27 @@ public class UserServiceImp implements UserService {
 		user.getRoles().add(role);
 
 		if (user.getDepId() == 1) {
-			Client client = modelMapper.map(user, Client.class);
+			Client client = modelMapper.map(userDto, Client.class);
 
 			client = clientRepo.save(client);
 
 			return modelMapper.map(client, UserDto.class);
 		} else if (user.getDepId() == 2) {
-			Moderator moderator = modelMapper.map(user, Moderator.class);
+			Moderator moderator = modelMapper.map(userDto, Moderator.class);
 
 			moderator = moderatorRepo.save(moderator);
 
 			return modelMapper.map(moderator, UserDto.class);
 		} else if (user.getDepId() == 3) {
-			ServiceProvider sp = modelMapper.map(user, ServiceProvider.class);
-
+			ServiceProvider sp = modelMapper.map(userDto, ServiceProvider.class);
+			if(!userDto.getSkills().isEmpty()) {
+				Set<Skill> skills = userDto.getSkills().stream()
+                .map(skillDto -> skillRepo.findById(skillDto.getId())
+                                .orElseThrow(() -> new ResourceNotFoundException("Skill", "id", skillDto.getId())))
+                .collect(Collectors.toSet());
+				sp.setSkills(skills);
+			}
 			sp = serviceProviderRepo.save(sp);
-
 			return modelMapper.map(sp, UserDto.class);
 		}
 

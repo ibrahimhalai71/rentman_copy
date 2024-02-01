@@ -1,11 +1,17 @@
 package com.rentmen.app.entities;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.JoinTable;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -18,8 +24,13 @@ public class ServiceProvider extends User {
 	private String contact;
 
 	@ManyToMany(fetch = FetchType.EAGER)
+	@JoinTable(name = "service_provider_skill", 
+	joinColumns = {@JoinColumn(name = "service_provider_id", referencedColumnName = "id") },
+	inverseJoinColumns = {@JoinColumn(name = "skill_id", referencedColumnName = "id") })
 	Set<Skill> skills = new HashSet<>();
 	
+	@OneToMany(mappedBy = "serviceProvider", cascade = CascadeType.ALL)
+    private List<Job> acceptedJobs = new ArrayList<>();
 
 	public Boolean getAvailabilityStatus() {
 		return availabilityStatus;
@@ -67,6 +78,14 @@ public class ServiceProvider extends User {
 
 	public void setContact(String contact) {
 		this.contact = contact;
+	}
+
+	public List<Job> getAcceptedJobs() {
+		return acceptedJobs;
+	}
+
+	public void setAcceptedJobs(List<Job> acceptedJobs) {
+		this.acceptedJobs = acceptedJobs;
 	}
 	
 	
