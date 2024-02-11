@@ -9,78 +9,193 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class UserDto {
-    private long id;
+	private long id;
 
-    @NotEmpty
-    @Size(min = 3, message = "Username must be at least 3 characters")
-    private String name;
+	@NotEmpty
+	@Size(min = 3, message = "Username must be at least 3 characters")
+	private String name;
 
-    private String email;
+	private String email;
 
-    @NotEmpty
-    @Size(min = 4, max = 16, message = "Password should be between 4-16 characters")
-    private String password;
+	@NotEmpty
+	@Size(min = 4, max = 16, message = "Password should be between 4-16 characters")
+	private String password;
 
-    private String about;
-    private int depId;
-    private Boolean active;
+	private String about;
+	private int depId;
+	private Boolean active;
 
-    public long getId() {
-        return this.id;
-    }
+	private Boolean status;
+	private String city;
+	
+	//Client Attributes
+	private String billingInfo;
+	private String preferences;
+	private String occupation;
+	
+	//Moderator Attributes
+	private String accessLevel;
 
-    public void setId(long id) {
-        this.id = id;
-    }
+	//Service Provider Attributes
+	private Boolean availabilityStatus;	
+	private Integer rating;	
+	private String description;
+	private Integer age;	
+	private String contact;
+	private Set<SkillDto> skills = new HashSet<>(); 
+	
+	public long getId() {
+		return this.id;
+	}
 
-    public String getName() {
-        return this.name;
-    }
+	public void setId(long id) {
+		this.id = id;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public String getName() {
+		return this.name;
+	}
 
-    public String getEmail() {
-        return this.email;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+	public String getEmail() {
+		return this.email;
+	}
 
-    @JsonIgnore
-    public String getPassword() {
-        return this.password;
-    }
+	public void setEmail(String email) {
+		this.email = email;
+	}
 
-    @JsonProperty
-    public void setPassword(String password) {
-        this.password = password;
-    }
+	@JsonIgnore
+	public String getPassword() {
+		return this.password;
+	}
 
-    public String getAbout() {
-        return this.about;
-    }
+	@JsonProperty
+	public void setPassword(String password) {
+		this.password = password;
+	}
 
-    public void setAbout(String about) {
-        this.about = about;
-    }
+	public String getAbout() {
+		return this.about;
+	}
 
-    public Boolean getActive() {
-        return this.active;
-    }
+	public void setAbout(String about) {
+		this.about = about;
+	}
 
-    public void setActive(Boolean active) {
-        this.active = active;
-    }
+	public Boolean getActive() {
+		return this.active;
+	}
 
-    public int getDepId() {
-        return this.depId;
-    }
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
 
-    public void setDepId(int depId) {
-        this.depId = depId;
-    }
+	public int getDepId() {
+		return this.depId;
+	}
+
+	public void setDepId(int depId) {
+		this.depId = depId;
+	}
+
+	public Boolean getStatus() {
+		return status;
+	}
+
+	public void setStatus(Boolean status) {
+		this.status = status;
+	}
+
+	public String getCity() {
+		return city;
+	}
+
+	public void setCity(String city) {
+		this.city = city;
+	}
+
+	public String getBillingInfo() {
+		return billingInfo;
+	}
+
+	public void setBillingInfo(String billingInfo) {
+		this.billingInfo = billingInfo;
+	}
+
+	public String getPreferences() {
+		return preferences;
+	}
+
+	public void setPreferences(String preferences) {
+		this.preferences = preferences;
+	}
+
+	public String getOccupation() {
+		return occupation;
+	}
+
+	public void setOccupation(String occupation) {
+		this.occupation = occupation;
+	}
+
+	public String getAccessLevel() {
+		return accessLevel;
+	}
+
+	public void setAccessLevel(String accessLevel) {
+		this.accessLevel = accessLevel;
+	}
+
+	public Boolean getAvailabilityStatus() {
+		return availabilityStatus;
+	}
+
+	public void setAvailabilityStatus(Boolean availabilityStatus) {
+		this.availabilityStatus = availabilityStatus;
+	}
+
+	public Integer getRating() {
+		return rating;
+	}
+
+	public void setRating(Integer rating) {
+		this.rating = rating;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public Integer getAge() {
+		return age;
+	}
+
+	public void setAge(Integer age) {
+		this.age = age;
+	}
+
+	public String getContact() {
+		return contact;
+	}
+
+	public void setContact(String contact) {
+		this.contact = contact;
+	}
+
+	public Set<SkillDto> getSkills() {
+		return skills;
+	}
+
+	public void setSkills(Set<SkillDto> skills) {
+		this.skills = skills;
+	}
 
 }

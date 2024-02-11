@@ -16,4 +16,8 @@ public interface UserService {
   
   void deleteUser(Long paramInteger);
   
+  List<UserDto> getAllClients();
+  
+  List<UserDto> getAllServiceProviders(Float rating);
+  
 }
