@@ -122,13 +122,15 @@ public class UserServiceImp implements UserService {
 
 		if (user.getDepId() == 1) {
 			Client client = modelMapper.map(userDto, Client.class);
-
+			client.setPassword(passwordEncoder.encode(client.getPassword()));
+			client.getRoles().add(role);
 			client = clientRepo.save(client);
 
 			return modelMapper.map(client, UserDto.class);
 		} else if (user.getDepId() == 2) {
 			Moderator moderator = modelMapper.map(userDto, Moderator.class);
-
+			moderator.setPassword(passwordEncoder.encode(moderator.getPassword()));
+			moderator.getRoles().add(role);
 			moderator = moderatorRepo.save(moderator);
 
 			return modelMapper.map(moderator, UserDto.class);
@@ -141,7 +143,10 @@ public class UserServiceImp implements UserService {
                 .collect(Collectors.toSet());
 				sp.setSkills(skills);
 			}
+			sp.setPassword(passwordEncoder.encode(sp.getPassword()));
+			sp.getRoles().add(role);
 			sp = serviceProviderRepo.save(sp);
+			
 			return modelMapper.map(sp, UserDto.class);
 		}
 
