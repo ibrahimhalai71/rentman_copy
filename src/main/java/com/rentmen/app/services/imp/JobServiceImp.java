@@ -1,6 +1,7 @@
 package com.rentmen.app.services.imp;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -189,15 +190,23 @@ public class JobServiceImp implements JobService {
 					.collect(Collectors.toSet());
 			job.setRequiredSkills(requiredSkills);
 		}
+		
 		if(!jobDto.getPotentialJobOffers().isEmpty()) {
-			Set<PotentialJobOffer> pJOs = jobDto.getPotentialJobOffers().stream()
-			        .map(dto -> {
-			            ServiceProvider sp = serviceProviderRepo.findById(dto.getServiceProviderId())
-			                    .orElseThrow(() -> new ResourceNotFoundException("ServiceProvider", "id", dto.getServiceProviderId()));
-			            return new PotentialJobOffer(job, sp);
-			        })
-			        .collect(Collectors.toSet());
-			job.setPotentialJobOffers(pJOs);
+			List<PotentialJobOffer> pjos;
+			if (jobDto.getId() == null) {
+				pjos = jobDto.getPotentialJobOffers().stream().map(dto -> {
+					ServiceProvider sp = serviceProviderRepo.findById(dto.getServiceProviderId()).orElseThrow(
+							() -> new ResourceNotFoundException("ServiceProvider", "id", dto.getServiceProviderId()));
+					return new PotentialJobOffer(job, sp);
+				}).collect(Collectors.toList());
+			} else {
+				List<PotentialJobOfferId> pjoIds = jobDto.getPotentialJobOffers().stream()
+						.filter(pjo -> jobDto.getId() != null)
+						.map(pjo -> new PotentialJobOfferId(jobDto.getId(), pjo.getServiceProviderId()))
+						.collect(Collectors.toList());
+				pjos = pjoRepo.findAllById(pjoIds);
+			}
+			job.setPotentialJobOffers(pjos);
 		}
 		
 		return job;

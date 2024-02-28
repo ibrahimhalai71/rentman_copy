@@ -2,6 +2,7 @@ package com.rentmen.app.entities;
 
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -65,7 +66,7 @@ public class Job {
 //    private Set<ServiceProvider> potentialServiceProviders;
     
     @OneToMany(mappedBy = "job", cascade=CascadeType.ALL, fetch=FetchType.LAZY)
-    private Set<PotentialJobOffer> potentialJobOffers;
+    private List<PotentialJobOffer> potentialJobOffers;
     
     private Boolean active;
     
@@ -139,11 +140,11 @@ public class Job {
 		this.requiredSkills = requiredSkills;
 	}
 
-	public Set<PotentialJobOffer> getPotentialJobOffers() {
+	public List<PotentialJobOffer> getPotentialJobOffers() {
 		return potentialJobOffers;
 	}
 
-	public void setPotentialJobOffers(Set<PotentialJobOffer> potentialJobOffers) {
+	public void setPotentialJobOffers(List<PotentialJobOffer> potentialJobOffers) {
 		this.potentialJobOffers = potentialJobOffers;
 	}
 

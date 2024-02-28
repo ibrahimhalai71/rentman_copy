@@ -11,8 +11,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.rentmen.app.entities.PotentialJobOffer;
+import com.rentmen.app.entities.PotentialJobOfferId;
 
-public interface PotentialJobOfferRepo extends JpaRepository<PotentialJobOffer, Long> {
+public interface PotentialJobOfferRepo extends JpaRepository<PotentialJobOffer, PotentialJobOfferId> {
 	
 	@Query(value = "SELECT pjo.* FROM potential_job_offers pjo WHERE pjo.service_provider_id = :serviceProviderId", nativeQuery = true)
 	List<PotentialJobOffer> findbyServiceProviderId(Long serviceProviderId);
