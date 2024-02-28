@@ -161,6 +161,12 @@ public class UserServiceImp implements UserService {
 		return modelMapper.map(clients, listType);
 	}
 	
+	public List<UserDto> getAllModerators(){
+		List<Moderator> moderators  = moderatorRepo.findAll();
+		Type listType = new TypeToken<List<UserDto>>() {}.getType();
+		return modelMapper.map(moderators, listType);
+	}
+	
 	public List<UserDto> getAllServiceProviders(Float rating){
 		List<ServiceProvider> serviceProviders = new ArrayList<ServiceProvider>();
 		Type listType = new TypeToken<List<UserDto>>() {}.getType();

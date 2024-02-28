@@ -4,8 +4,11 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -14,9 +17,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.springframework.format.annotation.DateTimeFormat;
+
+import com.rentmen.app.utils.JobStatus;
 
 @Entity
 @Table(name = "job")
@@ -49,14 +55,17 @@ public class Job {
         )
 	Set<Skill> requiredSkills = new HashSet<>();
     
-    @ManyToMany
-    @JoinTable(
-        name = "job_service_providers",
-        joinColumns = @JoinColumn(name = "job_id", referencedColumnName = "id"),
-        inverseJoinColumns = @JoinColumn(name = "service_provider_id", referencedColumnName = "id")
-    )
-    @Column(name = "accepted", columnDefinition = "boolean default false")  // Add this annotation
-    private Set<ServiceProvider> potentialServiceProviders;
+//    @ManyToMany
+//    @JoinTable(
+//        name = "job_service_providers",
+//        joinColumns = @JoinColumn(name = "job_id", referencedColumnName = "id"),
+//        inverseJoinColumns = @JoinColumn(name = "service_provider_id", referencedColumnName = "id")
+//    )
+//    @Column(name = "accepted", columnDefinition = "boolean default false")  // Add this annotation
+//    private Set<ServiceProvider> potentialServiceProviders;
+    
+    @OneToMany(mappedBy = "job", cascade=CascadeType.ALL, fetch=FetchType.LAZY)
+    private Set<PotentialJobOffer> potentialJobOffers;
     
     private Boolean active;
     
@@ -76,6 +85,9 @@ public class Job {
     
     @Column(name = "description", columnDefinition = "LONGTEXT")
     private String description;
+    
+    @Enumerated(EnumType.STRING)
+    private JobStatus status;
     // Other job-related fields and methods
     
     // Getters and setters
@@ -127,12 +139,12 @@ public class Job {
 		this.requiredSkills = requiredSkills;
 	}
 
-	public Set<ServiceProvider> getPotentialServiceProviders() {
-		return potentialServiceProviders;
+	public Set<PotentialJobOffer> getPotentialJobOffers() {
+		return potentialJobOffers;
 	}
 
-	public void setPotentialServiceProviders(Set<ServiceProvider> potentialServiceProviders) {
-		this.potentialServiceProviders = potentialServiceProviders;
+	public void setPotentialJobOffers(Set<PotentialJobOffer> potentialJobOffers) {
+		this.potentialJobOffers = potentialJobOffers;
 	}
 
 	public Boolean getActive() {
@@ -205,6 +217,14 @@ public class Job {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public JobStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(JobStatus status) {
+		this.status = status;
 	}
 
 }

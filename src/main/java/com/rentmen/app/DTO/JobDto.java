@@ -4,7 +4,10 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.rentmen.app.entities.PotentialJobOffer;
+import com.rentmen.app.utils.JobStatus;
 
 public class JobDto {
 	private Long id;
@@ -24,7 +27,8 @@ public class JobDto {
 	private Set<SkillDto> requiredSkills = new HashSet<>();
 	
 	@JsonProperty("potential_service_providers")
-	private Set<UserDto> potentialServiceProviders = new HashSet<>();
+	private Set<PotentialJobOfferDto> potentialJobOffers = new HashSet<>();
+	//	private Set<UserDto> potentialServiceProviders = new HashSet<>();
 	
 	private Boolean active;
 	
@@ -42,6 +46,7 @@ public class JobDto {
 	private String destination;
 	private String role;
 	private String description;
+	private JobStatus status;
 	public Long getId() {
 		return id;
 	}
@@ -78,11 +83,17 @@ public class JobDto {
 	public void setRequiredSkills(Set<SkillDto> requiredSkills) {
 		this.requiredSkills = requiredSkills;
 	}
-	public Set<UserDto> getPotentialServiceProviders() {
-		return potentialServiceProviders;
+//	public Set<UserDto> getPotentialServiceProviders() {
+//		return potentialServiceProviders;
+//	}
+//	public void setPotentialServiceProviders(Set<UserDto> potentialServiceProviders) {
+//		this.potentialServiceProviders = potentialServiceProviders;
+//	}
+	public Set<PotentialJobOfferDto> getPotentialJobOffers() {
+		return potentialJobOffers;
 	}
-	public void setPotentialServiceProviders(Set<UserDto> potentialServiceProviders) {
-		this.potentialServiceProviders = potentialServiceProviders;
+	public void setPotentialJobOffers(Set<PotentialJobOfferDto> potentialJobOffers) {
+		this.potentialJobOffers = potentialJobOffers;
 	}
 	public Boolean getActive() {
 		return active;
@@ -137,6 +148,12 @@ public class JobDto {
 	}
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	public JobStatus getStatus() {
+		return status;
+	}
+	public void setStatus(JobStatus status) {
+		this.status = status;
 	}
 	
 	

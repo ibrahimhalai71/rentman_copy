@@ -116,6 +116,11 @@ public class UserController {
     	return ResponseEntity.ok(this.userService.getAllServiceProviders(minRating));
     } 
     
+    @GetMapping({"/getAllModerators"})
+    public ResponseEntity<List<UserDto>> getAllModerators(){
+    	return ResponseEntity.ok(this.userService.getAllModerators());
+    }
+    
     @GetMapping({"/getAllSkills"})
     public ResponseEntity<Set<SkillDto>> getAllSkills(){
     	return ResponseEntity.ok(this.skillService.getAllSkills());

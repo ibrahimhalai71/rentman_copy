@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.rentmen.app.DTO.JobDto;
+import com.rentmen.app.DTO.PotentialJobOfferDto;
 
 public interface JobService {
  JobDto createJob(JobDto jobDto);
@@ -25,4 +26,10 @@ public interface JobService {
  List<JobDto> getAllJobsCreatedById(Long id);
  
  List<JobDto> getPotentialJobsOfferedToServiceProvider(Set<Long> serviceProviderIds);
+ 
+ List<PotentialJobOfferDto> getPotentialJobOffersToServiceProvider(Long serviceProviderIds);
+ 
+ int acceptJobOffers(List<Long> jobIds, Long serviceProviderId);
+ 
+ int rejectJobOffers(List<Long> jobIds, Long serviceProviderId);
 }

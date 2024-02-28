@@ -1,6 +1,8 @@
 package com.rentmen.app.services.imp;
 
 import java.lang.reflect.Type;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -11,10 +13,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.rentmen.app.DTO.JobDto;
+import com.rentmen.app.DTO.PotentialJobOfferDto;
 import com.rentmen.app.DTO.UserDto;
 import com.rentmen.app.entities.Client;
 import com.rentmen.app.entities.Job;
 import com.rentmen.app.entities.Moderator;
+import com.rentmen.app.entities.PotentialJobOffer;
+import com.rentmen.app.entities.PotentialJobOfferId;
 import com.rentmen.app.entities.ServiceProvider;
 import com.rentmen.app.entities.Skill;
 import com.rentmen.app.entities.User;
@@ -22,6 +27,7 @@ import com.rentmen.app.exceptions.ResourceNotFoundException;
 import com.rentmen.app.repositories.ClientRepo;
 import com.rentmen.app.repositories.JobRepo;
 import com.rentmen.app.repositories.ModeratorRepo;
+import com.rentmen.app.repositories.PotentialJobOfferRepo;
 import com.rentmen.app.repositories.ServiceProviderRepo;
 import com.rentmen.app.repositories.SkillRepo;
 import com.rentmen.app.repositories.UserRepo;
@@ -50,6 +56,9 @@ public class JobServiceImp implements JobService {
 	
 	@Autowired
 	private JobRepo jobRepo;
+	
+	@Autowired
+	private PotentialJobOfferRepo pjoRepo;
 
 	@Override
 	public JobDto createJob(JobDto jobDto) {
@@ -116,15 +125,34 @@ public class JobServiceImp implements JobService {
 
 	@Override
 	public List<JobDto> getPotentialJobsOfferedToServiceProvider(Set<Long> serviceProviderIds) {
-		Set<ServiceProvider> potentialServiceProviders = serviceProviderIds.stream()
-				.map(serviceProviderDto -> serviceProviderRepo.findById(serviceProviderDto).orElseThrow(
-						() -> new ResourceNotFoundException("ServiceProvider", "id", serviceProviderDto)))
-				.collect(Collectors.toSet());
-		List<Job> jobList = jobRepo.findByPotentialServiceProvidersIn(potentialServiceProviders);
-		Type listType = new TypeToken<List<JobDto>>() {}.getType();
-		return modelMapper.map(jobList, listType);
+		Set<PotentialJobOffer> potentialServiceProviders = serviceProviderIds.stream().map(spId -> {
+			ServiceProvider sp = serviceProviderRepo.findById(spId)
+					.orElseThrow(() -> new ResourceNotFoundException("ServiceProvider", "id", spId));
+			PotentialJobOffer pjo = new PotentialJobOffer();
+			return pjo;
+		}).collect(Collectors.toSet());
+		List<Job> jobList = jobRepo.findByPotentialJobOffersIn(potentialServiceProviders);
+//		Type listType = new TypeToken<List<JobDto>>() {}.getType();
+//		return modelMapper.map(jobList, listType);
+		return null;
 	}
 
+	@Override
+	public List<PotentialJobOfferDto> getPotentialJobOffersToServiceProvider(Long serviceProviderId){
+		List<PotentialJobOffer> pjos = pjoRepo.findbyServiceProviderId(serviceProviderId);
+		Type listType = new TypeToken<List<PotentialJobOfferDto>>() {}.getType();
+		return modelMapper.map(pjos, listType);
+	}
+	
+	@Override
+	public int acceptJobOffers(List<Long> jobIds, Long serviceProviderId){
+		return pjoRepo.acceptJobOffers(jobIds, serviceProviderId);
+	}
+	@Override
+	public int rejectJobOffers(List<Long> jobIds, Long serviceProviderId){
+		return pjoRepo.rejectJobOffers(jobIds, serviceProviderId);
+	}
+	
 	private Job setFeilds(JobDto jobDto) {
 		Job job;
 		Client client;
@@ -161,13 +189,15 @@ public class JobServiceImp implements JobService {
 					.collect(Collectors.toSet());
 			job.setRequiredSkills(requiredSkills);
 		}
-
-		if (!jobDto.getPotentialServiceProviders().isEmpty()) {
-			Set<ServiceProvider> potentialServiceProviders = jobDto.getPotentialServiceProviders().stream()
-					.map(serviceProviderDto -> serviceProviderRepo.findById(serviceProviderDto.getId()).orElseThrow(
-							() -> new ResourceNotFoundException("ServiceProvider", "id", serviceProviderDto.getId())))
-					.collect(Collectors.toSet());
-			job.setPotentialServiceProviders(potentialServiceProviders);
+		if(!jobDto.getPotentialJobOffers().isEmpty()) {
+			Set<PotentialJobOffer> pJOs = jobDto.getPotentialJobOffers().stream()
+			        .map(dto -> {
+			            ServiceProvider sp = serviceProviderRepo.findById(dto.getServiceProviderId())
+			                    .orElseThrow(() -> new ResourceNotFoundException("ServiceProvider", "id", dto.getServiceProviderId()));
+			            return new PotentialJobOffer(job, sp);
+			        })
+			        .collect(Collectors.toSet());
+			job.setPotentialJobOffers(pJOs);
 		}
 		
 		return job;

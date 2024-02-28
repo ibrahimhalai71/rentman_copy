@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import com.rentmen.app.entities.Job;
+import com.rentmen.app.entities.PotentialJobOffer;
 import com.rentmen.app.entities.ServiceProvider;
 
 public interface JobRepo extends JpaRepository<Job, Long> {
@@ -20,7 +21,7 @@ public interface JobRepo extends JpaRepository<Job, Long> {
 	@Query(value = "SELECT j.* FROM job j WHERE j.created_by = :userId", nativeQuery = true)
 	List<Job> findByCreatedBy(Long userId);
 	
-	List<Job> findByPotentialServiceProvidersIn(Set<ServiceProvider> serviceProviderIds);
+	List<Job> findByPotentialJobOffersIn(Set<PotentialJobOffer> potentialJobOffers);
 
 
 

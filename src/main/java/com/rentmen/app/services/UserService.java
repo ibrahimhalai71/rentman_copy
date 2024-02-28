@@ -20,4 +20,6 @@ public interface UserService {
   
   List<UserDto> getAllServiceProviders(Float rating);
   
+  List<UserDto> getAllModerators();
+  
 }
