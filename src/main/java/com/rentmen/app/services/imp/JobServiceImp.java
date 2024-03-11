@@ -111,8 +111,12 @@ public class JobServiceImp implements JobService {
 	}
 
 	@Override
-	public List<JobDto> getAllJobsServiceProviderId(Long id) {
-		List<Job> jobList = jobRepo.findByServiceProviderId(id);
+	public List<JobDto> getAllJobsServiceProviderIds(List<Long> serviceProviderIds) {
+		List<ServiceProvider> serviceProviders = serviceProviderIds.stream()
+				.map(serviceProviderDto -> serviceProviderRepo.findById(serviceProviderDto).orElseThrow(
+						() -> new ResourceNotFoundException("ServiceProvider", "id", serviceProviderDto)))
+				.collect(Collectors.toList());
+		List<Job> jobList = jobRepo.findByServiceProvidersListIn(serviceProviders);
 		Type listType = new TypeToken<List<JobDto>>() {}.getType();
 		return modelMapper.map(jobList, listType);
 	}
@@ -157,7 +161,6 @@ public class JobServiceImp implements JobService {
 	private Job setFeilds(JobDto jobDto) {
 		Job job;
 		Client client;
-		ServiceProvider serviceProvider;
 		Moderator moderator = new Moderator();
 		
 		job = modelMapper.map(jobDto, Job.class);
@@ -171,10 +174,13 @@ public class JobServiceImp implements JobService {
 			job.setModerator(moderator);
 		}
 		
-		if (jobDto.getServiceProvider() != null) {
-			serviceProvider = serviceProviderRepo.findById(jobDto.getServiceProvider().getId()).orElseThrow(
-					() -> new ResourceNotFoundException("ServiceProvider", "id", jobDto.getServiceProvider().getId()));
-			job.setServiceProvider(serviceProvider);
+		if (jobDto.getServiceProvidersList() != null && !jobDto.getServiceProvidersList().isEmpty()) {
+			List<ServiceProvider> serviceProviderList = jobDto.getServiceProvidersList().stream()
+					.map(sp -> serviceProviderRepo.findById(sp.getId())
+							.orElseThrow(() -> new ResourceNotFoundException("ServiceProvider", "id", sp.getId())))
+					.collect(Collectors.toList());
+
+			job.setServiceProvidersList(serviceProviderList);
 		}
 		
 		if (jobDto.getCreatedBy().getId() == client.getId()) {

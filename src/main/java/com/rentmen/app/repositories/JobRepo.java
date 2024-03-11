@@ -16,12 +16,14 @@ public interface JobRepo extends JpaRepository<Job, Long> {
 	
 	List<Job> findByModeratorId(Long moderatorId);
 
-	List<Job> findByServiceProviderId(Long serviceProviderId);
+//	List<Job> findByServiceProviderId(Long serviceProviderId);
 
 	@Query(value = "SELECT j.* FROM job j WHERE j.created_by = :userId", nativeQuery = true)
 	List<Job> findByCreatedBy(Long userId);
 	
 	List<Job> findByPotentialJobOffersIn(Set<PotentialJobOffer> potentialJobOffers);
+	
+	List<Job> findByServiceProvidersListIn(List<ServiceProvider> serviceProviders);
 
 
 

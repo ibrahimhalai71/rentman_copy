@@ -64,9 +64,9 @@ public class JobController {
 		return ResponseEntity.ok(jobService.getAllJobsByModeratorId(moderatorId));
 	}
 	
-	@GetMapping({"/getAllJobsServiceProviderId/{serviceProviderId}"})
-	public ResponseEntity<List<JobDto>> getAllJobsServiceProviderId(@PathVariable("serviceProviderId") Long serviceProviderId){
-		return ResponseEntity.ok(jobService.getAllJobsServiceProviderId(serviceProviderId));
+	@GetMapping({"/getAllJobsServiceProviderIds/{serviceProviderIds}"})
+	public ResponseEntity<List<JobDto>> getAllJobsServiceProviderId(@PathVariable("serviceProviderIds") List<Long> serviceProviderIds){
+		return ResponseEntity.ok(jobService.getAllJobsServiceProviderIds(serviceProviderIds));
 	}
 	
 	@GetMapping({"/getAllJobsCreatedById/{createdById}"})

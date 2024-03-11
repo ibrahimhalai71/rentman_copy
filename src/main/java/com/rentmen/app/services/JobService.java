@@ -21,7 +21,7 @@ public interface JobService {
  
  List<JobDto> getAllJobsByModeratorId(Long id);
  
- List<JobDto> getAllJobsServiceProviderId(Long id);
+ List<JobDto> getAllJobsServiceProviderIds(List<Long> serviceProviderIds);
  
  List<JobDto> getAllJobsCreatedById(Long id);
  

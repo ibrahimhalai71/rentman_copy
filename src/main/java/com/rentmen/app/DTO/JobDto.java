@@ -1,12 +1,21 @@
 package com.rentmen.app.DTO;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+
+import javax.persistence.Column;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.rentmen.app.entities.PotentialJobOffer;
+import com.rentmen.app.entities.ServiceProvider;
 import com.rentmen.app.utils.JobStatus;
 
 public class JobDto {
@@ -17,8 +26,8 @@ public class JobDto {
 	@JsonProperty("moderator")
 	private UserDto moderator;
 	
-	@JsonProperty("service_provider")
-	private UserDto serviceProvider;
+	@JsonProperty("service_providers_list")
+	private List<UserDto> serviceProvidersList = new ArrayList<UserDto>();
 	
 	@JsonProperty("created_by")
 	private UserDto createdBy;
@@ -42,11 +51,30 @@ public class JobDto {
 	private LocalDate endDate;
 	
 	private String title;
-	private String payment;
 	private String destination;
 	private String role;
 	private String description;
 	private JobStatus status;
+	
+	@JsonProperty("moderator_approval")
+    private Integer moderatorApproval;
+    
+    @JsonProperty("start_time")
+    private LocalTime startTime;
+    
+    @JsonProperty("end_time")
+    private LocalTime endTime;
+    
+    @JsonProperty("number_of_people")
+    private Integer numberOfPeople;
+    
+    @JsonProperty("project_lead_name")
+    private String projectLeadName;
+    
+    @JsonProperty("project_lead_number")
+    private String projectLeadNumber;
+    
+	
 	public Long getId() {
 		return id;
 	}
@@ -65,12 +93,6 @@ public class JobDto {
 	public void setModerator(UserDto moderator) {
 		this.moderator = moderator;
 	}
-	public UserDto getServiceProvider() {
-		return serviceProvider;
-	}
-	public void setServiceProvider(UserDto serviceProvider) {
-		this.serviceProvider = serviceProvider;
-	}
 	public UserDto getCreatedBy() {
 		return createdBy;
 	}
@@ -83,12 +105,6 @@ public class JobDto {
 	public void setRequiredSkills(Set<SkillDto> requiredSkills) {
 		this.requiredSkills = requiredSkills;
 	}
-//	public Set<UserDto> getPotentialServiceProviders() {
-//		return potentialServiceProviders;
-//	}
-//	public void setPotentialServiceProviders(Set<UserDto> potentialServiceProviders) {
-//		this.potentialServiceProviders = potentialServiceProviders;
-//	}
 	public Set<PotentialJobOfferDto> getPotentialJobOffers() {
 		return potentialJobOffers;
 	}
@@ -125,12 +141,6 @@ public class JobDto {
 	public void setTitle(String title) {
 		this.title = title;
 	}
-	public String getPayment() {
-		return payment;
-	}
-	public void setPayment(String payment) {
-		this.payment = payment;
-	}
 	public String getDestination() {
 		return destination;
 	}
@@ -154,6 +164,48 @@ public class JobDto {
 	}
 	public void setStatus(JobStatus status) {
 		this.status = status;
+	}
+	public List<UserDto> getServiceProvidersList() {
+		return serviceProvidersList;
+	}
+	public Integer getModeratorApproval() {
+		return moderatorApproval;
+	}
+	public LocalTime getStartTime() {
+		return startTime;
+	}
+	public LocalTime getEndTime() {
+		return endTime;
+	}
+	public Integer getNumberOfPeople() {
+		return numberOfPeople;
+	}
+	public String getProjectLeadName() {
+		return projectLeadName;
+	}
+	public String getProjectLeadNumber() {
+		return projectLeadNumber;
+	}
+	public void setServiceProvidersList(List<UserDto> serviceProvidersList) {
+		this.serviceProvidersList = serviceProvidersList;
+	}
+	public void setModeratorApproval(Integer moderatorApproval) {
+		this.moderatorApproval = moderatorApproval;
+	}
+	public void setStartTime(LocalTime startTime) {
+		this.startTime = startTime;
+	}
+	public void setEndTime(LocalTime endTime) {
+		this.endTime = endTime;
+	}
+	public void setNumberOfPeople(Integer numberOfPeople) {
+		this.numberOfPeople = numberOfPeople;
+	}
+	public void setProjectLeadName(String projectLeadName) {
+		this.projectLeadName = projectLeadName;
+	}
+	public void setProjectLeadNumber(String projectLeadNumber) {
+		this.projectLeadNumber = projectLeadNumber;
 	}
 	
 	

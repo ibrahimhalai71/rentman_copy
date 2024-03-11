@@ -1,6 +1,9 @@
 package com.rentmen.app.entities;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -20,6 +23,8 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -40,9 +45,13 @@ public class Job {
     @JoinColumn(name = "moderator_id")
     private Moderator moderator;
 
-    @ManyToOne
-    @JoinColumn(name = "service_provider_id")
-    private ServiceProvider serviceProvider;
+    @ManyToMany
+    @JoinTable(
+            name = "job_service_provider_ids",
+            joinColumns = @JoinColumn(name = "job_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "service_provider_id", referencedColumnName = "id")
+        )
+    private List<ServiceProvider> serviceProvidersList = new ArrayList<ServiceProvider>();
     
     @ManyToOne
     @JoinColumn(name = "created_by")
@@ -80,7 +89,6 @@ public class Job {
     private LocalDate endDate;
 
     private String title;
-    private String payment;
     private String destination;
     private String role;
     
@@ -89,6 +97,24 @@ public class Job {
     
     @Enumerated(EnumType.STRING)
     private JobStatus status;
+    
+    @Column(name = "moderator_approval")
+    private Integer moderatorApproval;
+    
+    @Column(name = "start_time")
+    private LocalTime startTime;
+    
+    @Column(name = "end_time")
+    private LocalTime endTime;
+    
+    @Column(name = "number_of_people")
+    private Integer numberOfPeople;
+    
+    @Column(name = "project_lead_name")
+    private String projectLeadName;
+    
+    @Column(name = "project_lead_number")
+    private String projectLeadNumber;
     // Other job-related fields and methods
     
     // Getters and setters
@@ -114,14 +140,6 @@ public class Job {
 
 	public void setModerator(Moderator moderator) {
 		this.moderator = moderator;
-	}
-
-	public ServiceProvider getServiceProvider() {
-		return serviceProvider;
-	}
-
-	public void setServiceProvider(ServiceProvider serviceProvider) {
-		this.serviceProvider = serviceProvider;
 	}
 
 	public User getCreatedBy() {
@@ -188,14 +206,6 @@ public class Job {
 		this.title = title;
 	}
 
-	public String getPayment() {
-		return payment;
-	}
-
-	public void setPayment(String payment) {
-		this.payment = payment;
-	}
-
 	public String getDestination() {
 		return destination;
 	}
@@ -226,6 +236,62 @@ public class Job {
 
 	public void setStatus(JobStatus status) {
 		this.status = status;
+	}
+
+	public List<ServiceProvider> getServiceProvidersList() {
+		return serviceProvidersList;
+	}
+
+	public Integer getModeratorApproval() {
+		return moderatorApproval;
+	}
+
+	public LocalTime getStartTime() {
+		return startTime;
+	}
+
+	public LocalTime getEndTime() {
+		return endTime;
+	}
+
+	public Integer getNumberOfPeople() {
+		return numberOfPeople;
+	}
+
+	public String getProjectLeadName() {
+		return projectLeadName;
+	}
+
+	public String getProjectLeadNumber() {
+		return projectLeadNumber;
+	}
+
+	public void setServiceProvidersList(List<ServiceProvider> serviceProvidersList) {
+		this.serviceProvidersList = serviceProvidersList;
+	}
+
+	public void setModeratorApproval(Integer moderatorApproval) {
+		this.moderatorApproval = moderatorApproval;
+	}
+
+	public void setStartTime(LocalTime startTime) {
+		this.startTime = startTime;
+	}
+
+	public void setEndTime(LocalTime endTime) {
+		this.endTime = endTime;
+	}
+
+	public void setNumberOfPeople(Integer numberOfPeople) {
+		this.numberOfPeople = numberOfPeople;
+	}
+
+	public void setProjectLeadName(String projectLeadName) {
+		this.projectLeadName = projectLeadName;
+	}
+
+	public void setProjectLeadNumber(String projectLeadNumber) {
+		this.projectLeadNumber = projectLeadNumber;
 	}
 
 }
