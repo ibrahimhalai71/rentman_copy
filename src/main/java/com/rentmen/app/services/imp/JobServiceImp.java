@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.transaction.Transactional;
+
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -149,8 +151,12 @@ public class JobServiceImp implements JobService {
 		return modelMapper.map(pjos, listType);
 	}
 	
+	@Transactional
 	@Override
 	public int acceptJobOffers(List<Long> jobIds, Long serviceProviderId){
+		for(Long jobId: jobIds) {
+			jobRepo.addToServiceProvidersList(jobId,serviceProviderId);
+		}
 		return pjoRepo.acceptJobOffers(jobIds, serviceProviderId);
 	}
 	@Override
