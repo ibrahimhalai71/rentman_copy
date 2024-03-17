@@ -65,16 +65,7 @@ public class Job {
         )
 	Set<Skill> requiredSkills = new HashSet<>();
     
-//    @ManyToMany
-//    @JoinTable(
-//        name = "job_service_providers",
-//        joinColumns = @JoinColumn(name = "job_id", referencedColumnName = "id"),
-//        inverseJoinColumns = @JoinColumn(name = "service_provider_id", referencedColumnName = "id")
-//    )
-//    @Column(name = "accepted", columnDefinition = "boolean default false")  // Add this annotation
-//    private Set<ServiceProvider> potentialServiceProviders;
-    
-    @OneToMany(mappedBy = "job", cascade=CascadeType.ALL, fetch=FetchType.LAZY)
+    @OneToMany(mappedBy = "job", cascade=CascadeType.ALL, fetch=FetchType.LAZY, orphanRemoval = true)
     private List<PotentialJobOffer> potentialJobOffers;
     
     private Boolean active;
