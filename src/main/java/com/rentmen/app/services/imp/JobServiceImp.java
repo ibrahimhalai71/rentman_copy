@@ -72,9 +72,9 @@ public class JobServiceImp implements JobService {
 
 	@Override
 	public JobDto updateJob(JobDto jobDto) {
+//		Job oldJob= jobRepo.findById(jobDto.getId()).orElseThrow(() -> new ResourceNotFoundException("Job", "id", jobDto.getId()));
 		Job updatedJob = setFeilds(jobDto);
-		Job oldJob= jobRepo.findById(jobDto.getId()).orElseThrow(() -> new ResourceNotFoundException("Job", "id", jobDto.getId()));
-		updatedJob.setId(oldJob.getId());
+//		updatedJob.setId(oldJob.getId());
 		updatedJob = jobRepo.save(updatedJob);
 		return modelMapper.map(updatedJob, JobDto.class);
 	}
@@ -203,21 +203,13 @@ public class JobServiceImp implements JobService {
 			job.setRequiredSkills(requiredSkills);
 		}
 		
-		if(!jobDto.getPotentialJobOffers().isEmpty()) {
+		if (!jobDto.getPotentialJobOffers().isEmpty()) {
 			List<PotentialJobOffer> pjos;
-			if (jobDto.getId() == null) {
-				pjos = jobDto.getPotentialJobOffers().stream().map(dto -> {
-					ServiceProvider sp = serviceProviderRepo.findById(dto.getServiceProviderId()).orElseThrow(
-							() -> new ResourceNotFoundException("ServiceProvider", "id", dto.getServiceProviderId()));
-					return new PotentialJobOffer(job, sp);
-				}).collect(Collectors.toList());
-			} else {
-				List<PotentialJobOfferId> pjoIds = jobDto.getPotentialJobOffers().stream()
-						.filter(pjo -> jobDto.getId() != null)
-						.map(pjo -> new PotentialJobOfferId(jobDto.getId(), pjo.getServiceProviderId()))
-						.collect(Collectors.toList());
-				pjos = pjoRepo.findAllById(pjoIds);
-			}
+			pjos = jobDto.getPotentialJobOffers().stream().map(dto -> {
+				ServiceProvider sp = serviceProviderRepo.findById(dto.getServiceProviderId()).orElseThrow(
+						() -> new ResourceNotFoundException("ServiceProvider", "id", dto.getServiceProviderId()));
+				return new PotentialJobOffer(job, sp);
+			}).collect(Collectors.toList());
 			job.setPotentialJobOffers(pjos);
 		}
 		
