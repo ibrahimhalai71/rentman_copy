@@ -2,9 +2,11 @@ package com.rentmen.app.services.imp;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -203,13 +205,47 @@ public class JobServiceImp implements JobService {
 			job.setRequiredSkills(requiredSkills);
 		}
 		
-		if (!jobDto.getPotentialJobOffers().isEmpty()) {
-			List<PotentialJobOffer> pjos;
-			pjos = jobDto.getPotentialJobOffers().stream().map(dto -> {
-				ServiceProvider sp = serviceProviderRepo.findById(dto.getServiceProviderId()).orElseThrow(
-						() -> new ResourceNotFoundException("ServiceProvider", "id", dto.getServiceProviderId()));
-				return new PotentialJobOffer(job, sp);
-			}).collect(Collectors.toList());
+		if(!jobDto.getPotentialJobOffers().isEmpty()) {
+			List<PotentialJobOffer> pjos = new ArrayList<PotentialJobOffer>();
+			if (jobDto.getId() == null) {
+				pjos = jobDto.getPotentialJobOffers().stream().map(dto -> {
+					ServiceProvider sp = serviceProviderRepo.findById(dto.getServiceProviderId()).orElseThrow(
+							() -> new ResourceNotFoundException("ServiceProvider", "id", dto.getServiceProviderId()));
+					return new PotentialJobOffer(job, sp);
+				}).collect(Collectors.toList());
+			} else {
+//				List<PotentialJobOfferId> pjoIds = jobDto.getPotentialJobOffers().stream()
+//						.filter(pjo -> jobDto.getId() != null)
+//						.map(pjo -> new PotentialJobOfferId(jobDto.getId(), pjo.getServiceProviderId()))
+//						.collect(Collectors.toList());
+//				pjos = pjoRepo.findAllById(pjoIds);
+				
+//				HashMap<Long,PotentialJobOffer> mapSpToPjos = new HashMap<Long,PotentialJobOffer>();
+//				for(PotentialJobOffer pjo : pjos) {
+//					mapSpToPjos.put(pjo.getServiceProvider().getId(), pjo);
+//				}
+//				for(PotentialJobOfferDto pjoDto : jobDto.getPotentialJobOffers()) {
+//					if(!mapSpToPjos.containsKey(pjoDto.getServiceProviderId())) {
+//						ServiceProvider sp = serviceProviderRepo.findById(pjoDto.getServiceProviderId()).orElseThrow(
+//								() -> new ResourceNotFoundException("ServiceProvider", "id", pjoDto.getServiceProviderId()));
+//						PotentialJobOffer pjo = new PotentialJobOffer(job, sp);
+//						pjos.add(pjo);
+//					}
+//				}
+				
+				for(PotentialJobOfferDto pjoDto : jobDto.getPotentialJobOffers()) {
+					PotentialJobOfferId pjoId= new PotentialJobOfferId(jobDto.getId(), pjoDto.getServiceProviderId());
+					Optional<PotentialJobOffer> pjo = pjoRepo.findById(pjoId);
+					if(pjo.isPresent()) {
+						pjos.add(pjo.get());
+					}else {
+						ServiceProvider sp = serviceProviderRepo.findById(pjoDto.getServiceProviderId()).orElseThrow(
+								() -> new ResourceNotFoundException("ServiceProvider", "id", pjoDto.getServiceProviderId()));
+						PotentialJobOffer newPjo = new PotentialJobOffer(job, sp);
+						pjos.add(newPjo);
+					}
+				}
+			}
 			job.setPotentialJobOffers(pjos);
 		}
 		
