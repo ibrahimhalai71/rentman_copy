@@ -22,4 +22,16 @@ public interface UserService {
   
   List<UserDto> getAllModerators();
   
+  UserDto getClient(Long id);
+  
+  UserDto getModerator(Long id);
+  
+  UserDto getServiceProvider(Long id);
+  
+  UserDto updateClient(UserDto dto);
+  
+  UserDto updateModerator(UserDto dto);
+ 
+  UserDto updateServiceProvider(UserDto dto);
+  
 }

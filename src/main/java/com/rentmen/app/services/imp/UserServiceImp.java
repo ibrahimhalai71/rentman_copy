@@ -1,5 +1,6 @@
 package com.rentmen.app.services.imp;
 
+import com.rentmen.app.DTO.SkillDto;
 import com.rentmen.app.DTO.UserDto;
 import com.rentmen.app.entities.Client;
 import com.rentmen.app.entities.Moderator;
@@ -15,6 +16,7 @@ import com.rentmen.app.repositories.ServiceProviderRepo;
 import com.rentmen.app.repositories.SkillRepo;
 import com.rentmen.app.repositories.UserRepo;
 import com.rentmen.app.services.UserService;
+import com.rentmen.app.utils.UtilFunctions;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -35,74 +37,83 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserServiceImp implements UserService {
 
-    @Autowired
-    private UserRepo userRepo;
-    
-    @Autowired
-    private ClientRepo clientRepo;
-    
-    @Autowired
-    private ModeratorRepo moderatorRepo;
-    
-    @Autowired
-    private ServiceProviderRepo serviceProviderRepo;
+	@Autowired
+	private UserRepo userRepo;
 
-    @Autowired
-    private ModelMapper modelMapper;
+	@Autowired
+	private ClientRepo clientRepo;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+	@Autowired
+	private ModeratorRepo moderatorRepo;
 
-    @Autowired
-    private RoleRepo roleRepo;
-    
-    @Autowired
-    private SkillRepo skillRepo;
+	@Autowired
+	private ServiceProviderRepo serviceProviderRepo;
 
-    public UserDto createUser(UserDto userDto) {
-        User user = dtoToUser(userDto);
-        user.setPassword(passwordEncoder.encode(userDto.getPassword()));
-        User savedUser = userRepo.save(user);
-        return userToDto(savedUser);
-    }
+	@Autowired
+	private ModelMapper modelMapper;
 
-    public UserDto updateUser(UserDto userDto, Long userId) {
-        User user = userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "id", userId.intValue()));
-        user.setName(userDto.getName());
-        user.setEmail(userDto.getEmail());
-        user.setPassword(passwordEncoder.encode(userDto.getPassword()));
-        user.setAbout(userDto.getAbout());
-        User updatedUser = userRepo.save(user);
-        UserDto updatedUserDto = userToDto(updatedUser);
-        return updatedUserDto;
-    }
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
-    public UserDto getUserById(Long userId) {
-        User user = userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "id", userId.intValue()));
-        return userToDto(user);
-    }
+	@Autowired
+	private RoleRepo roleRepo;
 
-    public List<UserDto> getAllUsers() {
-        List<User> users = userRepo.findAll();
-        List<UserDto> userDtos = users.stream().map(user -> userToDto(user)).collect(Collectors.toList());
-        return userDtos;
-    }
+	@Autowired
+	private SkillRepo skillRepo;
 
-    public void deleteUser(Long userId) {
-        User user = userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "id", userId.intValue()));
-        userRepo.delete(user);
-    }
+	@Override
+	public UserDto createUser(UserDto userDto) {
+		User user = dtoToUser(userDto);
+		user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+		User savedUser = userRepo.save(user);
+		return userToDto(savedUser);
+	}
 
-    public User dtoToUser(UserDto userDto) {
-        User user = modelMapper.map(userDto, User.class);
-        return user;
-    }
+	@Override
+	public UserDto updateUser(UserDto userDto, Long userId) {
+		User user = userRepo.findById(userId)
+				.orElseThrow(() -> new ResourceNotFoundException("User", "id", userId.intValue()));
+		user.setName(userDto.getName());
+		user.setEmail(userDto.getEmail());
+		user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+		user.setAbout(userDto.getAbout());
+		User updatedUser = userRepo.save(user);
+		UserDto updatedUserDto = userToDto(updatedUser);
+		return updatedUserDto;
+	}
 
-    public UserDto userToDto(User user) {
-        UserDto userDto = modelMapper.map(user, UserDto.class);
-        return userDto;
-    }
+	@Override
+	public UserDto getUserById(Long userId) {
+		User user = userRepo.findById(userId)
+				.orElseThrow(() -> new ResourceNotFoundException("User", "id", userId.intValue()));
+		return userToDto(user);
+	}
 
+	@Override
+	public List<UserDto> getAllUsers() {
+		List<User> users = userRepo.findAll();
+		List<UserDto> userDtos = users.stream().map(user -> userToDto(user)).collect(Collectors.toList());
+		return userDtos;
+	}
+
+	@Override
+	public void deleteUser(Long userId) {
+		User user = userRepo.findById(userId)
+				.orElseThrow(() -> new ResourceNotFoundException("User", "id", userId.intValue()));
+		userRepo.delete(user);
+	}
+
+	public User dtoToUser(UserDto userDto) {
+		User user = modelMapper.map(userDto, User.class);
+		return user;
+	}
+
+	public UserDto userToDto(User user) {
+		UserDto userDto = modelMapper.map(user, UserDto.class);
+		return userDto;
+	}
+
+	@Override
 	public UserDto registerNewUser(UserDto userDto) {
 		Role role;
 		User user = modelMapper.map(userDto, User.class);
@@ -136,17 +147,13 @@ public class UserServiceImp implements UserService {
 			return modelMapper.map(moderator, UserDto.class);
 		} else if (user.getDepId() == 3) {
 			ServiceProvider sp = modelMapper.map(userDto, ServiceProvider.class);
-			if(!userDto.getSkills().isEmpty()) {
-				Set<Skill> skills = userDto.getSkills().stream()
-                .map(skillDto -> skillRepo.findById(skillDto.getId())
-                                .orElseThrow(() -> new ResourceNotFoundException("Skill", "id", skillDto.getId())))
-                .collect(Collectors.toSet());
-				sp.setSkills(skills);
+			if (!userDto.getSkills().isEmpty()) {
+				sp.setSkills(getSkillSet(userDto.getSkills()));
 			}
 			sp.setPassword(passwordEncoder.encode(sp.getPassword()));
 			sp.getRoles().add(role);
 			sp = serviceProviderRepo.save(sp);
-			
+
 			return modelMapper.map(sp, UserDto.class);
 		}
 
@@ -155,26 +162,104 @@ public class UserServiceImp implements UserService {
 
 	}
 
-	public List<UserDto> getAllClients(){
-		List<Client> clients  = clientRepo.findAll();
-		Type listType = new TypeToken<List<UserDto>>() {}.getType();
+	@Override
+	public List<UserDto> getAllClients() {
+		List<Client> clients = clientRepo.findAll();
+		Type listType = new TypeToken<List<UserDto>>() {
+		}.getType();
 		return modelMapper.map(clients, listType);
 	}
-	
-	public List<UserDto> getAllModerators(){
-		List<Moderator> moderators  = moderatorRepo.findAll();
-		Type listType = new TypeToken<List<UserDto>>() {}.getType();
+
+	@Override
+	public List<UserDto> getAllModerators() {
+		List<Moderator> moderators = moderatorRepo.findAll();
+		Type listType = new TypeToken<List<UserDto>>() {
+		}.getType();
 		return modelMapper.map(moderators, listType);
 	}
-	
-	public List<UserDto> getAllServiceProviders(Float rating){
+
+	@Override
+	public List<UserDto> getAllServiceProviders(Float rating) {
 		List<ServiceProvider> serviceProviders = new ArrayList<ServiceProvider>();
-		Type listType = new TypeToken<List<UserDto>>() {}.getType();
-		if(rating == null || rating == 0) {
-		    serviceProviders = serviceProviderRepo.findAll();
-		}else {
+		Type listType = new TypeToken<List<UserDto>>() {
+		}.getType();
+		if (rating == null || rating == 0) {
+			serviceProviders = serviceProviderRepo.findAll();
+		} else {
 			serviceProviders = serviceProviderRepo.findByRatingGreaterThanOrEqual(rating);
 		}
 		return modelMapper.map(serviceProviders, listType);
+	}
+
+	@Override
+	public UserDto getClient(Long id) {
+		Client client = clientRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException("Client", "id", id));
+		return modelMapper.map(client, UserDto.class);
+	}
+
+	@Override
+	public UserDto getModerator(Long id) {
+		Moderator mod = moderatorRepo.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Moderator", "id", id));
+		return modelMapper.map(mod, UserDto.class);
+	}
+
+	@Override
+	public UserDto getServiceProvider(Long id) {
+		ServiceProvider sp = serviceProviderRepo.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("ServiceProvider", "id", id));
+		return modelMapper.map(sp, UserDto.class);
+	}
+
+	@Override
+	public UserDto updateClient(UserDto dto) {
+		Client client = clientRepo.findById(dto.getId())
+				.orElseThrow(() -> new ResourceNotFoundException("Client", "id", dto.getId()));
+		Client updatedClient = modelMapper.map(dto, Client.class);
+		try {
+			UtilFunctions.mergeObjects(updatedClient, client);
+			updatedClient = clientRepo.save(updatedClient);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return modelMapper.map(updatedClient, UserDto.class);
+	}
+	
+	@Override
+	public UserDto updateModerator(UserDto dto) {
+		Moderator moderator = moderatorRepo.findById(dto.getId())
+				.orElseThrow(() -> new ResourceNotFoundException("Moderator", "id", dto.getId()));
+		Moderator updatedModerator = modelMapper.map(dto, Moderator.class);
+		try {
+			UtilFunctions.mergeObjects(updatedModerator, moderator);
+			updatedModerator = moderatorRepo.save(updatedModerator);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return modelMapper.map(updatedModerator, UserDto.class);
+	}
+	
+	@Override
+	public UserDto updateServiceProvider(UserDto dto) {
+		ServiceProvider serviceProvider = serviceProviderRepo.findById(dto.getId())
+				.orElseThrow(() -> new ResourceNotFoundException("ServiceProvider", "id", dto.getId()));
+		ServiceProvider updatedServiceProvider = modelMapper.map(dto, ServiceProvider.class);
+		if (!dto.getSkills().isEmpty()) {
+			updatedServiceProvider.setSkills(getSkillSet(dto.getSkills()));
+		}
+		try {
+			UtilFunctions.mergeObjects(updatedServiceProvider, serviceProvider);
+			updatedServiceProvider = serviceProviderRepo.save(updatedServiceProvider);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return modelMapper.map(updatedServiceProvider, UserDto.class);
+	}
+	
+	public Set<Skill> getSkillSet(Set<SkillDto> skillDtoList){
+		return skillDtoList.stream()
+				.map(skillDto -> skillRepo.findById(skillDto.getId())
+						.orElseThrow(() -> new ResourceNotFoundException("Skill", "id", skillDto.getId())))
+				.collect(Collectors.toSet());
 	}
 }
