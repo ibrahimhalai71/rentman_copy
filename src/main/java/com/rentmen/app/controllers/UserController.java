@@ -131,9 +131,35 @@ public class UserController {
     	return ResponseEntity.ok(this.skillService.createSkill(skillDto));
     }
     
+    @GetMapping({"/getClient/{id}"})
+    public ResponseEntity<?> getClient(@PathVariable(required = true) Long id){
+    	return ResponseEntity.ok(this.userService.getClient(id));
+    }
     
+    @GetMapping({"/getModerator/{id}"})
+    public ResponseEntity<?> getModerator(@PathVariable(required = true) Long id){
+    	return ResponseEntity.ok(this.userService.getModerator(id));
+    }
     
+    @GetMapping({"/getServiceProvider/{id}"})
+    public ResponseEntity<?> getServiceProvider(@PathVariable(required = true) Long id){
+    	return ResponseEntity.ok(this.userService.getServiceProvider(id));
+    }
     
+    @PostMapping({"/updateClient"})
+    public ResponseEntity<?> updateClient(@RequestBody UserDto dto){
+    	return ResponseEntity.ok(this.userService.updateClient(dto));
+    }
+    
+    @PostMapping({"/updateModerator"})
+    public ResponseEntity<?> updateModerator(@RequestBody UserDto dto){
+    	return ResponseEntity.ok(this.userService.updateModerator(dto));
+    }
+    
+    @PostMapping({"/updateServiceProvider"})
+    public ResponseEntity<?> updateServiceProvider(@RequestBody UserDto dto){
+    	return ResponseEntity.ok(this.userService.updateServiceProvider(dto));
+    }
     
     
     
