@@ -22,7 +22,7 @@ public class UserDto {
 	private String password;
 
 	private String about;
-	private int depId;
+	private Integer depId;
 	private Boolean active;
 
 	private Boolean status;
@@ -94,11 +94,11 @@ public class UserDto {
 		this.active = active;
 	}
 
-	public int getDepId() {
+	public Integer getDepId() {
 		return this.depId;
 	}
 
-	public void setDepId(int depId) {
+	public void setDepId(Integer depId) {
 		this.depId = depId;
 	}
 

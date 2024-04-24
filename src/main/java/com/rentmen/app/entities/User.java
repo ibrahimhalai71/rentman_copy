@@ -36,7 +36,7 @@ public class User implements UserDetails {
 	private String email;
 	private String password;
 	private String about;
-	private int depId;
+	private Integer depId;
 	private Boolean active;
 	private Boolean status;	
 	private String city; 
@@ -96,11 +96,11 @@ public class User implements UserDetails {
 		this.active = active;
 	}
 
-	public int getDepId() {
+	public Integer getDepId() {
 		return this.depId;
 	}
 
-	public void setDepId(int depId) {
+	public void setDepId(Integer depId) {
 		this.depId = depId;
 	}
 
