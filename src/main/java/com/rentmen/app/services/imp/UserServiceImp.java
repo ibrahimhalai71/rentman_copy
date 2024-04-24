@@ -245,11 +245,11 @@ public class UserServiceImp implements UserService {
 				.orElseThrow(() -> new ResourceNotFoundException("ServiceProvider", "id", dto.getId()));
 		ServiceProvider updatedServiceProvider = modelMapper.map(dto, ServiceProvider.class);
 		if (!dto.getSkills().isEmpty()) {
-			updatedServiceProvider.setSkills(getSkillSet(dto.getSkills()));
+			serviceProvider.setSkills(getSkillSet(dto.getSkills()));
 		}
 		try {
-			UtilFunctions.mergeObjects(updatedServiceProvider, serviceProvider);
-			updatedServiceProvider = serviceProviderRepo.save(updatedServiceProvider);
+			UtilFunctions.mergeObjects(serviceProvider, updatedServiceProvider);
+			updatedServiceProvider = serviceProviderRepo.save(serviceProvider);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
