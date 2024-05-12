@@ -1,6 +1,8 @@
 package com.rentmen.app.services;
 
 import com.rentmen.app.DTO.UserDto;
+
+import java.time.LocalDate;
 import java.util.List;
 
 public interface UserService {
@@ -33,5 +35,7 @@ public interface UserService {
   UserDto updateModerator(UserDto dto);
  
   UserDto updateServiceProvider(UserDto dto);
+
+  List<UserDto> getServiceProvidersAvailableBetweenDates(LocalDate startDate, LocalDate endDate);
   
 }

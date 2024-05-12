@@ -19,6 +19,7 @@ import com.rentmen.app.services.UserService;
 import com.rentmen.app.utils.UtilFunctions;
 
 import java.lang.reflect.Type;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -254,6 +255,17 @@ public class UserServiceImp implements UserService {
 			e.printStackTrace();
 		}
 		return modelMapper.map(updatedServiceProvider, UserDto.class);
+	}
+	
+	@Override
+	public List<UserDto> getServiceProvidersAvailableBetweenDates(LocalDate startDate, LocalDate endDate) {
+		List<ServiceProvider> serviceProviders = new ArrayList<ServiceProvider>();
+		Type listType = new TypeToken<List<UserDto>>() {
+		}.getType();
+
+		serviceProviders = serviceProviderRepo.findAvailableBetweenDates(startDate, endDate);
+
+		return modelMapper.map(serviceProviders, listType);
 	}
 	
 	public Set<Skill> getSkillSet(Set<SkillDto> skillDtoList){

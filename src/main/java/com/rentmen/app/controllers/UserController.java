@@ -7,6 +7,7 @@ import com.rentmen.app.configurations.CustomUserDetailService;
 import com.rentmen.app.services.SkillService;
 import com.rentmen.app.services.UserService;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
@@ -16,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -160,6 +162,13 @@ public class UserController {
     public ResponseEntity<?> updateServiceProvider(@RequestBody UserDto dto){
     	return ResponseEntity.ok(this.userService.updateServiceProvider(dto));
     }
+
+	@GetMapping({ "/getServiceProvidersAvailableBetweenDates/{startDate}/{endDate}" })
+	public ResponseEntity<?> getServiceProvidersAvailableBetweenDates(
+			@PathVariable(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+			@PathVariable(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
+		return ResponseEntity.ok(this.userService.getServiceProvidersAvailableBetweenDates(startDate, endDate));
+	}
     
     
     

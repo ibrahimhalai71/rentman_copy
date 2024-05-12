@@ -2,9 +2,12 @@ package com.rentmen.app.DTO;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.rentmen.app.utils.AvailabilityOptions;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
+
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -43,6 +46,13 @@ public class UserDto {
 	private Integer age;	
 	private String contact;
 	private Set<SkillDto> skills = new HashSet<>(); 
+	@JsonProperty("availability_start_date")
+	private LocalDate availabilityStartDate;
+	@JsonProperty("availability_end_date")
+	private LocalDate availabilityEndDate;
+	@JsonProperty("availability_options")
+	private AvailabilityOptions availabilityOptions;
+	
 	
 	public long getId() {
 		return this.id;
@@ -196,6 +206,30 @@ public class UserDto {
 
 	public void setSkills(Set<SkillDto> skills) {
 		this.skills = skills;
+	}
+
+	public LocalDate getAvailabilityStartDate() {
+		return availabilityStartDate;
+	}
+
+	public LocalDate getAvailabilityEndDate() {
+		return availabilityEndDate;
+	}
+
+	public AvailabilityOptions getAvailabilityOptions() {
+		return availabilityOptions;
+	}
+
+	public void setAvailabilityStartDate(LocalDate availabilityStartDate) {
+		this.availabilityStartDate = availabilityStartDate;
+	}
+
+	public void setAvailabilityEndDate(LocalDate availabilityEndDate) {
+		this.availabilityEndDate = availabilityEndDate;
+	}
+
+	public void setAvailabilityOptions(AvailabilityOptions availabilityOptions) {
+		this.availabilityOptions = availabilityOptions;
 	}
 
 }
