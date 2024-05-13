@@ -1,18 +1,21 @@
 package com.rentmen.app.entities;
 
-import java.util.ArrayList;
+import java.time.LocalDate;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinTable;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import org.springframework.format.annotation.DateTimeFormat;
+
+import com.rentmen.app.utils.AvailabilityOptions;
 
 @Entity
 @Table(name = "service_provider")
@@ -22,6 +25,15 @@ public class ServiceProvider extends User {
 	private String description;
 	private Integer age;	
 	private String contact;
+	
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate availabilityStartDate;
+
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate availabilityEndDate;
+    
+    @Enumerated(EnumType.STRING)
+    private AvailabilityOptions availabilityOptions;
 
 	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "service_provider_skill", joinColumns = {
@@ -75,6 +87,30 @@ public class ServiceProvider extends User {
 
 	public void setContact(String contact) {
 		this.contact = contact;
+	}
+
+	public LocalDate getAvailabilityStartDate() {
+		return availabilityStartDate;
+	}
+
+	public LocalDate getAvailabilityEndDate() {
+		return availabilityEndDate;
+	}
+
+	public AvailabilityOptions getAvailabilityOptions() {
+		return availabilityOptions;
+	}
+
+	public void setAvailabilityStartDate(LocalDate availabilityStartDate) {
+		this.availabilityStartDate = availabilityStartDate;
+	}
+
+	public void setAvailabilityEndDate(LocalDate availabilityEndDate) {
+		this.availabilityEndDate = availabilityEndDate;
+	}
+
+	public void setAvailabilityOptions(AvailabilityOptions availabilityOptions) {
+		this.availabilityOptions = availabilityOptions;
 	}
 
 }

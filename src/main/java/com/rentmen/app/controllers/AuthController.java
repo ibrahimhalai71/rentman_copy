@@ -12,6 +12,7 @@ import com.rentmen.app.services.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -19,6 +20,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.security.Principal;
@@ -68,9 +70,11 @@ public class AuthController {
 		}
 	}
 
-	@PostMapping({ "/register" })
-	public ResponseEntity<UserDto> registerUser(@Valid @RequestBody UserDto userDto) {
-		UserDto registeredUser = this.userService.registerNewUser(userDto);
+	@PostMapping(path = { "/register" }, consumes = { MediaType.MULTIPART_FORM_DATA_VALUE,
+			MediaType.APPLICATION_JSON_VALUE })
+	public ResponseEntity<UserDto> registerUser(@Valid @RequestPart(value = "user") UserDto userDto,
+			@RequestPart(value = "profile_image", required = false) MultipartFile profileImage) {
+		UserDto registeredUser = this.userService.registerNewUser(userDto, profileImage);
 		return new ResponseEntity<>(registeredUser, HttpStatus.CREATED);
 	}
 
