@@ -18,22 +18,20 @@ import com.rentmen.app.repositories.UserRepo;
 import com.rentmen.app.services.UserService;
 import com.rentmen.app.utils.UtilFunctions;
 
+import java.io.File;
 import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-import org.modelmapper.Converter;
-import org.modelmapper.AbstractConverter;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeMap;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class UserServiceImp implements UserService {
@@ -115,7 +113,7 @@ public class UserServiceImp implements UserService {
 	}
 
 	@Override
-	public UserDto registerNewUser(UserDto userDto) {
+	public UserDto registerNewUser(UserDto userDto, MultipartFile image) {
 		Role role;
 		User user = modelMapper.map(userDto, User.class);
 
@@ -130,12 +128,18 @@ public class UserServiceImp implements UserService {
 //        } else {
 //            role = roleRepo.findById(2).get();
 //        }
+		System.getProperty("user.dir");
+		String imageString = null;
+		if (image != null && !image.isEmpty()) {
+			imageString = UtilFunctions.saveMultipartFileToPath(image, user.getName());
+		}
 		user.getRoles().add(role);
 
 		if (user.getDepId() == 1) {
 			Client client = modelMapper.map(userDto, Client.class);
 			client.setPassword(passwordEncoder.encode(client.getPassword()));
 			client.getRoles().add(role);
+			client.setProfileImage(imageString);
 			client = clientRepo.save(client);
 
 			return modelMapper.map(client, UserDto.class);
@@ -143,6 +147,7 @@ public class UserServiceImp implements UserService {
 			Moderator moderator = modelMapper.map(userDto, Moderator.class);
 			moderator.setPassword(passwordEncoder.encode(moderator.getPassword()));
 			moderator.getRoles().add(role);
+			moderator.setProfileImage(imageString);
 			moderator = moderatorRepo.save(moderator);
 
 			return modelMapper.map(moderator, UserDto.class);
@@ -153,6 +158,7 @@ public class UserServiceImp implements UserService {
 			}
 			sp.setPassword(passwordEncoder.encode(sp.getPassword()));
 			sp.getRoles().add(role);
+			sp.setProfileImage(imageString);
 			sp = serviceProviderRepo.save(sp);
 
 			return modelMapper.map(sp, UserDto.class);
@@ -213,9 +219,10 @@ public class UserServiceImp implements UserService {
 	}
 
 	@Override
-	public UserDto updateClient(UserDto dto) {
+	public UserDto updateClient(UserDto dto, MultipartFile image) {
 		Client client = clientRepo.findById(dto.getId())
 				.orElseThrow(() -> new ResourceNotFoundException("Client", "id", dto.getId()));
+		updateUserProfileImage(dto,image,client.getProfileImage());
 		Client updatedClient = modelMapper.map(dto, Client.class);
 		try {
 			UtilFunctions.mergeObjects(updatedClient, client);
@@ -227,9 +234,10 @@ public class UserServiceImp implements UserService {
 	}
 	
 	@Override
-	public UserDto updateModerator(UserDto dto) {
+	public UserDto updateModerator(UserDto dto, MultipartFile image) {
 		Moderator moderator = moderatorRepo.findById(dto.getId())
 				.orElseThrow(() -> new ResourceNotFoundException("Moderator", "id", dto.getId()));
+		updateUserProfileImage(dto,image,moderator.getProfileImage());
 		Moderator updatedModerator = modelMapper.map(dto, Moderator.class);
 		try {
 			UtilFunctions.mergeObjects(updatedModerator, moderator);
@@ -241,9 +249,10 @@ public class UserServiceImp implements UserService {
 	}
 	
 	@Override
-	public UserDto updateServiceProvider(UserDto dto) {
+	public UserDto updateServiceProvider(UserDto dto, MultipartFile image) {
 		ServiceProvider serviceProvider = serviceProviderRepo.findById(dto.getId())
 				.orElseThrow(() -> new ResourceNotFoundException("ServiceProvider", "id", dto.getId()));
+		updateUserProfileImage(dto,image,serviceProvider.getProfileImage());
 		ServiceProvider updatedServiceProvider = modelMapper.map(dto, ServiceProvider.class);
 		if (!dto.getSkills().isEmpty()) {
 			serviceProvider.setSkills(getSkillSet(dto.getSkills()));
@@ -274,4 +283,39 @@ public class UserServiceImp implements UserService {
 						.orElseThrow(() -> new ResourceNotFoundException("Skill", "id", skillDto.getId())))
 				.collect(Collectors.toSet());
 	}
+	public boolean updateUserProfileImage(UserDto dto, MultipartFile image, String oldImagePath) {
+		if (image != null && !image.isEmpty()) {
+			boolean toReturn = deleteUserProfileImage(oldImagePath);
+			if (toReturn && (oldImagePath == null || oldImagePath.isEmpty())) {
+				String imagePath = UtilFunctions.saveMultipartFileToPath(image, dto.getName());
+				if (imagePath != null && !imagePath.isEmpty()) {
+					dto.setProfileImage(imagePath);
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	private boolean deleteUserProfileImage(String oldImagePath) {
+		boolean toReturn = false;
+		if (oldImagePath != null && !oldImagePath.isEmpty()) {
+			File fileToDelete = new File(oldImagePath);
+			if (fileToDelete.exists()) {
+				// Delete the file
+				if (fileToDelete.delete()) {
+					System.out.println("File deleted successfully: " + oldImagePath);
+					toReturn = true;
+				} else {
+					System.out.println("Failed to delete file: " + oldImagePath);
+				}
+			} else {
+				System.out.println("File does not exist: " + oldImagePath);
+			}
+		}else {
+			toReturn = true;
+		}
+		return toReturn;
+	}
+	
 }

@@ -5,6 +5,8 @@ import com.rentmen.app.DTO.UserDto;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
+
 public interface UserService {
   UserDto createUser(UserDto paramUserDto);
   
@@ -14,7 +16,7 @@ public interface UserService {
   
   List<UserDto> getAllUsers();
   
-  UserDto registerNewUser(UserDto paramUserDto);
+  UserDto registerNewUser(UserDto paramUserDto, MultipartFile image);
   
   void deleteUser(Long paramInteger);
   
@@ -30,11 +32,11 @@ public interface UserService {
   
   UserDto getServiceProvider(Long id);
   
-  UserDto updateClient(UserDto dto);
+  UserDto updateClient(UserDto dto, MultipartFile image);
   
-  UserDto updateModerator(UserDto dto);
+  UserDto updateModerator(UserDto dto, MultipartFile image);
  
-  UserDto updateServiceProvider(UserDto dto);
+  UserDto updateServiceProvider(UserDto dto, MultipartFile image);
 
   List<UserDto> getServiceProvidersAvailableBetweenDates(LocalDate startDate, LocalDate endDate);
   

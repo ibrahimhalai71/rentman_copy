@@ -19,6 +19,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -35,7 +36,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping({"/api/user"})
@@ -147,20 +150,25 @@ public class UserController {
     public ResponseEntity<?> getServiceProvider(@PathVariable(required = true) Long id){
     	return ResponseEntity.ok(this.userService.getServiceProvider(id));
     }
-    
-    @PostMapping({"/updateClient"})
-    public ResponseEntity<?> updateClient(@RequestBody UserDto dto){
-    	return ResponseEntity.ok(this.userService.updateClient(dto));
+    @PostMapping(path = {"/updateClient"}, consumes = { MediaType.MULTIPART_FORM_DATA_VALUE,
+			MediaType.APPLICATION_JSON_VALUE })
+    public ResponseEntity<?> updateClient(@RequestPart(value = "user") UserDto dto,
+			@RequestPart(value = "profile_image", required = false) MultipartFile profileImage){
+    	return ResponseEntity.ok(this.userService.updateClient(dto, profileImage));
     }
     
-    @PostMapping({"/updateModerator"})
-    public ResponseEntity<?> updateModerator(@RequestBody UserDto dto){
-    	return ResponseEntity.ok(this.userService.updateModerator(dto));
+    @PostMapping(path = {"/updateModerator"}, consumes = { MediaType.MULTIPART_FORM_DATA_VALUE,
+			MediaType.APPLICATION_JSON_VALUE })
+    public ResponseEntity<?> updateModerator(@RequestPart(value = "user") UserDto dto,
+			@RequestPart(value = "profile_image", required = false) MultipartFile profileImage){
+    	return ResponseEntity.ok(this.userService.updateModerator(dto, profileImage));
     }
     
-    @PostMapping({"/updateServiceProvider"})
-    public ResponseEntity<?> updateServiceProvider(@RequestBody UserDto dto){
-    	return ResponseEntity.ok(this.userService.updateServiceProvider(dto));
+    @PostMapping(path = {"/updateServiceProvider"}, consumes = { MediaType.MULTIPART_FORM_DATA_VALUE,
+			MediaType.APPLICATION_JSON_VALUE })
+    public ResponseEntity<?> updateServiceProvider(@RequestPart(value = "user") UserDto dto,
+			@RequestPart(value = "profile_image", required = false) MultipartFile profileImage){
+    	return ResponseEntity.ok(this.userService.updateServiceProvider(dto, profileImage));
     }
 
 	@GetMapping({ "/getServiceProvidersAvailableBetweenDates/{startDate}/{endDate}" })

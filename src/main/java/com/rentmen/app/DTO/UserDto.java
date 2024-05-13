@@ -30,6 +30,8 @@ public class UserDto {
 
 	private Boolean status;
 	private String city;
+	@JsonProperty("profile_image")
+	private String profileImage;
 	
 	//Client Attributes
 	private String billingInfo;
@@ -126,6 +128,14 @@ public class UserDto {
 
 	public void setCity(String city) {
 		this.city = city;
+	}
+
+	public String getProfileImage() {
+		return profileImage;
+	}
+
+	public void setProfileImage(String profileImage) {
+		this.profileImage = profileImage;
 	}
 
 	public String getBillingInfo() {

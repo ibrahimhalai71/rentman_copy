@@ -47,7 +47,8 @@ public class User implements UserDetails {
 					@JoinColumn(name = "role_id", referencedColumnName = "id") })
 	private Set<Role> roles = new HashSet<>();
 
-
+	private String profileImage;
+	
 	public long getId() {
 		return this.id;
 	}
@@ -152,5 +153,13 @@ public class User implements UserDetails {
 
 	public void setCity(String city) {
 		this.city = city;
+	}
+
+	public String getProfileImage() {
+		return profileImage;
+	}
+
+	public void setProfileImage(String profileImage) {
+		this.profileImage = profileImage;
 	}
 }
