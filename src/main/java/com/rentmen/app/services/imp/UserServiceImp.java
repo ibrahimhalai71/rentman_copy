@@ -128,10 +128,9 @@ public class UserServiceImp implements UserService {
 //        } else {
 //            role = roleRepo.findById(2).get();
 //        }
-		System.getProperty("user.dir");
 		String imageString = null;
 		if (image != null && !image.isEmpty()) {
-			imageString = UtilFunctions.saveMultipartFileToPath(image, user.getName());
+			imageString = UtilFunctions.createFileName(image, user.getName());
 		}
 		user.getRoles().add(role);
 
@@ -141,6 +140,7 @@ public class UserServiceImp implements UserService {
 			client.getRoles().add(role);
 			client.setProfileImage(imageString);
 			client = clientRepo.save(client);
+			imageString = UtilFunctions.saveMultipartFileToPath(image, imageString);
 
 			return modelMapper.map(client, UserDto.class);
 		} else if (user.getDepId() == 2) {
@@ -149,7 +149,8 @@ public class UserServiceImp implements UserService {
 			moderator.getRoles().add(role);
 			moderator.setProfileImage(imageString);
 			moderator = moderatorRepo.save(moderator);
-
+			imageString = UtilFunctions.saveMultipartFileToPath(image, imageString);
+			
 			return modelMapper.map(moderator, UserDto.class);
 		} else if (user.getDepId() == 3) {
 			ServiceProvider sp = modelMapper.map(userDto, ServiceProvider.class);
@@ -160,6 +161,7 @@ public class UserServiceImp implements UserService {
 			sp.getRoles().add(role);
 			sp.setProfileImage(imageString);
 			sp = serviceProviderRepo.save(sp);
+			imageString = UtilFunctions.saveMultipartFileToPath(image, imageString);
 
 			return modelMapper.map(sp, UserDto.class);
 		}

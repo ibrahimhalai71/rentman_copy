@@ -6,7 +6,9 @@ import com.rentmen.app.DTO.UserDto;
 import com.rentmen.app.configurations.CustomUserDetailService;
 import com.rentmen.app.services.SkillService;
 import com.rentmen.app.services.UserService;
+import com.rentmen.app.utils.UtilFunctions;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
@@ -132,9 +134,13 @@ public class UserController {
     }
     
     @PostMapping({"/createSkill"})
-    public ResponseEntity<?> createSkill(@RequestBody SkillDto skillDto){
-    	return ResponseEntity.ok(this.skillService.createSkill(skillDto));
-    }
+	public ResponseEntity<?> createSkill(@RequestBody SkillDto skillDto) {
+		try {
+			return ResponseEntity.ok(this.skillService.createSkill(skillDto));
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
+	}
     
     @GetMapping({"/getClient/{id}"})
     public ResponseEntity<?> getClient(@PathVariable(required = true) Long id){
@@ -153,31 +159,50 @@ public class UserController {
     @PostMapping(path = {"/updateClient"}, consumes = { MediaType.MULTIPART_FORM_DATA_VALUE,
 			MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<?> updateClient(@RequestPart(value = "user") UserDto dto,
-			@RequestPart(value = "profile_image", required = false) MultipartFile profileImage){
-    	return ResponseEntity.ok(this.userService.updateClient(dto, profileImage));
-    }
+			@RequestPart(value = "profile_image", required = false) MultipartFile profileImage) throws Exception {
+		try {
+			return ResponseEntity.ok(this.userService.updateClient(dto, profileImage));
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
+	}
     
     @PostMapping(path = {"/updateModerator"}, consumes = { MediaType.MULTIPART_FORM_DATA_VALUE,
 			MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<?> updateModerator(@RequestPart(value = "user") UserDto dto,
-			@RequestPart(value = "profile_image", required = false) MultipartFile profileImage){
-    	return ResponseEntity.ok(this.userService.updateModerator(dto, profileImage));
-    }
+			@RequestPart(value = "profile_image", required = false) MultipartFile profileImage) throws Exception {
+		try {
+			return ResponseEntity.ok(this.userService.updateModerator(dto, profileImage));
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
+	}
     
     @PostMapping(path = {"/updateServiceProvider"}, consumes = { MediaType.MULTIPART_FORM_DATA_VALUE,
 			MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<?> updateServiceProvider(@RequestPart(value = "user") UserDto dto,
-			@RequestPart(value = "profile_image", required = false) MultipartFile profileImage){
-    	return ResponseEntity.ok(this.userService.updateServiceProvider(dto, profileImage));
-    }
+			@RequestPart(value = "profile_image", required = false) MultipartFile profileImage) throws Exception {
+		try {
+			return ResponseEntity.ok(this.userService.updateServiceProvider(dto, profileImage));
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
+	}
 
 	@GetMapping({ "/getServiceProvidersAvailableBetweenDates/{startDate}/{endDate}" })
 	public ResponseEntity<?> getServiceProvidersAvailableBetweenDates(
 			@PathVariable(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
-			@PathVariable(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
+			@PathVariable(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) throws Exception{
 		return ResponseEntity.ok(this.userService.getServiceProvidersAvailableBetweenDates(startDate, endDate));
 	}
-    
+	@GetMapping("/getUserProfileImage/{fileName}")
+		public ResponseEntity<?> downloadImageFromFileSystem(@PathVariable String fileName) throws IOException {
+			byte[] imageData=UtilFunctions.downloadImageFromFileSystem(fileName);
+			return ResponseEntity.status(HttpStatus.OK)
+					.contentType(MediaType.valueOf("image/png"))
+					.body(imageData);
+	
+		}
     
     
 }
