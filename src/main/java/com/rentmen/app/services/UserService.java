@@ -16,7 +16,7 @@ public interface UserService {
   
   List<UserDto> getAllUsers();
   
-  UserDto registerNewUser(UserDto paramUserDto, MultipartFile image);
+  UserDto registerNewUser(UserDto paramUserDto);
   
   void deleteUser(Long paramInteger);
   
@@ -32,12 +32,14 @@ public interface UserService {
   
   UserDto getServiceProvider(Long id);
   
-  UserDto updateClient(UserDto dto, MultipartFile image);
+  UserDto updateClient(UserDto dto);
   
-  UserDto updateModerator(UserDto dto, MultipartFile image);
+  UserDto updateModerator(UserDto dto);
  
-  UserDto updateServiceProvider(UserDto dto, MultipartFile image);
+  UserDto updateServiceProvider(UserDto dto);
 
   List<UserDto> getServiceProvidersAvailableBetweenDates(LocalDate startDate, LocalDate endDate);
+  
+  UserDto updateUserProfileImage(Long userId, MultipartFile image) throws Exception;
   
 }

@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -156,34 +157,28 @@ public class UserController {
     public ResponseEntity<?> getServiceProvider(@PathVariable(required = true) Long id){
     	return ResponseEntity.ok(this.userService.getServiceProvider(id));
     }
-    @PostMapping(path = {"/updateClient"}, consumes = { MediaType.MULTIPART_FORM_DATA_VALUE,
-			MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<?> updateClient(@RequestPart(value = "user") UserDto dto,
-			@RequestPart(value = "profile_image", required = false) MultipartFile profileImage) throws Exception {
+    @PostMapping(path = {"/updateClient"})
+    public ResponseEntity<?> updateClient(@RequestBody UserDto dto) throws Exception {
 		try {
-			return ResponseEntity.ok(this.userService.updateClient(dto, profileImage));
+			return ResponseEntity.ok(this.userService.updateClient(dto));
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
 	}
     
-    @PostMapping(path = {"/updateModerator"}, consumes = { MediaType.MULTIPART_FORM_DATA_VALUE,
-			MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<?> updateModerator(@RequestPart(value = "user") UserDto dto,
-			@RequestPart(value = "profile_image", required = false) MultipartFile profileImage) throws Exception {
+    @PostMapping(path = {"/updateModerator"})
+    public ResponseEntity<?> updateModerator(@RequestBody UserDto dto) throws Exception {
 		try {
-			return ResponseEntity.ok(this.userService.updateModerator(dto, profileImage));
+			return ResponseEntity.ok(this.userService.updateModerator(dto));
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
 	}
     
-    @PostMapping(path = {"/updateServiceProvider"}, consumes = { MediaType.MULTIPART_FORM_DATA_VALUE,
-			MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<?> updateServiceProvider(@RequestPart(value = "user") UserDto dto,
-			@RequestPart(value = "profile_image", required = false) MultipartFile profileImage) throws Exception {
+    @PostMapping(path = {"/updateServiceProvider"})
+    public ResponseEntity<?> updateServiceProvider(@RequestBody UserDto dto) throws Exception {
 		try {
-			return ResponseEntity.ok(this.userService.updateServiceProvider(dto, profileImage));
+			return ResponseEntity.ok(this.userService.updateServiceProvider(dto));
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
@@ -192,17 +187,26 @@ public class UserController {
 	@GetMapping({ "/getServiceProvidersAvailableBetweenDates/{startDate}/{endDate}" })
 	public ResponseEntity<?> getServiceProvidersAvailableBetweenDates(
 			@PathVariable(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
-			@PathVariable(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) throws Exception{
+			@PathVariable(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) throws Exception {
 		return ResponseEntity.ok(this.userService.getServiceProvidersAvailableBetweenDates(startDate, endDate));
 	}
+
 	@GetMapping("/getUserProfileImage/{fileName}")
-		public ResponseEntity<?> downloadImageFromFileSystem(@PathVariable String fileName) throws IOException {
-			byte[] imageData=UtilFunctions.downloadImageFromFileSystem(fileName);
-			return ResponseEntity.status(HttpStatus.OK)
-					.contentType(MediaType.valueOf("image/png"))
-					.body(imageData);
-	
+	public ResponseEntity<?> downloadImageFromFileSystem(@PathVariable String fileName) throws IOException {
+		byte[] imageData = UtilFunctions.downloadImageFromFileSystem(fileName);
+		return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.valueOf("image/png")).body(imageData);
+
+	}
+
+	@PostMapping("/updateUserProfileImage")
+	public ResponseEntity<?> updateUserProfileImage(@RequestParam(value = "userId") Long userId,
+			@RequestParam(value = "profile_image") MultipartFile image) {
+		try {
+			return ResponseEntity.ok(this.userService.updateUserProfileImage(userId, image));
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
 		}
+	}
     
     
 }

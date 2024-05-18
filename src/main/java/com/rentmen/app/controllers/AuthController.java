@@ -70,12 +70,10 @@ public class AuthController {
 		}
 	}
 
-	@PostMapping(path = { "/register" }, consumes = { MediaType.MULTIPART_FORM_DATA_VALUE,
-			MediaType.APPLICATION_JSON_VALUE })
-	public ResponseEntity<?> registerUser(@Valid @RequestPart(value = "user") UserDto userDto,
-			@RequestPart(value = "profile_image", required = false) MultipartFile profileImage) {
+	@PostMapping(path = { "/register" })
+	public ResponseEntity<?> registerUser(@Valid @RequestBody UserDto userDto) {
 		try {
-			UserDto registeredUser = this.userService.registerNewUser(userDto, profileImage);
+			UserDto registeredUser = this.userService.registerNewUser(userDto);
 			return new ResponseEntity<>(registeredUser, HttpStatus.CREATED);
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
