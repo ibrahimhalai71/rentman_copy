@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -12,30 +13,58 @@ import javax.persistence.Table;
 @Table(name = "client")
 public class Client extends User {
 	
-	private String billingInfo;
-	private String preferences;
-	private String occupation;
+	private String address;
+	private String contactPerson;
+	private String phoneNumber;
+	private String phoneNumberPlanning;
+	private String invoiceMail;
+	private String sector;
+	private Double kilometerRate;
 	
 	@OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
     private List<Job> jobs = new ArrayList<>();
 	
-	public String getBillingInfo() {
-		return billingInfo;
+	public String getAddress() {
+		return address;
 	}
-	public void setBillingInfo(String billingInfo) {
-		this.billingInfo = billingInfo;
+	public String getContactPerson() {
+		return contactPerson;
 	}
-	public String getPreferences() {
-		return preferences;
+	public String getPhoneNumber() {
+		return phoneNumber;
 	}
-	public void setPreferences(String preferences) {
-		this.preferences = preferences;
+	public String getPhoneNumberPlanning() {
+		return phoneNumberPlanning;
 	}
-	public String getOccupation() {
-		return occupation;
+	public String getInvoiceMail() {
+		return invoiceMail;
 	}
-	public void setOccupation(String occupation) {
-		this.occupation = occupation;
+	public String getSector() {
+		return sector;
+	}
+	public Double getKilometerRate() {
+		return kilometerRate;
+	}
+	public void setAddress(String address) {
+		this.address = address;
+	}
+	public void setContactPerson(String contactPerson) {
+		this.contactPerson = contactPerson;
+	}
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
+	}
+	public void setPhoneNumberPlanning(String phoneNumberPlanning) {
+		this.phoneNumberPlanning = phoneNumberPlanning;
+	}
+	public void setInvoiceMail(String invoiceMail) {
+		this.invoiceMail = invoiceMail;
+	}
+	public void setSector(String sector) {
+		this.sector = sector;
+	}
+	public void setKilometerRate(Double kilometerRate) {
+		this.kilometerRate = kilometerRate;
 	}
 	public List<Job> getJobs() {
 		return jobs;

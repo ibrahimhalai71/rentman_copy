@@ -40,6 +40,6 @@ public interface UserService {
 
   List<UserDto> getServiceProvidersAvailableBetweenDates(LocalDate startDate, LocalDate endDate);
   
-  UserDto updateUserProfileImage(Long userId, MultipartFile image) throws Exception;
+  UserDto updateUserFile(Long userId, MultipartFile file, Integer docType) throws Exception;
   
 }

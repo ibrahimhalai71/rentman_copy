@@ -29,17 +29,18 @@ public class User implements UserDetails {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id")
 	private long id;
-
-	@Column(name = "user_name", nullable = false, length = 100, unique = true)
-	private String name;
-
+	private String firstName;
+	private String lastName;
+	private String businessRegistration;
+	@Column(name = "email", nullable = false, length = 100, unique = true)
 	private String email;
+	private String VAT;
+	private Double discussedRate;
 	private String password;
-	private String about;
 	private Integer depId;
 	private Boolean active;
 	private Boolean status;	
-	private String city; 
+    private String agreement;
 	
 	@ManyToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
 	@JoinTable(name = "user_role", joinColumns = {
@@ -57,14 +58,6 @@ public class User implements UserDetails {
 		this.id = id;
 	}
 
-	public String getName() {
-		return this.name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
 	public String getEmail() {
 		return this.email;
 	}
@@ -79,14 +72,6 @@ public class User implements UserDetails {
 
 	public void setPassword(String password) {
 		this.password = password;
-	}
-
-	public String getAbout() {
-		return this.about;
-	}
-
-	public void setAbout(String about) {
-		this.about = about;
 	}
 
 	public Boolean getActive() {
@@ -119,10 +104,6 @@ public class User implements UserDetails {
 		return authorities;
 	}
 
-	public String getUsername() {
-		return this.name;
-	}
-
 	public boolean isAccountNonExpired() {
 		return true;
 	}
@@ -147,19 +128,64 @@ public class User implements UserDetails {
 		this.status = status;
 	}
 
-	public String getCity() {
-		return city;
-	}
-
-	public void setCity(String city) {
-		this.city = city;
-	}
-
 	public String getProfileImage() {
 		return profileImage;
 	}
 
 	public void setProfileImage(String profileImage) {
 		this.profileImage = profileImage;
+	}
+
+	@Override
+	public String getUsername() {
+		return this.firstName;
+	}
+
+	public String getFirstName() {
+		return firstName;
+	}
+
+	public String getLastName() {
+		return lastName;
+	}
+
+	public String getBusinessRegistration() {
+		return businessRegistration;
+	}
+
+	public String getVAT() {
+		return VAT;
+	}
+
+	public Double getDiscussedRate() {
+		return discussedRate;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
+	public void setBusinessRegistration(String businessRegistration) {
+		this.businessRegistration = businessRegistration;
+	}
+
+	public void setVAT(String vAT) {
+		VAT = vAT;
+	}
+
+	public void setDiscussedRate(Double discussedRate) {
+		this.discussedRate = discussedRate;
+	}
+
+	public String getAgreement() {
+		return agreement;
+	}
+
+	public void setAgreement(String agreement) {
+		this.agreement = agreement;
 	}
 }

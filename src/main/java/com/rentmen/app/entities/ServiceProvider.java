@@ -1,9 +1,11 @@
 package com.rentmen.app.entities;
 
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -16,14 +18,13 @@ import javax.persistence.Table;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.rentmen.app.utils.AvailabilityOptions;
+import com.rentmen.app.utils.DriversLicense;
 
 @Entity
 @Table(name = "service_provider")
 public class ServiceProvider extends User {
 	private Boolean availabilityStatus;	
 	private Float rating;	
-	private String description;
-	private Integer age;	
 	private String contact;
 	
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -35,6 +36,12 @@ public class ServiceProvider extends User {
     @Enumerated(EnumType.STRING)
     private AvailabilityOptions availabilityOptions;
 
+    @Enumerated(EnumType.STRING)
+    private DriversLicense driversLicense;
+    
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate dateOfBirth;
+    
 	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "service_provider_skill", joinColumns = {
 			@JoinColumn(name = "service_provider_id", referencedColumnName = "id") }, inverseJoinColumns = {
@@ -57,14 +64,6 @@ public class ServiceProvider extends User {
 		this.rating = rating;
 	}
 
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
 	public Set<Skill> getSkills() {
 		return skills;
 	}
@@ -74,11 +73,11 @@ public class ServiceProvider extends User {
 	}
 
 	public Integer getAge() {
-		return age;
-	}
-
-	public void setAge(Integer age) {
-		this.age = age;
+		if ((this.dateOfBirth != null)) {
+            return Period.between(this.dateOfBirth, LocalDate.now()).getYears();
+        } else {
+            return 0;
+        }
 	}
 
 	public String getContact() {
@@ -111,6 +110,22 @@ public class ServiceProvider extends User {
 
 	public void setAvailabilityOptions(AvailabilityOptions availabilityOptions) {
 		this.availabilityOptions = availabilityOptions;
+	}
+
+	public DriversLicense getDriversLicense() {
+		return driversLicense;
+	}
+
+	public LocalDate getDateOfBirth() {
+		return dateOfBirth;
+	}
+
+	public void setDriversLicense(DriversLicense driversLicense) {
+		this.driversLicense = driversLicense;
+	}
+
+	public void setDateOfBirth(LocalDate dateOfBirth) {
+		this.dateOfBirth = dateOfBirth;
 	}
 
 }
