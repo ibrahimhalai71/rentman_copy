@@ -193,8 +193,14 @@ public class UserController {
 
 	@GetMapping("/getUserProfileImage/{fileName}")
 	public ResponseEntity<?> downloadImageFromFileSystem(@PathVariable String fileName) throws IOException {
-		byte[] imageData = UtilFunctions.downloadImageFromFileSystem(fileName);
+		byte[] imageData = UtilFunctions.downloadFileFromFileSystem(fileName,1);
 		return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.valueOf("image/png")).body(imageData);
+
+	}
+	@GetMapping("/getUserAgreement/{fileName}")
+	public ResponseEntity<?> downloadAgreementFromFileSystem(@PathVariable String fileName) throws IOException {
+		byte[] imageData = UtilFunctions.downloadFileFromFileSystem(fileName,2);
+		return ResponseEntity.status(HttpStatus.OK).contentType(MediaType.valueOf("application/pdf")).body(imageData);
 
 	}
 
@@ -202,7 +208,17 @@ public class UserController {
 	public ResponseEntity<?> updateUserProfileImage(@RequestParam(value = "userId") Long userId,
 			@RequestParam(value = "profile_image") MultipartFile image) {
 		try {
-			return ResponseEntity.ok(this.userService.updateUserProfileImage(userId, image));
+			return ResponseEntity.ok(this.userService.updateUserFile(userId, image, 1));
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
+	}
+	
+	@PostMapping("/updateUserAgreement")
+	public ResponseEntity<?> updateUserAgreement(@RequestParam(value = "userId") Long userId,
+			@RequestParam(value = "file") MultipartFile file) {
+		try {
+			return ResponseEntity.ok(this.userService.updateUserFile(userId, file, 2));
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}

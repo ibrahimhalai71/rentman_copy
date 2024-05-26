@@ -74,10 +74,10 @@ public class UserServiceImp implements UserService {
 	public UserDto updateUser(UserDto userDto, Long userId) {
 		User user = userRepo.findById(userId)
 				.orElseThrow(() -> new ResourceNotFoundException("User", "id", userId.intValue()));
-		user.setName(userDto.getName());
+//		user.setName(userDto.getName());
 		user.setEmail(userDto.getEmail());
 		user.setPassword(passwordEncoder.encode(userDto.getPassword()));
-		user.setAbout(userDto.getAbout());
+//		user.setAbout(userDto.getAbout());
 		User updatedUser = userRepo.save(user);
 		UserDto updatedUserDto = userToDto(updatedUser);
 		return updatedUserDto;
@@ -275,47 +275,35 @@ public class UserServiceImp implements UserService {
 				.collect(Collectors.toSet());
 	}
 	@Override
-	public UserDto updateUserProfileImage(Long userId, MultipartFile image) throws Exception {
+	public UserDto updateUserFile(Long userId, MultipartFile file, Integer docType) throws Exception {
 		User user = userRepo.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
-		if (image != null && !image.isEmpty()) {
-			boolean toReturn = deleteUserProfileImage(user.getProfileImage());
-			if (toReturn) {
-				String imageName = UtilFunctions.createFileName(image, user.getName());
-				String imagePath = UtilFunctions.saveMultipartFileToPath(image, imageName);
-				if (imagePath != null && !imagePath.isEmpty()) {
-					user.setProfileImage(imageName);
-					userRepo.save(user);
-				} else {
-					throw new Exception("Error: image save unsuccessful");
+		if (file != null && !file.isEmpty()) {
+			String storedFileName = null;
+			if(docType == 1) {//for profile image
+				storedFileName = user.getProfileImage();
+			}else if( docType == 2) {//for agreement
+				storedFileName = user.getAgreement();
+			}else {
+				throw new Exception("Error: document type not mentioned");
+			}
+			if (storedFileName != null && !storedFileName.isEmpty()) {
+				UtilFunctions.deleteFile(storedFileName);
+			}
+			String fileName = UtilFunctions.createFileName(file, user.getEmail());
+			String filePath = UtilFunctions.saveMultipartFileToPath(file, fileName, docType);
+			if (filePath != null && !filePath.isEmpty()) {
+				if(docType == 1) {
+					user.setProfileImage(fileName);
+				}else if(docType == 2) {
+					user.setAgreement(fileName);
 				}
+				userRepo.save(user);
 			} else {
-				throw new Exception("Error: image deletion unsuccessful");
+				throw new Exception("Error: image save unsuccessful");
 			}
 		} else {
 			throw new Exception("Error: Multipart Image null or empty");
 		}
 		return modelMapper.map(user, UserDto.class);
 	}
-	
-	private boolean deleteUserProfileImage(String oldImagePath) {
-		boolean toReturn = false;
-		if (oldImagePath != null && !oldImagePath.isEmpty()) {
-			File fileToDelete = new File(Constants.PROFILE_IMAGE_PATH+"/"+oldImagePath);
-			if (fileToDelete.exists()) {
-				// Delete the file
-				if (fileToDelete.delete()) {
-					System.out.println("File deleted successfully: " + oldImagePath);
-					toReturn = true;
-				} else {
-					System.out.println("Failed to delete file: " + oldImagePath);
-				}
-			} else {
-				System.out.println("File does not exist: " + oldImagePath);
-			}
-		}else {
-			toReturn = true;
-		}
-		return toReturn;
-	}
-	
 }

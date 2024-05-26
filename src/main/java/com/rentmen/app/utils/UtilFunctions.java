@@ -39,9 +39,13 @@ public class UtilFunctions {
         return target;
     }
 	
-	public static String saveMultipartFileToPath(MultipartFile imageFile, String fileName) {
+	public static String saveMultipartFileToPath(MultipartFile imageFile, String fileName, Integer docType) {
 		StringBuilder filePath = new StringBuilder();
-		filePath.append(Constants.PROFILE_IMAGE_PATH);
+		if(docType == 1) {//for profile image
+			filePath.append(Constants.PROFILE_IMAGE_PATH);
+		}else if( docType == 2) {//for agreement
+			filePath.append(Constants.AGREEMENT_PATH);
+		}
 		File image = new File(filePath.toString());
 		if(!image.exists()) {
 			if(image.mkdirs()) {
@@ -70,11 +74,31 @@ public class UtilFunctions {
 		return name+"_"+UUID.randomUUID().toString() + "." + getFileExtension(imageFile);
 		
 	}
-	public static byte[] downloadImageFromFileSystem(String fileName) throws IOException {
+	public static byte[] downloadFileFromFileSystem(String fileName, Integer docType) throws IOException {
 		StringBuilder filePath = new StringBuilder();
-		filePath.append(Constants.PROFILE_IMAGE_PATH);
+		if(docType == 1) {//for profile image
+			filePath.append(Constants.PROFILE_IMAGE_PATH);
+		}else if( docType == 2) {//for agreement
+			filePath.append(Constants.AGREEMENT_PATH);
+		}
 		filePath.append("/"+fileName);
         byte[] images = Files.readAllBytes(new File(filePath.toString()).toPath());
         return images;
     }
+	
+	public static void deleteFile(String filePath) throws Exception {
+		File fileToDelete = new File(filePath);
+		if (fileToDelete.exists()) {
+			// Delete the file
+			if (fileToDelete.delete()) {
+				System.out.println("File deleted successfully: " + filePath);
+			} else {
+				System.out.println("Failed to delete file: " + filePath);
+				throw new Exception("Failed to delete file: " + filePath);
+			}
+		} else {
+			System.out.println("File does not exist: " + filePath);
+			throw new Exception("File does not exist: " + filePath);
+		}
+	}
 }

@@ -13,6 +13,6 @@ public interface ServiceProviderRepo extends JpaRepository<ServiceProvider, Long
 	@Query(value = "SELECT u.* FROM users u WHERE u.rating >= :minRating", nativeQuery = true)
 	    List<ServiceProvider> findByRatingGreaterThanOrEqual(Float minRating);
 
-	@Query(value = "SELECT sp FROM ServiceProvider sp WHERE (sp.availabilityStartDate >= :startDate AND sp.availabilityEndDate < :endDate) OR (sp.availabilityStartDate IS NULL AND sp.availabilityEndDate IS NULL)")
+	@Query(value = "SELECT sp FROM ServiceProvider sp WHERE (sp.availabilityStartDate <= :startDate AND sp.availabilityEndDate >= :endDate) OR (sp.availabilityStartDate IS NULL AND sp.availabilityEndDate IS NULL)")
 	List<ServiceProvider> findAvailableBetweenDates(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 }

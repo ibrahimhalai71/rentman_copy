@@ -3,8 +3,13 @@ package com.rentmen.app.configurations;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+
+import com.rentmen.app.exceptions.ResourceNotFoundException;
+import com.rentmen.app.repositories.UserRepo;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -13,6 +18,8 @@ import java.util.function.Function;
 
 @Component
 public class JwtTokenHelper {
+	 @Autowired
+	    private UserRepo userRepo;
     public static final long JWT_TOKEN_VALIDITY = 18000L;
     private String secret = "jwtTokenKey";
 
@@ -40,7 +47,7 @@ public class JwtTokenHelper {
 
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
-        return doGenerateToken(claims, userDetails.getUsername());
+        return doGenerateToken(claims, getEmailFromUserDetails(userDetails));
     }
 
     private String doGenerateToken(Map<String, Object> claims, String subject) {
@@ -51,6 +58,10 @@ public class JwtTokenHelper {
 
     public Boolean validateToken(String token, UserDetails userDetails) {
         String username = getUsernameFromToken(token);
-        return Boolean.valueOf((username.equals(userDetails.getUsername()) && !isTokenExpired(token).booleanValue()));
+        return Boolean.valueOf((username.equals(getEmailFromUserDetails(userDetails)) && !isTokenExpired(token).booleanValue()));
+    }
+    
+    private String getEmailFromUserDetails(UserDetails userDetails) {
+    	return this.userRepo.findByFirstName(userDetails.getUsername()).orElseThrow(() -> new ResourceNotFoundException("User", "name", userDetails.getUsername())).getEmail();
     }
 }
