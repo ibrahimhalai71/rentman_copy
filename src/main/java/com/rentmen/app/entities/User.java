@@ -41,6 +41,7 @@ public class User implements UserDetails {
 	private Boolean active;
 	private Boolean status;	
     private String agreement;
+    private String about;
 	
 	@ManyToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
 	@JoinTable(name = "user_role", joinColumns = {
@@ -187,5 +188,13 @@ public class User implements UserDetails {
 
 	public void setAgreement(String agreement) {
 		this.agreement = agreement;
+	}
+
+	public String getAbout() {
+		return about;
+	}
+
+	public void setAbout(String about) {
+		this.about = about;
 	}
 }

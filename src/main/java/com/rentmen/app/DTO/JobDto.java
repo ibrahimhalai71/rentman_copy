@@ -74,6 +74,9 @@ public class JobDto {
     @JsonProperty("project_lead_number")
     private String projectLeadNumber;
     
+    @JsonProperty("job_other_skills")
+    private List<String> jobOtherSkills;
+    
 	
 	public Long getId() {
 		return id;
@@ -207,7 +210,10 @@ public class JobDto {
 	public void setProjectLeadNumber(String projectLeadNumber) {
 		this.projectLeadNumber = projectLeadNumber;
 	}
-	
-	
-
+	public List<String> getJobOtherSkills() {
+		return jobOtherSkills;
+	}
+	public void setJobOtherSkills(List<String> jobOtherSkills) {
+		this.jobOtherSkills = jobOtherSkills;
+	}
 }
