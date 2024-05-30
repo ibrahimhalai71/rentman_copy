@@ -10,6 +10,7 @@ import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -29,6 +30,7 @@ import javax.persistence.TemporalType;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.rentmen.app.utils.JobStatus;
+import com.rentmen.app.utils.StringListConverter;
 
 @Entity
 @Table(name = "job")
@@ -106,6 +108,10 @@ public class Job {
     
     @Column(name = "project_lead_number")
     private String projectLeadNumber;
+
+    @Convert(converter = StringListConverter.class)
+    @Column(name = "job_other_skills", nullable = false)
+    private List<String> jobOtherSkills;
     // Other job-related fields and methods
     
     // Getters and setters
@@ -285,5 +291,12 @@ public class Job {
 		this.projectLeadNumber = projectLeadNumber;
 	}
 
+	public List<String> getJobOtherSkills() {
+		return jobOtherSkills;
+	}
+
+	public void setJobOtherSkills(List<String> jobOtherSkills) {
+		this.jobOtherSkills = jobOtherSkills;
+	}
 }
 
