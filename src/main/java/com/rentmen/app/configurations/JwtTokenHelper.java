@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import com.rentmen.app.exceptions.ResourceNotFoundException;
+import com.rentmen.app.repositories.JobRepo;
 import com.rentmen.app.repositories.UserRepo;
 
 import java.util.Date;
@@ -20,6 +21,8 @@ import java.util.function.Function;
 public class JwtTokenHelper {
 	 @Autowired
 	    private UserRepo userRepo;
+	 @Autowired
+	 private JobRepo jobRepo;
     public static final long JWT_TOKEN_VALIDITY = 18000L;
     private String secret = "jwtTokenKey";
 
@@ -39,6 +42,10 @@ public class JwtTokenHelper {
     private Claims getAllClaimsFromToken(String token) {
         return (Claims) Jwts.parser().setSigningKey(this.secret).parseClaimsJws(token).getBody();
     }
+    private Boolean isReviewFormToken(String token) {
+    	Claims claims = getAllClaimsFromToken(token);
+    	return (Boolean) claims.get("review_form");
+    }
 
     private Boolean isTokenExpired(String token) {
         Date expiration = getExpirationDateFromToken(token);
@@ -47,12 +54,13 @@ public class JwtTokenHelper {
 
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
-        return doGenerateToken(claims, getEmailFromUserDetails(userDetails));
+        long expTime = System.currentTimeMillis() + 18000000L;
+        return doGenerateToken(claims, getEmailFromUserDetails(userDetails), expTime);
     }
 
-    private String doGenerateToken(Map<String, Object> claims, String subject) {
+    private String doGenerateToken(Map<String, Object> claims, String subject, long expTime) {
         return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 18000000L))
+                .setExpiration(new Date(expTime))
                 .signWith(SignatureAlgorithm.HS512, this.secret).compact();
     }
 
@@ -64,4 +72,21 @@ public class JwtTokenHelper {
     private String getEmailFromUserDetails(UserDetails userDetails) {
     	return this.userRepo.findByFirstName(userDetails.getUsername()).orElseThrow(() -> new ResourceNotFoundException("User", "name", userDetails.getUsername())).getEmail();
     }
+    
+    public Long getJobIdFromToken(String token) {
+    	return Long.parseLong(getUsernameFromToken(token));
+    }
+
+	public String generateTokenForReviewForm(String jobId) {
+		Map<String, Object> claims = new HashMap<>();
+		long currentTimeMillis = System.currentTimeMillis();
+		long expirationTimeMillis = currentTimeMillis + 5L * 24 * 60 * 60 * 1000;
+		claims.put("review_form", true);
+		return doGenerateToken(claims, jobId, expirationTimeMillis);
+	}
+    
+	public Boolean validateTokenForReviewForm(String token) {
+		return Boolean.valueOf(this.jobRepo.existsById(getJobIdFromToken(token))
+				&& !isTokenExpired(token).booleanValue() && isReviewFormToken(token).booleanValue());
+	}
 }

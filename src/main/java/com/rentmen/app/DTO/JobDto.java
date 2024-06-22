@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -17,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.rentmen.app.entities.PotentialJobOffer;
 import com.rentmen.app.entities.ServiceProvider;
 import com.rentmen.app.utils.JobStatus;
+import com.rentmen.app.utils.UtilFunctions;
 
 public class JobDto {
 	private Long id;
@@ -55,6 +57,10 @@ public class JobDto {
 	private String role;
 	private String description;
 	private JobStatus status;
+	@JsonProperty("reviewed_by_client")
+	private Boolean reviewedByClient;
+	@JsonProperty("reviewed_by_service_provider")
+    private Map<Long, Boolean> reviewedByServiceProvider;
 	
 	@JsonProperty("moderator_approval")
     private Integer moderatorApproval;
@@ -215,5 +221,20 @@ public class JobDto {
 	}
 	public void setJobOtherSkills(List<String> jobOtherSkills) {
 		this.jobOtherSkills = jobOtherSkills;
+	}
+	public Boolean getReviewedByClient() {
+		return reviewedByClient;
+	}
+	public void setReviewedByClient(Boolean reviewedByClient) {
+		this.reviewedByClient = reviewedByClient;
+	}
+	public Map<Long, Boolean> getReviewedByServiceProvider() {
+		return reviewedByServiceProvider;
+	}
+	public void setReviewedByServiceProvider(Map<Long, Boolean> reviewedByServiceProvider) {
+		this.reviewedByServiceProvider = reviewedByServiceProvider;
+	}
+	public void setReviewedByServiceProvider(String strReviewBySP) {
+		this.reviewedByServiceProvider = strReviewBySP != null ? UtilFunctions.convertWithStream(strReviewBySP) : null;
 	}
 }

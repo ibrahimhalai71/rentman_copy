@@ -13,11 +13,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.rentmen.app.DTO.InvoiceDto;
 import com.rentmen.app.DTO.JobDto;
 import com.rentmen.app.DTO.PotentialJobOfferDto;
+import com.rentmen.app.DTO.ReviewFormClient;
 import com.rentmen.app.DTO.UserDto;
+import com.rentmen.app.configurations.JwtTokenHelper;
 import com.rentmen.app.services.JobService;
 
 @RestController
@@ -27,6 +31,8 @@ public class JobController {
 	
 	@Autowired
 	private JobService jobService;
+	@Autowired
+	private JwtTokenHelper jwtTokenHelper;
 	
 	@PostMapping({"/createJob"})
 	public ResponseEntity<?> createJob(@RequestBody JobDto job) {
@@ -98,5 +104,33 @@ public class JobController {
 		return ResponseEntity.ok("Updated");
 	}
 	
+	@GetMapping({"/review-form/client/{token}"})
+	public ResponseEntity<?> getClientReviewForm(@PathVariable("token") String token){
+		try {
+			return ResponseEntity.ok(jobService.getClientReviewForm(token));
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
+	}
+	
+	@PostMapping({"/review-form/client"})
+	public ResponseEntity<?> postClientReviewForm(@RequestParam(value = "token") String token, @RequestBody List<ReviewFormClient> reviews) throws Exception{
+			jobService.postClientReviewForm(token, reviews);
+			return ResponseEntity.ok("review posted successfully");
+	}
+	@GetMapping({"/review-form/getToken/{jobId}"})
+	public ResponseEntity<?> getReviewToken(@PathVariable("jobId") String jobId){
+		return ResponseEntity.ok(jwtTokenHelper.generateTokenForReviewForm(jobId));
+	}
+	@GetMapping({"/review-form/service-provider/{token}/{spId}"})
+	public ResponseEntity<?> isReviewedServiceProviderReviewForm(@PathVariable("token")String token, @PathVariable("spId") Long spId) throws Exception{
+		return ResponseEntity.ok(jobService.isReviewedServiceProviderReviewForm(token, spId));
+	}
+	
+	@PostMapping({"/review-form/service-provider"})
+	public ResponseEntity<?> postReviewFormServiceProvider(@RequestParam(value = "token") String token,@RequestBody InvoiceDto invoice) throws Exception{
+		jobService.postReviewFormServiceProvider(token, invoice);
+		return ResponseEntity.ok("Sucsess: review form posted successfully");
+	}
 
 }

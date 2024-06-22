@@ -3,8 +3,11 @@ package com.rentmen.app.services;
 import java.util.List;
 import java.util.Set;
 
+import com.rentmen.app.DTO.InvoiceDto;
 import com.rentmen.app.DTO.JobDto;
 import com.rentmen.app.DTO.PotentialJobOfferDto;
+import com.rentmen.app.DTO.ReviewFormClient;
+import com.rentmen.app.entities.Job;
 
 public interface JobService {
  JobDto createJob(JobDto jobDto);
@@ -32,4 +35,12 @@ public interface JobService {
  int acceptJobOffers(List<Long> jobIds, Long serviceProviderId);
  
  int rejectJobOffers(List<Long> jobIds, Long serviceProviderId);
+ 
+ public JobDto getClientReviewForm(String token) throws Exception;
+ 
+ public void postClientReviewForm(String token, List<ReviewFormClient> review)throws Exception;
+ 
+ public Boolean isReviewedServiceProviderReviewForm(String token, Long serviceProviderId) throws Exception;
+ 
+ public void postReviewFormServiceProvider(String token, InvoiceDto invoiceDto) throws Exception;
 }

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -31,6 +32,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import com.rentmen.app.utils.JobStatus;
 import com.rentmen.app.utils.StringListConverter;
+import com.rentmen.app.utils.StringMapConverter;
 
 @Entity
 @Table(name = "job")
@@ -110,10 +112,14 @@ public class Job {
     private String projectLeadNumber;
 
     @Convert(converter = StringListConverter.class)
-    @Column(name = "job_other_skills", nullable = false)
+    @Column(name = "job_other_skills", nullable = true)
     private List<String> jobOtherSkills;
     // Other job-related fields and methods
+    @Convert(converter = StringMapConverter.class)
+    @Column(name = "reviewed_by_ServiceProvider", nullable = true)
+    private Map<Long, Boolean> reviewedByServiceProvider;
     
+    private Boolean reviewedByClient;
     // Getters and setters
 	public Long getId() {
 		return id;
@@ -297,6 +303,22 @@ public class Job {
 
 	public void setJobOtherSkills(List<String> jobOtherSkills) {
 		this.jobOtherSkills = jobOtherSkills;
+	}
+
+	public Boolean getReviewedByClient() {
+		return reviewedByClient;
+	}
+
+	public void setReviewedByClient(Boolean reviewedByClient) {
+		this.reviewedByClient = reviewedByClient;
+	}
+
+	public Map<Long, Boolean> getReviewedByServiceProvider() {
+		return reviewedByServiceProvider;
+	}
+
+	public void setReviewedByServiceProvider(Map<Long, Boolean> reviewedByServiceProvider) {
+		this.reviewedByServiceProvider = reviewedByServiceProvider;
 	}
 }
 

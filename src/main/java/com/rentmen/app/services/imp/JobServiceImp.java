@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -17,10 +18,14 @@ import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.rentmen.app.DTO.InvoiceDto;
 import com.rentmen.app.DTO.JobDto;
 import com.rentmen.app.DTO.PotentialJobOfferDto;
+import com.rentmen.app.DTO.ReviewFormClient;
 import com.rentmen.app.DTO.UserDto;
+import com.rentmen.app.configurations.JwtTokenHelper;
 import com.rentmen.app.entities.Client;
+import com.rentmen.app.entities.Invoice;
 import com.rentmen.app.entities.Job;
 import com.rentmen.app.entities.Moderator;
 import com.rentmen.app.entities.PotentialJobOffer;
@@ -30,6 +35,7 @@ import com.rentmen.app.entities.Skill;
 import com.rentmen.app.entities.User;
 import com.rentmen.app.exceptions.ResourceNotFoundException;
 import com.rentmen.app.repositories.ClientRepo;
+import com.rentmen.app.repositories.InvoiceRepo;
 import com.rentmen.app.repositories.JobRepo;
 import com.rentmen.app.repositories.ModeratorRepo;
 import com.rentmen.app.repositories.PotentialJobOfferRepo;
@@ -37,6 +43,8 @@ import com.rentmen.app.repositories.ServiceProviderRepo;
 import com.rentmen.app.repositories.SkillRepo;
 import com.rentmen.app.repositories.UserRepo;
 import com.rentmen.app.services.JobService;
+import com.rentmen.app.utils.StringMapConverter;
+import com.rentmen.app.utils.UtilFunctions;
 
 @Service
 public class JobServiceImp implements JobService {
@@ -64,6 +72,12 @@ public class JobServiceImp implements JobService {
 	
 	@Autowired
 	private PotentialJobOfferRepo pjoRepo;
+	
+	@Autowired
+	private JwtTokenHelper jwtTokenHelper;
+	
+	@Autowired
+	private InvoiceRepo invoiceRepo;
 
 	@Override
 	public JobDto createJob(JobDto jobDto) {
@@ -251,4 +265,86 @@ public class JobServiceImp implements JobService {
 		
 		return job;
 	}
-}
+	
+	
+	@Override
+	public JobDto getClientReviewForm(String token) throws Exception {
+		if (jwtTokenHelper.validateTokenForReviewForm(token)) {
+			Long jobId = jwtTokenHelper.getJobIdFromToken(token);
+			return modelMapper.map(
+					this.jobRepo.findById(jobId).orElseThrow(() -> new ResourceNotFoundException("Job", "id", jobId)),
+					JobDto.class);
+		} else {
+			throw new Exception("Error: invalid token or token expired");
+
+		}
+	}
+	@Transactional
+	@Override
+	public void postClientReviewForm(String token, List<ReviewFormClient> reviews) throws Exception{
+		if (jwtTokenHelper.validateTokenForReviewForm(token)) {
+			Long jobId = jwtTokenHelper.getJobIdFromToken(token);
+			Job job = this.jobRepo.findById(jobId).orElseThrow(() -> new ResourceNotFoundException("Job", "id", jobId));
+			if(job.getReviewedByClient() != null ? job.getReviewedByClient() : false) {
+				throw new Exception("Error: review has been done");
+			}
+			List<ServiceProvider> spList = job.getServiceProvidersList();
+			Map<Long, Float> clientReviewMap = reviews.stream()
+					.collect(Collectors.toMap(ReviewFormClient::getServiceProviderId, ReviewFormClient::getRating));
+			for(ServiceProvider sp :spList) {
+				Float review = clientReviewMap.get(sp.getId());
+				Float rating = sp.getRating();
+				Integer totalJobs = jobRepo.getReviewedJobsCount(sp.getId());
+				if (review > 0 || rating > 0) {
+					rating = ((rating * totalJobs) + review) / (totalJobs + 1);
+					sp.setRating(rating);
+					serviceProviderRepo.updateRating(rating, sp.getId());
+				}
+			}
+			jobRepo.setReviewedByClientTrue(jobId);
+		} else {
+			throw new Exception("Error: invalid token or token expired");
+
+		}
+	}
+	
+	public Boolean isReviewedServiceProviderReviewForm(String token, Long serviceProviderId) throws Exception  {
+		if (jwtTokenHelper.validateTokenForReviewForm(token)) {
+			Long jobId = jwtTokenHelper.getJobIdFromToken(token);
+			Job job = this.jobRepo.findById(jobId).orElseThrow(() -> new ResourceNotFoundException("Job", "id", jobId));
+			Map<Long, Boolean> spReviewMap = job.getReviewedByServiceProvider();
+			List<ServiceProvider> spList = job.getServiceProvidersList();
+			if(!spList.stream().anyMatch(sp -> sp.getId() == serviceProviderId)) {
+				throw new Exception("Error: Service-provider/student not present in job");
+			}
+			if(spReviewMap.containsKey(serviceProviderId)) {
+				return spReviewMap.get(serviceProviderId);
+			}else {
+				return false;
+			}
+		} else {
+			throw new Exception("Error: invalid token or token expired");
+
+		}
+	}
+	
+	public void postReviewFormServiceProvider(String token, InvoiceDto invoiceDto) throws Exception {
+		Long serviceProviderId = invoiceDto.getServiceProvider().getId();
+		if(!isReviewedServiceProviderReviewForm(token, serviceProviderId)){
+			Long jobId = jwtTokenHelper.getJobIdFromToken(token);
+			Job job = this.jobRepo.findById(jobId).orElseThrow(() -> new ResourceNotFoundException("Job", "id", jobId));
+			Map<Long, Boolean> spReviewMap = job.getReviewedByServiceProvider();
+			if(!spReviewMap.containsKey(serviceProviderId) || !spReviewMap.get(serviceProviderId)) {
+				spReviewMap.put(serviceProviderId, true);
+				String strSPReviewMap = UtilFunctions.convertWithStream(spReviewMap);
+				this.jobRepo.setReviewedByServiceProviderTrue(strSPReviewMap, jobId);
+				Invoice invoice = modelMapper.map(invoiceDto, Invoice.class);
+				invoice.setJob(job);
+				invoice.setServiceProvider(this.serviceProviderRepo.findById(serviceProviderId).orElseThrow(() -> new ResourceNotFoundException("Job", "id", jobId)));
+				this.invoiceRepo.save(invoice);
+			}
+		}else {
+			throw new Exception("Error: review form already filled");
+		}
+	}
+ }

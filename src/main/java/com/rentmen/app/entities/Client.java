@@ -6,8 +6,12 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import com.rentmen.app.utils.Billable;
 
 @Entity
 @Table(name = "client")
@@ -20,7 +24,15 @@ public class Client extends User {
 	private String invoiceMail;
 	private String sector;
 	private Double kilometerRate;
+	@Enumerated(EnumType.STRING)
+	private Billable billable;
 	
+	public Billable getBillable() {
+		return billable;
+	}
+	public void setBillable(Billable billable) {
+		this.billable = billable;
+	}
 	@OneToMany(mappedBy = "client", cascade = CascadeType.ALL)
     private List<Job> jobs = new ArrayList<>();
 	
