@@ -1,17 +1,14 @@
 package com.rentmen.app.utils;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -100,5 +97,19 @@ public class UtilFunctions {
 			System.out.println("File does not exist: " + filePath);
 			throw new Exception("File does not exist: " + filePath);
 		}
+	}
+	
+	public static Map<Long, Boolean> convertWithStream(String mapAsString) {
+	    Map<Long, Boolean> map = Arrays.stream(mapAsString.split(","))
+	      .map(entry -> entry.split("="))
+	      .collect(Collectors.toMap(entry -> Long.parseLong(entry[0]), entry -> Boolean.parseBoolean(entry[1])));
+	    return map;
+	}
+	
+	public static String convertWithStream(Map<Long, Boolean> map) {
+	    String mapAsString = map.keySet().stream()
+	      .map(key -> key + "=" + map.get(key))
+	      .collect(Collectors.joining(","));
+	    return mapAsString;
 	}
 }
