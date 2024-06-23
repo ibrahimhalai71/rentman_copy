@@ -43,4 +43,6 @@ public interface JobService {
  public Boolean isReviewedServiceProviderReviewForm(String token, Long serviceProviderId) throws Exception;
  
  public void postReviewFormServiceProvider(String token, InvoiceDto invoiceDto) throws Exception;
+ 
+ public String getInvoice(Long jobId) throws Exception;
 }

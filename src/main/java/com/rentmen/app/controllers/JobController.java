@@ -148,5 +148,9 @@ public class JobController {
 		jobService.postReviewFormServiceProvider(token, invoice);
 		return ResponseEntity.ok("Sucsess: review form posted successfully");
 	}
+	@GetMapping("/generateInvoice/{jobId}")
+	public ResponseEntity<?> generateInvoice(@PathVariable("jobId") Long jobId) throws Exception{
+		return ResponseEntity.ok(jobService.getInvoice(jobId));
+	}
 
 }

@@ -1,6 +1,9 @@
 package com.rentmen.app.services.imp;
 
 import java.lang.reflect.Type;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,11 +16,16 @@ import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
+import org.modelmapper.TypeMap;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rentmen.app.Constants.Constants;
 import com.rentmen.app.DTO.InvoiceDto;
 import com.rentmen.app.DTO.JobDto;
 import com.rentmen.app.DTO.PotentialJobOfferDto;
@@ -43,6 +51,7 @@ import com.rentmen.app.repositories.ServiceProviderRepo;
 import com.rentmen.app.repositories.SkillRepo;
 import com.rentmen.app.repositories.UserRepo;
 import com.rentmen.app.services.JobService;
+import com.rentmen.app.utils.Billable;
 import com.rentmen.app.utils.StringMapConverter;
 import com.rentmen.app.utils.UtilFunctions;
 
@@ -308,6 +317,7 @@ public class JobServiceImp implements JobService {
 		}
 	}
 	
+	@Override
 	public Boolean isReviewedServiceProviderReviewForm(String token, Long serviceProviderId) throws Exception  {
 		if (jwtTokenHelper.validateTokenForReviewForm(token)) {
 			Long jobId = jwtTokenHelper.getJobIdFromToken(token);
@@ -328,6 +338,7 @@ public class JobServiceImp implements JobService {
 		}
 	}
 	
+	@Override
 	public void postReviewFormServiceProvider(String token, InvoiceDto invoiceDto) throws Exception {
 		Long serviceProviderId = invoiceDto.getServiceProvider().getId();
 		if(!isReviewedServiceProviderReviewForm(token, serviceProviderId)){
@@ -346,5 +357,41 @@ public class JobServiceImp implements JobService {
 		}else {
 			throw new Exception("Error: review form already filled");
 		}
+	}
+	
+	public String getInvoice(Long jobId) throws Exception {
+		ObjectMapper objectMapper = new ObjectMapper();
+		Map<String, Object> returnMap = new HashMap<String, Object>();
+		Optional<List<Invoice>> invoiceList = this.invoiceRepo.findByJobId(jobId);
+		Job job = this.jobRepo.findById(jobId).orElseThrow(() -> new ResourceNotFoundException("Job", "id", jobId));
+		Double extraCost = 0.0;
+		Double kilometer = 0.0;
+		if (invoiceList.isPresent()) {
+			extraCost = invoiceList.get().stream().mapToDouble(Invoice::getExtraCost).sum();
+			kilometer = invoiceList.get().stream().mapToDouble(Invoice::getKilometer).sum();
+		}
+		Double cost = getJobCost(job);
+		Double totalCost = cost + extraCost + (kilometer * job.getClient().getKilometerRate());
+		Double totalCostTax = totalCost * (Constants.VAT + 1);
+		returnMap.put("extra_cost", extraCost);
+		returnMap.put("kilometer", kilometer);
+		returnMap.put("job_cost", cost);
+		returnMap.put("total_cost", totalCost);
+		returnMap.put("total_cost_tax", totalCostTax);
+		String returnString = objectMapper.writeValueAsString(returnMap);
+		return returnString;
+	}
+	
+	public Double getJobCost(Job job) {
+		Double cost = 0.0;
+		Double clientRate = job.getClient().getDiscussedRate();
+		Long days = ChronoUnit.DAYS.between(job.getStartDate(), job.getEndDate());
+		Long hours = ChronoUnit.HOURS.between(job.getStartTime(), job.getEndTime());
+		if (job.getClient().getBillable() == Billable.DAY) {
+			cost = days * clientRate;
+		} else {
+			cost = (days * hours) * clientRate;
+		}
+		return cost;
 	}
  }
