@@ -1,18 +1,27 @@
 package com.rentmen.app.DTO;
 
+import javax.validation.constraints.NotEmpty;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class InvoiceDto {
 	private int id;
+	
+	@NotEmpty
 	private JobDto job;
+	
+	@NotEmpty
 	@JsonProperty("service_provider")
 	private UserDto serviceProvider;
 	
+	@NotEmpty
 	private Double kilometer;
 
+	@NotEmpty
 	@JsonProperty("extra_cost")
 	private Double extraCost;
 
+	@NotEmpty
 	@JsonProperty("extra_cost_description")
 	private String extraCostDescription;
 
