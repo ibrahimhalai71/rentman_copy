@@ -371,7 +371,8 @@ public class JobServiceImp implements JobService {
 			kilometer = invoiceList.get().stream().mapToDouble(Invoice::getKilometer).sum();
 		}
 		Double cost = getJobCost(job);
-		Double totalCost = cost + extraCost + (kilometer * job.getClient().getKilometerRate());
+		Double kilometerRate = job.getClient().getKilometerRate() != null ? job.getClient().getKilometerRate() : 0.0;
+		Double totalCost = cost + extraCost + (kilometer * kilometerRate);
 		Double totalCostTax = totalCost * (Constants.VAT + 1);
 		returnMap.put("extra_cost", extraCost);
 		returnMap.put("kilometer", kilometer);
@@ -384,7 +385,7 @@ public class JobServiceImp implements JobService {
 	
 	public Double getJobCost(Job job) {
 		Double cost = 0.0;
-		Double clientRate = job.getClient().getDiscussedRate();
+		Double clientRate = job.getClient().getDiscussedRate() != null ? job.getClient().getDiscussedRate() : 0.0;
 		Long days = ChronoUnit.DAYS.between(job.getStartDate(), job.getEndDate());
 		Long hours = ChronoUnit.HOURS.between(job.getStartTime(), job.getEndTime());
 		if (job.getClient().getBillable() == Billable.DAY) {
