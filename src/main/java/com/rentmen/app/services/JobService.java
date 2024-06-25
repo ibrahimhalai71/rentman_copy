@@ -3,6 +3,7 @@ package com.rentmen.app.services;
 import java.util.List;
 import java.util.Set;
 
+import com.rentmen.app.DTO.GeneratedInvoiceDto;
 import com.rentmen.app.DTO.InvoiceDto;
 import com.rentmen.app.DTO.JobDto;
 import com.rentmen.app.DTO.PotentialJobOfferDto;
@@ -44,5 +45,5 @@ public interface JobService {
  
  public void postReviewFormServiceProvider(String token, InvoiceDto invoiceDto) throws Exception;
  
- public String getInvoice(Long jobId) throws Exception;
+ public GeneratedInvoiceDto getInvoice(Long jobId) throws Exception;
 }
