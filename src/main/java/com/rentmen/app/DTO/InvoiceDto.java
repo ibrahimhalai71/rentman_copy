@@ -14,14 +14,11 @@ public class InvoiceDto {
 	@JsonProperty("service_provider")
 	private UserDto serviceProvider;
 	
-	@NotEmpty
 	private Double kilometer;
 
-	@NotEmpty
 	@JsonProperty("extra_cost")
 	private Double extraCost;
 
-	@NotEmpty
 	@JsonProperty("extra_cost_description")
 	private String extraCostDescription;
 
