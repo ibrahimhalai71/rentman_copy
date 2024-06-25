@@ -26,6 +26,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rentmen.app.Constants.Constants;
+import com.rentmen.app.DTO.GeneratedInvoiceDto;
 import com.rentmen.app.DTO.InvoiceDto;
 import com.rentmen.app.DTO.JobDto;
 import com.rentmen.app.DTO.PotentialJobOfferDto;
@@ -359,9 +360,7 @@ public class JobServiceImp implements JobService {
 		}
 	}
 	
-	public String getInvoice(Long jobId) throws Exception {
-		ObjectMapper objectMapper = new ObjectMapper();
-		Map<String, Object> returnMap = new HashMap<String, Object>();
+	public GeneratedInvoiceDto getInvoice(Long jobId) throws Exception {
 		Optional<List<Invoice>> invoiceList = this.invoiceRepo.findByJobId(jobId);
 		Job job = this.jobRepo.findById(jobId).orElseThrow(() -> new ResourceNotFoundException("Job", "id", jobId));
 		Double extraCost = 0.0;
@@ -374,13 +373,10 @@ public class JobServiceImp implements JobService {
 		Double kilometerRate = job.getClient().getKilometerRate() != null ? job.getClient().getKilometerRate() : 0.0;
 		Double totalCost = cost + extraCost + (kilometer * kilometerRate);
 		Double totalCostTax = totalCost * (Constants.VAT + 1);
-		returnMap.put("extra_cost", extraCost);
-		returnMap.put("kilometer", kilometer);
-		returnMap.put("job_cost", cost);
-		returnMap.put("total_cost", totalCost);
-		returnMap.put("total_cost_tax", totalCostTax);
-		String returnString = objectMapper.writeValueAsString(returnMap);
-		return returnString;
+		Type listType = new TypeToken<List<InvoiceDto>>() {}.getType();
+		List<InvoiceDto> invoiceListDto = this.modelMapper.map(invoiceList, listType);
+		GeneratedInvoiceDto generatedInvoiceDto = new GeneratedInvoiceDto(invoiceListDto, extraCost, kilometer, cost, totalCost, totalCostTax);
+		return generatedInvoiceDto;
 	}
 	
 	public Double getJobCost(Job job) {
