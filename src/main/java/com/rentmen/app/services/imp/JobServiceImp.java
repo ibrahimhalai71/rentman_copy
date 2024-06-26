@@ -324,6 +324,9 @@ public class JobServiceImp implements JobService {
 			Long jobId = jwtTokenHelper.getJobIdFromToken(token);
 			Job job = this.jobRepo.findById(jobId).orElseThrow(() -> new ResourceNotFoundException("Job", "id", jobId));
 			Map<Long, Boolean> spReviewMap = job.getReviewedByServiceProvider();
+			if(spReviewMap == null) {
+				return false;
+			}
 			List<ServiceProvider> spList = job.getServiceProvidersList();
 			if(!spList.stream().anyMatch(sp -> sp.getId() == serviceProviderId)) {
 				throw new Exception("Error: Service-provider/student not present in job");
@@ -345,7 +348,7 @@ public class JobServiceImp implements JobService {
 		if(!isReviewedServiceProviderReviewForm(token, serviceProviderId)){
 			Long jobId = jwtTokenHelper.getJobIdFromToken(token);
 			Job job = this.jobRepo.findById(jobId).orElseThrow(() -> new ResourceNotFoundException("Job", "id", jobId));
-			Map<Long, Boolean> spReviewMap = job.getReviewedByServiceProvider();
+			Map<Long, Boolean> spReviewMap = job.getReviewedByServiceProvider() == null ? new HashMap<Long, Boolean>() : job.getReviewedByServiceProvider();
 			if(!spReviewMap.containsKey(serviceProviderId) || !spReviewMap.get(serviceProviderId)) {
 				spReviewMap.put(serviceProviderId, true);
 				String strSPReviewMap = UtilFunctions.convertWithStream(spReviewMap);
