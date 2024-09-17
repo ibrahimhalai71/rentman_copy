@@ -2,7 +2,7 @@ package com.rentmen.app.DTO;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class SkillDto {
+public class SkillDto implements Comparable<SkillDto>{
 
     private Long id;
     
@@ -10,8 +10,17 @@ public class SkillDto {
     private String skillName;
 
     // Getters and setters
+    
+    public SkillDto() {
 
-    public Long getId() {
+	}
+
+    public SkillDto(Long id2, String skillName2) {
+		this.id = id2;
+		this.skillName = skillName2;
+	}
+
+	public Long getId() {
         return id;
     }
 
@@ -26,5 +35,11 @@ public class SkillDto {
     public void setSkillName(String skillName) {
         this.skillName = skillName;
     }
+
+	@Override
+	public int compareTo(SkillDto o) {
+		// TODO Auto-generated method stub
+		return this.skillName.compareTo(o.skillName);
+	}
 }
 

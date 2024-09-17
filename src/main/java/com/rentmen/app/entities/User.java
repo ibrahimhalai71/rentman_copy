@@ -1,56 +1,83 @@
 package com.rentmen.app.entities;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import javax.persistence.*;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.Table;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
-@Table(name = "users")
+@Table(
+		name = "users"
+)
 public class User implements UserDetails {
 	private static final long serialVersionUID = 1L;
-
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id")
+	@GeneratedValue(
+			strategy = GenerationType.IDENTITY
+	)
+	@Column(
+			name = "id"
+	)
 	private long id;
 	private String firstName;
 	private String lastName;
 	private String businessRegistration;
-	@Column(name = "email", nullable = false, length = 100, unique = true)
+	@Enumerated(EnumType.STRING)
+	@Column(
+			name = "rate_type"
+	)
+	private RateType rateType;
+	@Column(
+			name = "time_based_rate"
+	)
+	private Boolean timeBasedRate;
+	@Column(
+			name = "email",
+			nullable = false,
+			length = 100,
+			unique = true
+	)
 	private String email;
 	private String VAT;
 	private Double discussedRate;
+	private Double dayRate;
+	private Double nightRate;
+	private Double weekendRate;
 	private String password;
 	private Integer depId;
 	private Boolean active;
-	private Boolean status;	
-    private String agreement;
-    private String about;
-	
-	@ManyToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
-	@JoinTable(name = "user_role", joinColumns = {
-			@JoinColumn(name = "user_id", referencedColumnName = "id") }, inverseJoinColumns = {
-					@JoinColumn(name = "role_id", referencedColumnName = "id") })
-	private Set<Role> roles = new HashSet<>();
-
+	private Boolean status;
+	private String agreement;
+	private String about;
+	@ManyToMany(
+			cascade = {CascadeType.ALL},
+			fetch = FetchType.EAGER
+	)
+	@JoinTable(
+			name = "user_role",
+			joinColumns = {@JoinColumn(
+					name = "user_id",
+					referencedColumnName = "id"
+			)},
+			inverseJoinColumns = {@JoinColumn(
+					name = "role_id",
+					referencedColumnName = "id"
+			)}
+	)
+	private Set<Role> roles = new HashSet();
 	private String profileImage;
-	
+
+	public User() {
+	}
+
 	public long getId() {
 		return this.id;
 	}
@@ -100,8 +127,9 @@ public class User implements UserDetails {
 	}
 
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		List<SimpleGrantedAuthority> authorities = this.roles.stream()
-				.map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList());
+		List<SimpleGrantedAuthority> authorities = (List)this.roles.stream().map((role) -> {
+			return new SimpleGrantedAuthority(role.getName());
+		}).collect(Collectors.toList());
 		return authorities;
 	}
 
@@ -122,7 +150,7 @@ public class User implements UserDetails {
 	}
 
 	public Boolean getStatus() {
-		return status;
+		return this.status;
 	}
 
 	public void setStatus(Boolean status) {
@@ -130,36 +158,35 @@ public class User implements UserDetails {
 	}
 
 	public String getProfileImage() {
-		return profileImage;
+		return this.profileImage;
 	}
 
 	public void setProfileImage(String profileImage) {
 		this.profileImage = profileImage;
 	}
 
-	@Override
 	public String getUsername() {
 		return this.firstName;
 	}
 
 	public String getFirstName() {
-		return firstName;
+		return this.firstName;
 	}
 
 	public String getLastName() {
-		return lastName;
+		return this.lastName;
 	}
 
 	public String getBusinessRegistration() {
-		return businessRegistration;
+		return this.businessRegistration;
 	}
 
 	public String getVAT() {
-		return VAT;
+		return this.VAT;
 	}
 
 	public Double getDiscussedRate() {
-		return discussedRate;
+		return this.discussedRate;
 	}
 
 	public void setFirstName(String firstName) {
@@ -175,7 +202,7 @@ public class User implements UserDetails {
 	}
 
 	public void setVAT(String vAT) {
-		VAT = vAT;
+		this.VAT = vAT;
 	}
 
 	public void setDiscussedRate(Double discussedRate) {
@@ -183,7 +210,7 @@ public class User implements UserDetails {
 	}
 
 	public String getAgreement() {
-		return agreement;
+		return this.agreement;
 	}
 
 	public void setAgreement(String agreement) {
@@ -191,10 +218,82 @@ public class User implements UserDetails {
 	}
 
 	public String getAbout() {
-		return about;
+		return this.about;
 	}
 
 	public void setAbout(String about) {
 		this.about = about;
+	}
+
+	public RateType getRateType() {
+		return this.rateType;
+	}
+
+	public void setRateType(RateType rateType) {
+		this.rateType = rateType;
+	}
+
+	public Boolean getTimeBasedRate() {
+		return this.timeBasedRate;
+	}
+
+	public void setTimeBasedRate(Boolean timeBasedRate) {
+		this.timeBasedRate = timeBasedRate;
+	}
+
+	public Double getDayRate() {
+		return this.dayRate;
+	}
+
+	public void setDayRate(Double dayRate) {
+		this.dayRate = dayRate;
+	}
+
+	public Double getNightRate() {
+		return this.nightRate;
+	}
+
+	public void setNightRate(Double nightRate) {
+		this.nightRate = nightRate;
+	}
+
+	public Double getWeekendRate() {
+		return this.weekendRate;
+	}
+
+	public void setWeekendRate(Double weekendRate) {
+		this.weekendRate = weekendRate;
+	}
+
+	public static enum RateType {
+		DAY("DAY"),
+		HOURLY("HOURLY");
+
+		private final String value;
+
+		private RateType(String value) {
+			this.value = value;
+		}
+
+		@JsonValue
+		public String getValue() {
+			return this.value;
+		}
+
+		@JsonCreator
+		public static RateType fromString(String key) {
+			if (key == null) {
+				return null;
+			} else {
+				switch (key.toUpperCase()) {
+					case "DAY":
+						return DAY;
+					case "HOURLY":
+						return HOURLY;
+					default:
+						throw new IllegalArgumentException("Unknown value: " + key);
+				}
+			}
+		}
 	}
 }

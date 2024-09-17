@@ -1,29 +1,28 @@
-package com.rentmen.app.DTO;
 
-import javax.validation.constraints.NotEmpty;
+package com.rentmen.app.DTO;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.validation.constraints.NotEmpty;
+
 public class InvoiceDto {
 	private int id;
-	
-	@NotEmpty
-	private JobDto job;
-	
-	@NotEmpty
+	private @NotEmpty JobDto job;
 	@JsonProperty("service_provider")
-	private UserDto serviceProvider;
-	
+	private @NotEmpty UserDto serviceProvider;
 	private Double kilometer;
-
 	@JsonProperty("extra_cost")
 	private Double extraCost;
-
 	@JsonProperty("extra_cost_description")
 	private String extraCostDescription;
+	private Boolean reviewedBySp;
+	private Boolean reviewedByClient;
+
+	public InvoiceDto() {
+	}
 
 	public int getId() {
-		return id;
+		return this.id;
 	}
 
 	public void setId(int id) {
@@ -31,7 +30,7 @@ public class InvoiceDto {
 	}
 
 	public JobDto getJob() {
-		return job;
+		return this.job;
 	}
 
 	public void setJob(JobDto job) {
@@ -39,7 +38,7 @@ public class InvoiceDto {
 	}
 
 	public UserDto getServiceProvider() {
-		return serviceProvider;
+		return this.serviceProvider;
 	}
 
 	public void setServiceProvider(UserDto serviceProvider) {
@@ -47,7 +46,7 @@ public class InvoiceDto {
 	}
 
 	public Double getKilometer() {
-		return kilometer;
+		return this.kilometer;
 	}
 
 	public void setKilometer(Double kilometer) {
@@ -55,7 +54,7 @@ public class InvoiceDto {
 	}
 
 	public Double getExtraCost() {
-		return extraCost;
+		return this.extraCost;
 	}
 
 	public void setExtraCost(Double extraCost) {
@@ -63,11 +62,26 @@ public class InvoiceDto {
 	}
 
 	public String getExtraCostDescription() {
-		return extraCostDescription;
+		return this.extraCostDescription;
 	}
 
 	public void setExtraCostDescription(String extraCostDescription) {
 		this.extraCostDescription = extraCostDescription;
-	} 
+	}
 
+	public Boolean getReviewedBySp() {
+		return this.reviewedBySp;
+	}
+
+	public void setReviewedBySp(Boolean reviewedBySp) {
+		this.reviewedBySp = reviewedBySp;
+	}
+
+	public Boolean getReviewedByClient() {
+		return this.reviewedByClient;
+	}
+
+	public void setReviewedByClient(Boolean reviewedByClient) {
+		this.reviewedByClient = reviewedByClient;
+	}
 }
