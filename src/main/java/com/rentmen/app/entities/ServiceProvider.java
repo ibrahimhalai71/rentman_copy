@@ -8,6 +8,7 @@ import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -66,6 +67,21 @@ public class ServiceProvider extends User {
 	)
 	Set<Skill> skills = new HashSet();
 
+	@ElementCollection
+	@CollectionTable(name = "service_provider_availability_dates", joinColumns = @JoinColumn(name = "service_provider_id"))
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
+	private List<LocalDate> availabilityDates;
+
+	@ElementCollection
+	@CollectionTable(name = "service_provider_unavailability_dates", joinColumns = @JoinColumn(name = "service_provider_id"))
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
+	private List<LocalDate> unavailabilityDates;
+
+	@ElementCollection
+	@CollectionTable(name = "service_provider_unknown_dates", joinColumns = @JoinColumn(name = "service_provider_id"))
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
+	private List<LocalDate> unknownDates;
+	
 	public ServiceProvider() {
 	}
 
@@ -175,5 +191,29 @@ public class ServiceProvider extends User {
 
 	public void setUnknownEndDate(LocalDate unknownEndDate) {
 		this.unknownEndDate = unknownEndDate;
+	}
+
+	public List<LocalDate> getAvailabilityDates() {
+		return availabilityDates;
+	}
+
+	public void setAvailabilityDates(List<LocalDate> availabilityDates) {
+		this.availabilityDates = availabilityDates;
+	}
+
+	public List<LocalDate> getUnavailabilityDates() {
+		return unavailabilityDates;
+	}
+
+	public void setUnavailabilityDates(List<LocalDate> unavailabilityDates) {
+		this.unavailabilityDates = unavailabilityDates;
+	}
+
+	public List<LocalDate> getUnknownDates() {
+		return unknownDates;
+	}
+
+	public void setUnknownDates(List<LocalDate> unknownDates) {
+		this.unknownDates = unknownDates;
 	}
 }

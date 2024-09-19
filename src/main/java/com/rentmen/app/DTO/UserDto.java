@@ -11,6 +11,7 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class UserDto {
@@ -85,6 +86,12 @@ public class UserDto {
 	private String agreement;
 	@JsonProperty("date_of_birth")
 	private LocalDate dateOfBirth;
+	@JsonProperty("availability_dates")
+	private List<LocalDate> availabilityDates;
+	@JsonProperty("unavailability_dates")
+	private List<LocalDate> unavailabilityDates;
+	@JsonProperty("unknown_dates")
+	private List<LocalDate> unknownDates;
 
 	public UserDto() {
 	}
@@ -409,5 +416,29 @@ public class UserDto {
 
 	public void setUnknownEndDate(LocalDate unknownEndDate) {
 		this.unknownEndDate = unknownEndDate;
+	}
+
+	public List<LocalDate> getAvailabilityDates() {
+		return availabilityDates;
+	}
+
+	public void setAvailabilityDates(List<LocalDate> availabilityDates) {
+		this.availabilityDates = availabilityDates;
+	}
+
+	public List<LocalDate> getUnavailabilityDates() {
+		return unavailabilityDates;
+	}
+
+	public void setUnavailabilityDates(List<LocalDate> unavailabilityDates) {
+		this.unavailabilityDates = unavailabilityDates;
+	}
+
+	public List<LocalDate> getUnknownDates() {
+		return unknownDates;
+	}
+
+	public void setUnknownDates(List<LocalDate> unknownDates) {
+		this.unknownDates = unknownDates;
 	}
 }

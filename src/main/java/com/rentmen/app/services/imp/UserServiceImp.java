@@ -243,6 +243,15 @@ public class UserServiceImp implements UserService {
         if (!dto.getSkills().isEmpty()) {
             serviceProvider.setSkills(getSkillSet(dto.getSkills()));
         }
+        if (dto.getAvailabilityDates() != null && !dto.getAvailabilityDates().isEmpty()) {
+            serviceProvider.setAvailabilityDates(dto.getAvailabilityDates());
+        }
+        if (dto.getUnavailabilityDates() != null && !dto.getUnavailabilityDates().isEmpty()) {
+            serviceProvider.setUnavailabilityDates(dto.getUnavailabilityDates());
+        }
+        if (dto.getUnknownDates() != null && !dto.getUnknownDates().isEmpty()) {
+            serviceProvider.setUnknownDates(dto.getUnknownDates());
+        }
         try {
             UtilFunctions.mergeObjects(serviceProvider, updatedServiceProvider);
             updatedServiceProvider = serviceProviderRepo.save(serviceProvider);
@@ -258,7 +267,7 @@ public class UserServiceImp implements UserService {
         Type listType = new TypeToken<List<UserDto>>() {
         }.getType();
 
-        serviceProviders = serviceProviderRepo.findAvailableBetweenDates(startDate, endDate);
+        serviceProviders = serviceProviderRepo.findServiceProvidersWithAvailabilityBetween(startDate, endDate);
 
         return modelMapper.map(serviceProviders, listType);
     }

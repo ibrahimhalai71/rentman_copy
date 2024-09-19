@@ -21,4 +21,8 @@ public interface ServiceProviderRepo extends JpaRepository<ServiceProvider, Long
 	@Modifying
 	@Query(value = "UPDATE users SET rating = :rating WHERE id = :serviceProviderId", nativeQuery = true)
 	void updateRating(Float rating, Long serviceProviderId);
+	
+	@Query("SELECT DISTINCT sp FROM ServiceProvider sp JOIN sp.availabilityDates ad WHERE ad BETWEEN :startDate AND :endDate")
+	List<ServiceProvider> findServiceProvidersWithAvailabilityBetween(@Param("startDate") LocalDate startDate,
+			@Param("endDate") LocalDate endDate);
 }
