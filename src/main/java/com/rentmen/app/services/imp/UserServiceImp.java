@@ -243,13 +243,13 @@ public class UserServiceImp implements UserService {
         if (!dto.getSkills().isEmpty()) {
             serviceProvider.setSkills(getSkillSet(dto.getSkills()));
         }
-        if (dto.getAvailabilityDates() != null && !dto.getAvailabilityDates().isEmpty()) {
+        if (dto.getAvailabilityDates() != null) {
             serviceProvider.setAvailabilityDates(dto.getAvailabilityDates());
         }
-        if (dto.getUnavailabilityDates() != null && !dto.getUnavailabilityDates().isEmpty()) {
+        if (dto.getUnavailabilityDates() != null) {
             serviceProvider.setUnavailabilityDates(dto.getUnavailabilityDates());
         }
-        if (dto.getUnknownDates() != null && !dto.getUnknownDates().isEmpty()) {
+        if (dto.getUnknownDates() != null) {
             serviceProvider.setUnknownDates(dto.getUnknownDates());
         }
         try {
