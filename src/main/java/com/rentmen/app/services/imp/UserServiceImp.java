@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class UserServiceImp implements UserService {
@@ -267,7 +268,15 @@ public class UserServiceImp implements UserService {
         Type listType = new TypeToken<List<UserDto>>() {
         }.getType();
 
-        serviceProviders = serviceProviderRepo.findServiceProvidersWithAvailabilityBetween(startDate, endDate);
+        if (startDate.equals(endDate)) {
+            serviceProviders = serviceProviderRepo.findServiceProvidersWithAvailabilityBetween(startDate, endDate);
+        } else {
+            List<LocalDate> dates = Stream.iterate(startDate, date -> date.plusDays(1))
+                    .limit(java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate) + 1)
+                    .collect(Collectors.toList());
+            long size = dates.size();
+            serviceProviders = serviceProviderRepo.findUsersAvailableOnDates(dates,size);
+        }
 
         return modelMapper.map(serviceProviders, listType);
     }
@@ -294,7 +303,7 @@ public class UserServiceImp implements UserService {
             if (storedFileName != null && !storedFileName.isEmpty()) {
                 try {
                     UtilFunctions.deleteFile(storedFileName);
-                }catch (Exception e){
+                } catch (Exception e) {
                     user.setProfileImage(null);
                     //userRepo.save(user);
                 }
