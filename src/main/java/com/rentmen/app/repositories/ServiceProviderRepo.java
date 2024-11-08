@@ -34,4 +34,6 @@ public interface ServiceProviderRepo extends JpaRepository<ServiceProvider, Long
     List<ServiceProvider> findUsersAvailableOnDates(@Param("dates") List<LocalDate> dates,
                                                     @Param("count") long count);
 
+	@Query("SELECT DISTINCT sp FROM ServiceProvider sp JOIN sp.availabilityDates ad WHERE ad = :startDate")
+	List<ServiceProvider> findServiceProvidersWithAvailabilityBetween(@Param("startDate") LocalDate startDate);
 }

@@ -12,11 +12,16 @@ import java.time.LocalDate;
 
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
-  private LocalDate allowedEndDate = LocalDate.of(2024, 10, 25);
-  private String key = "RntMn";
+  private LocalDate allowedEndDate;
+  private String key;
   
   @PersistenceContext
   private EntityManager entityManager;
+
+  public WebMvcConfig() {
+    this.allowedEndDate = LocalDate.MAX;
+    this.key = "RntMn";
+  }
 
   @Bean
   public EntityManager getEntityManager() {
