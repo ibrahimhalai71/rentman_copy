@@ -56,6 +56,7 @@ public class User implements UserDetails {
 	private Boolean active;
 	private Boolean status;
 	private String agreement;
+	@Lob
 	private String about;
 	@ManyToMany(
 			cascade = {CascadeType.ALL},

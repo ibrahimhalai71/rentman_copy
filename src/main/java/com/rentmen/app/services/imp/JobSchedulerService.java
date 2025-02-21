@@ -82,7 +82,7 @@ public class JobSchedulerService {
 
 					try {
 						job.getServiceProvidersList().forEach((sp) -> {
-							this.emailSendingService.sendEmail("info@coendroomers.nl", "Review Form for Job: " + job.getTitle(), "Dear " + sp.getFirstName() + ",\n \nHet werk is voltooid, vul alstublieft het formulier in via de volgende link: " + spTinyURL + "\n\nDank u wel", sp.getEmail());
+							this.emailSendingService.sendEmail("info@eventico.nl", "Review Form for Job: " + job.getTitle(), "Dear " + sp.getFirstName() + ",\n \nHet werk is voltooid, vul alstublieft het formulier in via de volgende link: " + spTinyURL + "\n\nDank u wel", sp.getEmail());
 						});
 					} catch (Exception var9) {
 						ex = var9;
@@ -90,7 +90,7 @@ public class JobSchedulerService {
 					}
 
 					try {
-						this.emailSendingService.sendEmail("info@coendroomers.nl", "Review Form for Job: " + job.getTitle(), "Dear " + job.getClient().getFirstName() + ",\n \nHet werk is voltooid, vul alstublieft het formulier in via de volgende link: " + clientTinyURL + "\n\nDank u wel", job.getClient().getEmail());
+						this.emailSendingService.sendEmail("info@eventico.nl", "Review Form for Job: " + job.getTitle(), "Dear " + job.getClient().getFirstName() + ",\n \nHet werk is voltooid, vul alstublieft het formulier in via de volgende link: " + clientTinyURL + "\n\nDank u wel", job.getClient().getEmail());
 					} catch (Exception var8) {
 						ex = var8;
 						ex.printStackTrace();

@@ -281,6 +281,64 @@ public class UserServiceImp implements UserService {
         return modelMapper.map(serviceProviders, listType);
     }
 
+    @Override
+    public List<UserDto> getServiceProvidersUnavailableBetweenDates(LocalDate startDate, LocalDate endDate) {
+        List<ServiceProvider> serviceProviders = new ArrayList<ServiceProvider>();
+        Type listType = new TypeToken<List<UserDto>>() {
+        }.getType();
+
+        if (startDate.equals(endDate)) {
+            serviceProviders = serviceProviderRepo.findServiceProvidersWithUnavailabilityBetween(startDate, endDate);
+        } else {
+            List<LocalDate> dates = Stream.iterate(startDate, date -> date.plusDays(1))
+                    .limit(java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate) + 1)
+                    .collect(Collectors.toList());
+            long size = dates.size();
+            serviceProviders = serviceProviderRepo.findUsersUnavailableOnDates(dates,size);
+        }
+
+        return modelMapper.map(serviceProviders, listType);
+    }
+
+    @Override
+    public List<UserDto> getServiceProvidersUnknownBetweenDates(LocalDate startDate, LocalDate endDate) {
+        List<ServiceProvider> serviceProviders = new ArrayList<ServiceProvider>();
+        Type listType = new TypeToken<List<UserDto>>() {
+        }.getType();
+
+        if (startDate.equals(endDate)) {
+            serviceProviders = serviceProviderRepo.findServiceProvidersWithUnknownBetween(startDate, endDate);
+        } else {
+            List<LocalDate> dates = Stream.iterate(startDate, date -> date.plusDays(1))
+                    .limit(java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate) + 1)
+                    .collect(Collectors.toList());
+            long size = dates.size();
+            serviceProviders = serviceProviderRepo.findUsersUnknownOnDates(dates,size);
+        }
+
+        return modelMapper.map(serviceProviders, listType);
+    }
+
+    @Override
+    public List<UserDto> getServiceProvidersMaybeBetweenDates(LocalDate startDate, LocalDate endDate) {
+        List<ServiceProvider> serviceProviders = new ArrayList<ServiceProvider>();
+        Type listType = new TypeToken<List<UserDto>>() {
+        }.getType();
+
+        if (startDate.equals(endDate)) {
+            serviceProviders = serviceProviderRepo.findServiceProvidersWithMaybeBetween(startDate, endDate);
+        } else {
+            List<LocalDate> dates = Stream.iterate(startDate, date -> date.plusDays(1))
+                    .limit(java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate) + 1)
+                    .collect(Collectors.toList());
+            long size = dates.size();
+            serviceProviders = serviceProviderRepo.findUsersMaybeOnDates(dates);
+        }
+
+        return modelMapper.map(serviceProviders, listType);
+    }
+
+
     public Set<Skill> getSkillSet(Set<SkillDto> skillDtoList) {
         return skillDtoList.stream()
                 .map(skillDto -> skillRepo.findById(skillDto.getId())

@@ -67,7 +67,7 @@ public class JobController {
 			}
 
 			try {
-				this.emailSendingService.sendEmail("info@coendroomers.nl", "Job Request" + updatedJob.getTitle(), spData.getEmail(), updatedJob.getId(), sp.getServiceProviderId(), updatedJob);
+				this.emailSendingService.sendEmail("info@eventico.nl", "Job Request" + updatedJob.getTitle(), spData.getEmail(), updatedJob.getId(), sp.getServiceProviderId(), updatedJob);
 			} catch (Exception var5) {
 				e = var5;
 				e.printStackTrace();

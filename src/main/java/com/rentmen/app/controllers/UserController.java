@@ -20,6 +20,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,7 +32,9 @@ import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @RestController
@@ -175,6 +178,21 @@ public class UserController {
     @GetMapping({"/getServiceProvidersAvailableBetweenDates/{startDate}/{endDate}"})
     public ResponseEntity<?> getServiceProvidersAvailableBetweenDates(@PathVariable(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate, @PathVariable(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) throws Exception {
         return ResponseEntity.ok(this.userService.getServiceProvidersAvailableBetweenDates(startDate, endDate));
+    }
+
+    @GetMapping({"/getServiceProvidersBetweenDates/{startDate}/{endDate}"})
+    public ResponseEntity<Map<String,List<UserDto>>> getServiceProvidersBetweenDates(@PathVariable(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate, @PathVariable(required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) throws Exception {
+        List<UserDto> availables =  this.userService.getServiceProvidersAvailableBetweenDates(startDate, endDate);
+        List<UserDto> unavailables =  this.userService.getServiceProvidersUnavailableBetweenDates(startDate, endDate);
+        List<UserDto> unknowns =  this.userService.getServiceProvidersUnknownBetweenDates(startDate, endDate);
+        List<UserDto> maybes =  this.userService.getServiceProvidersMaybeBetweenDates(startDate, endDate);
+
+        Map<String,List<UserDto>> map = new HashMap<>();
+        map.put("Available",availables);
+        map.put("Unavailable",unavailables);
+        map.put("Unknown",unknowns);
+        map.put("Maybe",maybes);
+        return ResponseEntity.ok(map);
     }
 
     @GetMapping({"/getUserProfileImage/{fileName}"})

@@ -24,7 +24,7 @@ public class EmailSendingService {
 		message.setSubject(subject);
 		message.setText(text);
 		message.setTo(to);
-		this.mailSender.send(message);
+//		this.mailSender.send(message);
 		return "Email Sent";
 	}
 
@@ -38,7 +38,7 @@ public class EmailSendingService {
 			String htmlMsg = "<p>Beste gebruiker,</p><p>U heeft een werkverzoek ontvangen.</p><p>Datum/Tijd: " + updatedJob.getStartDate() + " " + updatedJob.getStartTime() + "</p><p><a href=\"https://eventicobe.watisdeplanning.nl/api/job/acceptJobOfferFromEmail?jobId=" + jobId + "&userId=" + userId + "\"><button style=\"background-color: green; color: white; padding: 10px 15px; border: none; cursor: pointer;\">Accepteren</button></a></p><p>Log alstublieft in om te accepteren.</p><p>Dank u wel</p>";
 			helper.setText(htmlMsg, true);
 			helper.setTo(to);
-			this.mailSender.send(message);
+			//this.mailSender.send(message);
 			return "Email Sent";
 		} catch (MessagingException var10) {
 			MessagingException e = var10;
