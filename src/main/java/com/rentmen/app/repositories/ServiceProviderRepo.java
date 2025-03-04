@@ -22,22 +22,22 @@ public interface ServiceProviderRepo extends JpaRepository<ServiceProvider, Long
     @Query(value = "UPDATE users SET rating = :rating WHERE id = :serviceProviderId", nativeQuery = true)
     void updateRating(Float rating, Long serviceProviderId);
 
-    @Query("SELECT DISTINCT sp FROM ServiceProvider sp JOIN sp.availabilityDates ad WHERE ad BETWEEN :startDate AND :endDate")
+    @Query("SELECT DISTINCT sp FROM ServiceProvider sp JOIN sp.availabilityDates ad WHERE ad BETWEEN :startDate AND :endDate AND sp.active = true")
     List<ServiceProvider> findServiceProvidersWithAvailabilityBetween(@Param("startDate") LocalDate startDate,
                                                                       @Param("endDate") LocalDate endDate);
 
-    @Query("SELECT DISTINCT sp FROM ServiceProvider sp JOIN sp.unavailabilityDates ad WHERE ad BETWEEN :startDate AND :endDate")
+    @Query("SELECT DISTINCT sp FROM ServiceProvider sp JOIN sp.unavailabilityDates ad WHERE ad BETWEEN :startDate AND :endDate AND sp.active = true")
     List<ServiceProvider> findServiceProvidersWithUnavailabilityBetween(@Param("startDate") LocalDate startDate,
                                                                       @Param("endDate") LocalDate endDate);
 
-    @Query("SELECT DISTINCT sp FROM ServiceProvider sp JOIN sp.unknownDates ad WHERE ad BETWEEN :startDate AND :endDate")
+    @Query("SELECT DISTINCT sp FROM ServiceProvider sp JOIN sp.unknownDates ad WHERE ad BETWEEN :startDate AND :endDate AND sp.active = true")
     List<ServiceProvider> findServiceProvidersWithUnknownBetween(@Param("startDate") LocalDate startDate,
                                                                       @Param("endDate") LocalDate endDate);
 
     @Query("SELECT sp FROM ServiceProvider sp " +
             "WHERE NOT EXISTS (SELECT ad FROM sp.availabilityDates ad WHERE ad BETWEEN :startDate AND :endDate) " +
             "  AND NOT EXISTS (SELECT uad FROM sp.unavailabilityDates uad WHERE uad BETWEEN :startDate AND :endDate) " +
-            "  AND NOT EXISTS (SELECT ud FROM sp.unknownDates ud WHERE ud BETWEEN :startDate AND :endDate)")
+            "  AND NOT EXISTS (SELECT ud FROM sp.unknownDates ud WHERE ud BETWEEN :startDate AND :endDate) AND sp.active = true")
     List<ServiceProvider> findServiceProvidersWithMaybeBetween(@Param("startDate") LocalDate startDate,
                                                                @Param("endDate") LocalDate endDate);
 
@@ -45,7 +45,7 @@ public interface ServiceProviderRepo extends JpaRepository<ServiceProvider, Long
             "JOIN sp.availabilityDates ad " +
             "WHERE ad IN :dates " +
             "GROUP BY sp.id " +
-            "HAVING COUNT(DISTINCT ad) = :count")
+            "HAVING COUNT(DISTINCT ad) = :count AND sp.active = true")
     List<ServiceProvider> findUsersAvailableOnDates(@Param("dates") List<LocalDate> dates,
                                                     @Param("count") long count);
 
@@ -53,7 +53,7 @@ public interface ServiceProviderRepo extends JpaRepository<ServiceProvider, Long
             "JOIN sp.unavailabilityDates ad " +
             "WHERE ad IN :dates " +
             "GROUP BY sp.id " +
-            "HAVING COUNT(DISTINCT ad) = :count")
+            "HAVING COUNT(DISTINCT ad) = :count AND sp.active = true")
     List<ServiceProvider> findUsersUnavailableOnDates(@Param("dates") List<LocalDate> dates,
                                                     @Param("count") long count);
 
@@ -61,16 +61,16 @@ public interface ServiceProviderRepo extends JpaRepository<ServiceProvider, Long
             "JOIN sp.unknownDates ad " +
             "WHERE ad IN :dates " +
             "GROUP BY sp.id " +
-            "HAVING COUNT(DISTINCT ad) = :count")
+            "HAVING COUNT(DISTINCT ad) = :count AND sp.active = true")
     List<ServiceProvider> findUsersUnknownOnDates(@Param("dates") List<LocalDate> dates,
                                                     @Param("count") long count);
 
     @Query("SELECT sp FROM ServiceProvider sp " +
             "WHERE NOT EXISTS (SELECT ad FROM sp.availabilityDates ad WHERE ad IN :dates) " +
             "  AND NOT EXISTS (SELECT ud FROM sp.unavailabilityDates ud WHERE ud IN :dates) " +
-            "  AND NOT EXISTS (SELECT kd FROM sp.unknownDates kd WHERE kd IN :dates)")
+            "  AND NOT EXISTS (SELECT kd FROM sp.unknownDates kd WHERE kd IN :dates) AND sp.active = true")
     List<ServiceProvider> findUsersMaybeOnDates(@Param("dates") List<LocalDate> dates);
 
-	@Query("SELECT DISTINCT sp FROM ServiceProvider sp JOIN sp.availabilityDates ad WHERE ad = :startDate")
+	@Query("SELECT DISTINCT sp FROM ServiceProvider sp JOIN sp.availabilityDates ad WHERE ad = :startDate AND sp.active = true")
 	List<ServiceProvider> findServiceProvidersWithAvailabilityBetween(@Param("startDate") LocalDate startDate);
 }

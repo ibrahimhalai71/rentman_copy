@@ -1,30 +1,34 @@
-package com.rentmen.app.entities;
+    package com.rentmen.app.entities;
 
-import javax.persistence.*;
+    import org.hibernate.annotations.OnDelete;
+    import org.hibernate.annotations.OnDeleteAction;
 
-@Entity
-public class Role {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private int id;
+    import javax.persistence.*;
 
-    @Column(name = "name")
-    private String name;
+    @Entity
+    public class Role {
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        @Column(name = "id")
+        @OnDelete(action = OnDeleteAction.CASCADE)
+        private int id;
 
-    public int getId() {
-        return this.id;
+        @Column(name = "name")
+        private String name;
+
+        public int getId() {
+            return this.id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return this.name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
     }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-}

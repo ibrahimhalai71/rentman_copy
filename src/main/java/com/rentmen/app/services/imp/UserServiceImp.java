@@ -3,6 +3,7 @@ package com.rentmen.app.services.imp;
 import com.rentmen.app.DTO.SkillDto;
 import com.rentmen.app.DTO.UserDto;
 import com.rentmen.app.entities.*;
+import com.rentmen.app.exceptions.CustomException;
 import com.rentmen.app.exceptions.ResourceNotFoundException;
 import com.rentmen.app.repositories.*;
 import com.rentmen.app.services.UserService;
@@ -10,10 +11,14 @@ import com.rentmen.app.utils.UtilFunctions;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.transaction.Transactional;
+import javax.validation.ConstraintViolationException;
 import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -51,10 +56,17 @@ public class UserServiceImp implements UserService {
 
     @Override
     public UserDto createUser(UserDto userDto) {
-        User user = dtoToUser(userDto);
-        user.setPassword(passwordEncoder.encode(userDto.getPassword()));
-        User savedUser = userRepo.save(user);
-        return userToDto(savedUser);
+        try {
+            User user = dtoToUser(userDto);
+            user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+            User savedUser = userRepo.save(user);
+            return userToDto(savedUser);
+        } catch (DataIntegrityViolationException e) {
+            if (e.getCause() instanceof ConstraintViolationException) {
+                throw new CustomException("Email already exists!");
+            }
+            throw new CustomException("An error occurred!");
+        }
     }
 
     @Override
@@ -85,10 +97,18 @@ public class UserServiceImp implements UserService {
     }
 
     @Override
+    @Transactional
     public void deleteUser(Long userId) {
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId.intValue()));
-        userRepo.delete(user);
+//        user.getRoles().clear();
+//        userRepo.saveAndFlush(user);
+//        userRepo.deleteUserReferences(userId);
+//        userRepo.deleteUserReferencesInJobs(userId);
+//        userRepo.delete(user);
+        user.setActive(false);
+        user.setStatus(Boolean.FALSE);
+        userRepo.save(user);
     }
 
     public User dtoToUser(UserDto userDto) {
