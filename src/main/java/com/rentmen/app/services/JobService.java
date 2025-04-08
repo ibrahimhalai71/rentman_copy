@@ -1,6 +1,8 @@
 package com.rentmen.app.services;
 
 import com.rentmen.app.DTO.*;
+import com.rentmen.app.entities.Invoice;
+import org.springframework.core.io.Resource;
 
 import java.util.List;
 import java.util.Set;
@@ -38,6 +40,21 @@ public interface JobService {
 
  Boolean isReviewedServiceProviderReviewForm(String token, Long serviceProviderId) throws Exception;
 
+ Boolean isOverriddenByClientBeforeServiceProviderReviewForm(String token, Long serviceProviderId) throws Exception;
+
+ Invoice createInvoice(Long jobId) throws Exception;
+
+ Invoice mergeInvoices(Long invoiceNumber, List<Long> invoiceIds);
+
+ Invoice updateInvoice(Long invoiceId,Invoice invoice);
+
+ Boolean deleteInvoice(Long invoiceId);
+
+ List<Invoice> getAllInvoices();
+
+ List<Resource> getFilesForInvoice(Long invoiceId);
+
+ List<Invoice> createAllPurchaseOrders(Long jobId) throws Exception;
  void postReviewFormServiceProvider(String token, InvoiceDto invoiceDto) throws Exception;
 
  GeneratedInvoiceDto getInvoice(Long jobId) throws Exception;

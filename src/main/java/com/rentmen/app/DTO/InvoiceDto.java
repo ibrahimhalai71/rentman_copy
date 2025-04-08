@@ -2,8 +2,13 @@
 package com.rentmen.app.DTO;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.rentmen.app.utils.InvoiceType;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.validation.constraints.NotEmpty;
+import java.util.List;
 
 public class InvoiceDto {
 	private int id;
@@ -17,6 +22,9 @@ public class InvoiceDto {
 	private String extraCostDescription;
 	private Boolean reviewedBySp;
 	private Boolean reviewedByClient;
+	@JsonProperty("invoice_type")
+	private InvoiceType invoiceType;
+	List<MultipartFile> files;
 
 	public InvoiceDto() {
 	}
@@ -51,6 +59,22 @@ public class InvoiceDto {
 
 	public void setKilometer(Double kilometer) {
 		this.kilometer = kilometer;
+	}
+
+	public List<MultipartFile> getFiles() {
+		return files;
+	}
+
+	public void setFiles(List<MultipartFile> files) {
+		this.files = files;
+	}
+
+	public InvoiceType getInvoiceType() {
+		return invoiceType;
+	}
+
+	public void setInvoiceType(InvoiceType invoiceType) {
+		this.invoiceType = invoiceType;
 	}
 
 	public Double getExtraCost() {

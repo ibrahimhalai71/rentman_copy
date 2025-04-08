@@ -1,6 +1,7 @@
 package com.rentmen.app.entities;
 
 import com.rentmen.app.utils.Billable;
+import com.rentmen.app.utils.ClientEventRateType;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -18,13 +19,17 @@ public class Client extends User {
 	private String invoiceMail;
 	private String sector;
 	private Double kilometerRate;
+	private Double minimumPaymentHour;
 	@Enumerated(EnumType.STRING)
 	private Billable billable;
+	@Enumerated(EnumType.STRING)
+	private ClientEventRateType clientEventRateType;
 	@OneToMany(
 			mappedBy = "client",
 			cascade = {CascadeType.ALL}
 	)
-	private List<Job> jobs = new ArrayList();
+	private List<Job> jobs = new ArrayList<>();
+
 
 	public Client() {
 	}
@@ -35,6 +40,14 @@ public class Client extends User {
 
 	public void setBillable(Billable billable) {
 		this.billable = billable;
+	}
+
+	public ClientEventRateType getClientEventRateType() {
+		return clientEventRateType;
+	}
+
+	public void setClientEventRateType(ClientEventRateType clientEventRateType) {
+		this.clientEventRateType = clientEventRateType;
 	}
 
 	public String getAddress() {
@@ -87,6 +100,14 @@ public class Client extends User {
 
 	public void setSector(String sector) {
 		this.sector = sector;
+	}
+
+	public Double getMinimumPaymentHour() {
+		return minimumPaymentHour;
+	}
+
+	public void setMinimumPaymentHour(Double minimumPaymentHour) {
+		this.minimumPaymentHour = minimumPaymentHour;
 	}
 
 	public void setKilometerRate(Double kilometerRate) {

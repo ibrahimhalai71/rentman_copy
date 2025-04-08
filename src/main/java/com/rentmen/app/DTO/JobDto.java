@@ -10,254 +10,265 @@ import java.time.LocalTime;
 import java.util.*;
 
 public class JobDto {
-	private Long id;
-	@JsonProperty("client")
-	private UserDto client;
-	@JsonProperty("moderator")
-	private UserDto moderator;
-	@JsonProperty("service_providers_list")
-	private List<UserDto> serviceProvidersList = new ArrayList();
-	@JsonProperty("created_by")
-	private UserDto createdBy;
-	@JsonProperty("required_skills")
-	private Set<SkillDto> requiredSkills = new HashSet();
-	@JsonProperty("potential_service_providers")
-	private Set<PotentialJobOfferDto> potentialJobOffers = new HashSet();
-	private Boolean active;
-	@JsonProperty("creation_date")
-	private LocalDate creationDate;
-	@JsonProperty("start_date")
-	private LocalDate startDate;
-	@JsonProperty("end_date")
-	private LocalDate endDate;
-	private String title;
-	private String destination;
-	private String role;
-	private String description;
-	private JobStatus status;
-	@JsonProperty("reviewed_by_client")
-	private Boolean reviewedByClient;
-	@JsonProperty("reviewed_by_service_provider")
-	private Map<Long, Boolean> reviewedByServiceProvider;
-	@JsonProperty("moderator_approval")
-	private Integer moderatorApproval;
-	@JsonProperty("start_time")
-	private LocalTime startTime;
-	@JsonProperty("end_time")
-	private LocalTime endTime;
-	@JsonProperty("number_of_people")
-	private Integer numberOfPeople;
-	@JsonProperty("project_lead_name")
-	private String projectLeadName;
-	@JsonProperty("project_lead_number")
-	private String projectLeadNumber;
-	@JsonProperty("job_other_skills")
-	private List<String> jobOtherSkills;
+    private Long id;
+    @JsonProperty("client")
+    private UserDto client;
+    @JsonProperty("moderator")
+    private UserDto moderator;
+    @JsonProperty("service_providers_list")
+    private List<UserDto> serviceProvidersList = new ArrayList();
+    @JsonProperty("created_by")
+    private UserDto createdBy;
+    @JsonProperty("required_skills")
+    private Set<SkillDto> requiredSkills = new HashSet();
+    @JsonProperty("potential_service_providers")
+    private Set<PotentialJobOfferDto> potentialJobOffers = new HashSet();
+    private Boolean active;
+    @JsonProperty("creation_date")
+    private LocalDate creationDate;
+    @JsonProperty("start_date")
+    private LocalDate startDate;
+    @JsonProperty("end_date")
+    private LocalDate endDate;
+    private String title;
+    private String destination;
+    private String role;
+    private String description;
+    private JobStatus status;
+    @JsonProperty("reviewed_by_client")
+    private Boolean reviewedByClient;
+    @JsonProperty("reviewed_by_service_provider")
+    private Map<Long, Boolean> reviewedByServiceProvider;
+    @JsonProperty("moderator_approval")
+    private Integer moderatorApproval;
+    @JsonProperty("start_time")
+    private LocalTime startTime;
+    @JsonProperty("end_time")
+    private LocalTime endTime;
+    @JsonProperty("number_of_people")
+    private Integer numberOfPeople;
+    @JsonProperty("project_lead_name")
+    private String projectLeadName;
+    @JsonProperty("project_lead_number")
+    private String projectLeadNumber;
+    @JsonProperty("job_other_skills")
+    private List<String> jobOtherSkills;
+    @JsonProperty("is_expired")
+    private Boolean isExpired;
 
-	public JobDto() {
-	}
+    public JobDto() {
+    }
 
-	public Long getId() {
-		return this.id;
-	}
+    public Long getId() {
+        return this.id;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public UserDto getClient() {
-		return this.client;
-	}
+    public UserDto getClient() {
+        return this.client;
+    }
 
-	public void setClient(UserDto client) {
-		this.client = client;
-	}
+    public void setClient(UserDto client) {
+        this.client = client;
+    }
 
-	public UserDto getModerator() {
-		return this.moderator;
-	}
+    public UserDto getModerator() {
+        return this.moderator;
+    }
 
-	public void setModerator(UserDto moderator) {
-		this.moderator = moderator;
-	}
+    public void setModerator(UserDto moderator) {
+        this.moderator = moderator;
+    }
 
-	public UserDto getCreatedBy() {
-		return this.createdBy;
-	}
+    public UserDto getCreatedBy() {
+        return this.createdBy;
+    }
 
-	public void setCreatedBy(UserDto createdBy) {
-		this.createdBy = createdBy;
-	}
+    public void setCreatedBy(UserDto createdBy) {
+        this.createdBy = createdBy;
+    }
 
-	public Set<SkillDto> getRequiredSkills() {
-		return this.requiredSkills;
-	}
+    public Set<SkillDto> getRequiredSkills() {
+        return this.requiredSkills;
+    }
 
-	public void setRequiredSkills(Set<SkillDto> requiredSkills) {
-		this.requiredSkills = requiredSkills;
-	}
+    public void setRequiredSkills(Set<SkillDto> requiredSkills) {
+        this.requiredSkills = requiredSkills;
+    }
 
-	public Set<PotentialJobOfferDto> getPotentialJobOffers() {
-		return this.potentialJobOffers;
-	}
+    public Set<PotentialJobOfferDto> getPotentialJobOffers() {
+        return this.potentialJobOffers;
+    }
 
-	public void setPotentialJobOffers(Set<PotentialJobOfferDto> potentialJobOffers) {
-		this.potentialJobOffers = potentialJobOffers;
-	}
+    public void setPotentialJobOffers(Set<PotentialJobOfferDto> potentialJobOffers) {
+        this.potentialJobOffers = potentialJobOffers;
+    }
 
-	public Boolean getActive() {
-		return this.active;
-	}
 
-	public void setActive(Boolean active) {
-		this.active = active;
-	}
+    public Boolean getExpired() {
+        return isExpired;
+    }
 
-	public LocalDate getCreationDate() {
-		return this.creationDate;
-	}
+    public void setExpired(Boolean expired) {
+        isExpired = expired;
+    }
 
-	public void setCreationDate(LocalDate creationDate) {
-		this.creationDate = creationDate;
-	}
+    public Boolean getActive() {
+        return this.active;
+    }
 
-	public LocalDate getStartDate() {
-		return this.startDate;
-	}
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
 
-	public void setStartDate(LocalDate startDate) {
-		this.startDate = startDate;
-	}
+    public LocalDate getCreationDate() {
+        return this.creationDate;
+    }
 
-	public LocalDate getEndDate() {
-		return this.endDate;
-	}
+    public void setCreationDate(LocalDate creationDate) {
+        this.creationDate = creationDate;
+    }
 
-	public void setEndDate(LocalDate endDate) {
-		this.endDate = endDate;
-	}
+    public LocalDate getStartDate() {
+        return this.startDate;
+    }
 
-	public String getTitle() {
-		return this.title;
-	}
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
 
-	public void setTitle(String title) {
-		this.title = title;
-	}
+    public LocalDate getEndDate() {
+        return this.endDate;
+    }
 
-	public String getDestination() {
-		return this.destination;
-	}
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
 
-	public void setDestination(String destination) {
-		this.destination = destination;
-	}
+    public String getTitle() {
+        return this.title;
+    }
 
-	public String getRole() {
-		return this.role;
-	}
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
-	public void setRole(String role) {
-		this.role = role;
-	}
+    public String getDestination() {
+        return this.destination;
+    }
 
-	public String getDescription() {
-		return this.description;
-	}
+    public void setDestination(String destination) {
+        this.destination = destination;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public String getRole() {
+        return this.role;
+    }
 
-	public JobStatus getStatus() {
-		return this.status;
-	}
+    public void setRole(String role) {
+        this.role = role;
+    }
 
-	public void setStatus(JobStatus status) {
-		this.status = status;
-	}
+    public String getDescription() {
+        return this.description;
+    }
 
-	public List<UserDto> getServiceProvidersList() {
-		return this.serviceProvidersList;
-	}
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-	public Integer getModeratorApproval() {
-		return this.moderatorApproval;
-	}
+    public JobStatus getStatus() {
+        return this.status;
+    }
 
-	public LocalTime getStartTime() {
-		return this.startTime;
-	}
+    public void setStatus(JobStatus status) {
+        this.status = status;
+    }
 
-	public LocalTime getEndTime() {
-		return this.endTime;
-	}
+    public List<UserDto> getServiceProvidersList() {
+        return this.serviceProvidersList;
+    }
 
-	public Integer getNumberOfPeople() {
-		return this.numberOfPeople;
-	}
+    public Integer getModeratorApproval() {
+        return this.moderatorApproval;
+    }
 
-	public String getProjectLeadName() {
-		return this.projectLeadName;
-	}
+    public LocalTime getStartTime() {
+        return this.startTime;
+    }
 
-	public String getProjectLeadNumber() {
-		return this.projectLeadNumber;
-	}
+    public LocalTime getEndTime() {
+        return this.endTime;
+    }
 
-	public void setServiceProvidersList(List<UserDto> serviceProvidersList) {
-		this.serviceProvidersList = serviceProvidersList;
-	}
+    public Integer getNumberOfPeople() {
+        return this.numberOfPeople;
+    }
 
-	public void setModeratorApproval(Integer moderatorApproval) {
-		this.moderatorApproval = moderatorApproval;
-	}
+    public String getProjectLeadName() {
+        return this.projectLeadName;
+    }
 
-	public void setStartTime(LocalTime startTime) {
-		this.startTime = startTime;
-	}
+    public String getProjectLeadNumber() {
+        return this.projectLeadNumber;
+    }
 
-	public void setEndTime(LocalTime endTime) {
-		this.endTime = endTime;
-	}
+    public void setServiceProvidersList(List<UserDto> serviceProvidersList) {
+        this.serviceProvidersList = serviceProvidersList;
+    }
 
-	public void setNumberOfPeople(Integer numberOfPeople) {
-		this.numberOfPeople = numberOfPeople;
-	}
+    public void setModeratorApproval(Integer moderatorApproval) {
+        this.moderatorApproval = moderatorApproval;
+    }
 
-	public void setProjectLeadName(String projectLeadName) {
-		this.projectLeadName = projectLeadName;
-	}
+    public void setStartTime(LocalTime startTime) {
+        this.startTime = startTime;
+    }
 
-	public void setProjectLeadNumber(String projectLeadNumber) {
-		this.projectLeadNumber = projectLeadNumber;
-	}
+    public void setEndTime(LocalTime endTime) {
+        this.endTime = endTime;
+    }
 
-	public List<String> getJobOtherSkills() {
-		return this.jobOtherSkills;
-	}
+    public void setNumberOfPeople(Integer numberOfPeople) {
+        this.numberOfPeople = numberOfPeople;
+    }
 
-	public void setJobOtherSkills(List<String> jobOtherSkills) {
-		this.jobOtherSkills = jobOtherSkills;
-	}
+    public void setProjectLeadName(String projectLeadName) {
+        this.projectLeadName = projectLeadName;
+    }
 
-	public Boolean getReviewedByClient() {
-		return this.reviewedByClient;
-	}
+    public void setProjectLeadNumber(String projectLeadNumber) {
+        this.projectLeadNumber = projectLeadNumber;
+    }
 
-	public void setReviewedByClient(Boolean reviewedByClient) {
-		this.reviewedByClient = reviewedByClient;
-	}
+    public List<String> getJobOtherSkills() {
+        return this.jobOtherSkills;
+    }
 
-	public Map<Long, Boolean> getReviewedByServiceProvider() {
-		return this.reviewedByServiceProvider;
-	}
+    public void setJobOtherSkills(List<String> jobOtherSkills) {
+        this.jobOtherSkills = jobOtherSkills;
+    }
 
-	public void setReviewedByServiceProvider(Map<Long, Boolean> reviewedByServiceProvider) {
-		this.reviewedByServiceProvider = reviewedByServiceProvider;
-	}
+    public Boolean getReviewedByClient() {
+        return this.reviewedByClient;
+    }
 
-	public void setReviewedByServiceProvider(String strReviewBySP) {
-		this.reviewedByServiceProvider = strReviewBySP != null ? UtilFunctions.convertWithStream(strReviewBySP) : null;
-	}
+    public void setReviewedByClient(Boolean reviewedByClient) {
+        this.reviewedByClient = reviewedByClient;
+    }
+
+    public Map<Long, Boolean> getReviewedByServiceProvider() {
+        return this.reviewedByServiceProvider;
+    }
+
+    public void setReviewedByServiceProvider(Map<Long, Boolean> reviewedByServiceProvider) {
+        this.reviewedByServiceProvider = reviewedByServiceProvider;
+    }
+
+    public void setReviewedByServiceProvider(String strReviewBySP) {
+        this.reviewedByServiceProvider = strReviewBySP != null ? UtilFunctions.convertWithStream(strReviewBySP) : null;
+    }
 }

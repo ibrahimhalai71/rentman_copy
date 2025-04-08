@@ -48,9 +48,13 @@ public class User implements UserDetails {
 	private String email;
 	private String VAT;
 	private Double discussedRate;
-	private Double dayRate;
+	private Double discussedRateRW;
+	private Double hourRate;
+	private Double hourRateRW;
 	private Double nightRate;
+	private Double nightRateRW;
 	private Double weekendRate;
+	private Double weekendRateRW;
 	private String password;
 	private Integer depId;
 	private Boolean active;
@@ -101,6 +105,14 @@ public class User implements UserDetails {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public Double getHourRate() {
+		return hourRate;
+	}
+
+	public void setHourRate(Double hourRate) {
+		this.hourRate = hourRate;
 	}
 
 	public Boolean getActive() {
@@ -242,12 +254,36 @@ public class User implements UserDetails {
 		this.timeBasedRate = timeBasedRate;
 	}
 
-	public Double getDayRate() {
-		return this.dayRate;
+	public Double getDiscussedRateRW() {
+		return discussedRateRW;
 	}
 
-	public void setDayRate(Double dayRate) {
-		this.dayRate = dayRate;
+	public void setDiscussedRateRW(Double discussedRateRW) {
+		this.discussedRateRW = discussedRateRW;
+	}
+
+	public Double getHourRateRW() {
+		return hourRateRW;
+	}
+
+	public void setHourRateRW(Double hourRateRW) {
+		this.hourRateRW = hourRateRW;
+	}
+
+	public Double getNightRateRW() {
+		return nightRateRW;
+	}
+
+	public void setNightRateRW(Double nightRateRW) {
+		this.nightRateRW = nightRateRW;
+	}
+
+	public Double getWeekendRateRW() {
+		return weekendRateRW;
+	}
+
+	public void setWeekendRateRW(Double weekendRateRW) {
+		this.weekendRateRW = weekendRateRW;
 	}
 
 	public Double getNightRate() {

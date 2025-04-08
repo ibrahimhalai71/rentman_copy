@@ -18,6 +18,7 @@ import java.util.Set;
 public class ServiceProvider extends User {
 	private Boolean availabilityStatus;
 	private Float rating;
+	private Double kilometerRate;
 	private String contact;
 	@DateTimeFormat(
 			pattern = "yyyy-MM-dd"
@@ -101,6 +102,14 @@ public class ServiceProvider extends User {
 		this.rating = rating;
 	}
 
+	public Double getKilometerRate() {
+		return kilometerRate;
+	}
+
+	public void setKilometerRate(Double kilometerRate) {
+		this.kilometerRate = kilometerRate;
+	}
+
 	public Set<Skill> getSkills() {
 		return this.skills;
 	}
@@ -120,6 +129,7 @@ public class ServiceProvider extends User {
 	public void setContact(String contact) {
 		this.contact = contact;
 	}
+
 
 	public LocalDate getAvailabilityStartDate() {
 		return this.availabilityStartDate;

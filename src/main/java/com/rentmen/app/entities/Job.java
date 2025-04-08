@@ -134,6 +134,10 @@ public class Job {
 	)
 	private Map<Long, Boolean> reviewedByServiceProvider;
 	private Boolean reviewedByClient;
+	@Column(name = "invoice_number")
+	private Long invoiceNumber;
+
+	private Boolean isExpired;
 
 	public Job() {
 	}
@@ -216,6 +220,22 @@ public class Job {
 
 	public void setEndDate(LocalDate endDate) {
 		this.endDate = endDate;
+	}
+
+	public Long getInvoiceNumber() {
+		return invoiceNumber;
+	}
+
+	public void setInvoiceNumber(Long invoiceNumber) {
+		this.invoiceNumber = invoiceNumber;
+	}
+
+	public Boolean getExpired() {
+		return isExpired;
+	}
+
+	public void setExpired(Boolean expired) {
+		isExpired = expired;
 	}
 
 	public String getTitle() {
