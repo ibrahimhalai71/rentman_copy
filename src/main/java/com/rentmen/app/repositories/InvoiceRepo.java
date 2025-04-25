@@ -13,6 +13,7 @@ public interface InvoiceRepo extends JpaRepository<Invoice, Long> {
 	Optional<List<Invoice>> findByJobId(Long jobId);
 	Optional<Invoice> findByJobIdAndServiceProvider(Long jobId, ServiceProvider serviceProvider);
 
+	List<Invoice> findAllByJobIdIn(List<Long> jobIds);
 	List<Invoice> findByInvoiceNumber(Long invoiceNumber);
 	public void deleteByJob(Job job);
 	

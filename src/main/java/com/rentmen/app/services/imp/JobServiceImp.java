@@ -1,5 +1,9 @@
 package com.rentmen.app.services.imp;
 
+import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.*;
+import java.io.ByteArrayOutputStream;
+
 import com.rentmen.app.Constants.Constants;
 import com.rentmen.app.DTO.*;
 import com.rentmen.app.configurations.JwtTokenHelper;
@@ -20,16 +24,21 @@ import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import javax.imageio.ImageIO;
 import javax.transaction.Transactional;
 import java.lang.reflect.Type;
 import java.time.DayOfWeek;
@@ -199,6 +208,11 @@ public class JobServiceImp implements JobService {
         Moderator moderator = new Moderator();
 
         job = modelMapper.map(jobDto, Job.class);
+        if (job.getInvoiceNumber() == null) {
+            String dateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyMMddHHmm"));
+            int rand = new Random().nextInt(10);
+            job.setInvoiceNumber(Long.parseLong(dateTime + rand));
+        }
         client = clientRepo.findById(jobDto.getClient().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Client", "id", jobDto.getClient().getId()));
         job.setClient(client);
@@ -371,39 +385,29 @@ public class JobServiceImp implements JobService {
     public Invoice createInvoice(Long jobId) throws Exception {
         Job job = this.jobRepo.findById(jobId).orElseThrow(() -> new ResourceNotFoundException("Job", "id", jobId));
         if (job.getStatus().equals(JobStatus.COMPLETED)) {
+            Optional<List<Invoice>> existingInvoice = invoiceRepo.findByJobId(jobId);
+            if (existingInvoice.isPresent()) {
+                List<Invoice> presentInvoices = existingInvoice.get();
+                Optional<Invoice> clientInvoice = presentInvoices
+                        .stream()
+                        .filter(inv -> inv.getInvoiceType().equals(InvoiceType.INVOICE)).findFirst();
+                if (clientInvoice.isPresent()) {
+                    if (clientInvoice.get().getParentInvoice() != null) {
+                        Invoice parentInvoice = clientInvoice.get().getParentInvoice();
+                        parentInvoice.getMergedInvoices().forEach(inv -> parentInvoice.getInvoiceLines().addAll(inv.getInvoiceLines()));
+                        return parentInvoice;
+                    } else {
+                        return clientInvoice.get();
+                    }
+                }
+            }
             //Invoice invoice = modelMapper.map(invoiceDto, Invoice.class);
             Invoice invoice = new Invoice();
             invoice.setJob(job);
             invoice.setInvoiceDate(LocalDate.now());
 
             List<InvoiceLines> lines = new ArrayList<>();
-            job.getServiceProvidersList().stream().forEach(sp -> {
-                InvoiceLines line = new InvoiceLines();
-                double hoursWorked = ChronoUnit.MINUTES.between(job.getStartTime(), job.getEndTime()) / 60.0;
-                if (job.getClient().getRateType().equals(RateType.HOURLY) && hoursWorked < job.getClient().getMinimumPaymentHour()) {
-                    line.setAantal(job.getClient().getMinimumPaymentHour());
-                    invoice.setHoursWorked(job.getClient().getMinimumPaymentHour());
-                } else if (job.getClient().getRateType().equals(RateType.HOURLY) && hoursWorked >= job.getClient().getMinimumPaymentHour()) {
-                    line.setAantal(hoursWorked);
-                    invoice.setHoursWorked(hoursWorked);
-                } else if (job.getClient().getRateType().equals(RateType.DAY)) {
-                    line.setAantal(1);
-                }
-                String skillName = "";
-                Set<Skill> skill = job.getRequiredSkills();
-                if (!skill.isEmpty()) {
-                    List<String> skillNames = skill.stream()
-                            .map(Skill::getName)
-                            .collect(Collectors.toList());
-                    skillName = skillNames.get(0);
-                }
-                line.setOmschrijving(job.getStartDate() + " / " + "Project: " + job.getInvoiceNumber() + " / " + skillName);
-                line.setPrice(UtilFunctions.clientsRateOnEventTypeAndJobTime(job, sp));
-                line.setInvoice(invoice);
-                lines.add(line);
-                //invoiceLinesRepo.save(line);
-
-            });
+            populateInvoiceLines(lines, job, invoice);
             if (job.getClient().getRateType().equals(RateType.DAY)) {
                 invoice.setHoursWorked(1);
             }
@@ -418,23 +422,56 @@ public class JobServiceImp implements JobService {
     }
 
     @Override
-    public Invoice mergeInvoices(Long invoiceNumber, List<Long> invoiceIds) {
+    public Invoice mergeInvoices(Long invoiceNumber, List<Long> jobIds) {
         Invoice invoice = new Invoice();
-        List<Invoice> existingInvoices = invoiceRepo.findAllById(invoiceIds);
-        Job job = existingInvoices.get(0).getJob();
+        List<Invoice> existingInvoices = invoiceRepo.findAllByJobIdIn(jobIds);
+        List<Invoice> clientInvoices = existingInvoices
+                .stream()
+                .filter(inv -> inv.getInvoiceType().equals(InvoiceType.INVOICE))
+                .collect(Collectors.toList());
+        Job job = clientInvoices.get(0).getJob();
         //invoice.setJob(job);
-        existingInvoices.forEach(i -> {
-            i.setParentInvoice(invoice);
-        });
-        invoice.setMergedInvoices(existingInvoices);
         invoice.setInvoiceDate(LocalDate.now());
-        List<InvoiceLines> lines = existingInvoices.stream()
+        List<InvoiceLines> lines = clientInvoices.stream()
                 .flatMap(il -> il.getInvoiceLines().stream())
                 .map(il -> invoiceLinesRepo.save(il))
                 .collect(Collectors.toList());
         invoice.setInvoiceLines(lines);
+        String dateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyMMddHHmm"));
+        int rand = new Random().nextInt(10);
+        invoice.setInvoiceNumber(Long.parseLong(dateTime + rand));
         invoice.setInvoiceType(InvoiceType.INVOICE);
+        clientInvoices.forEach(i -> i.setParentInvoice(invoice));
+        invoice.setMergedInvoices(clientInvoices);
         return this.invoiceRepo.save(invoice);
+    }
+
+    public void populateInvoiceLines(List<InvoiceLines> lines, Job job, Invoice invoice) {
+        job.getServiceProvidersList().stream().forEach(sp -> {
+            InvoiceLines line = new InvoiceLines();
+            double hoursWorked = ChronoUnit.MINUTES.between(job.getStartTime(), job.getEndTime()) / 60.0;
+            if (job.getClient().getRateType().equals(RateType.HOURLY) && hoursWorked < job.getClient().getMinimumPaymentHour()) {
+                line.setAantal(job.getClient().getMinimumPaymentHour());
+                invoice.setHoursWorked(job.getClient().getMinimumPaymentHour());
+            } else if (job.getClient().getRateType().equals(RateType.HOURLY) && hoursWorked >= job.getClient().getMinimumPaymentHour()) {
+                line.setAantal(hoursWorked);
+                invoice.setHoursWorked(hoursWorked);
+            } else if (job.getClient().getRateType().equals(RateType.DAY)) {
+                line.setAantal(1);
+            }
+            String skillName = "";
+            Set<Skill> skill = job.getRequiredSkills();
+            if (!skill.isEmpty()) {
+                List<String> skillNames = skill.stream()
+                        .map(Skill::getName)
+                        .collect(Collectors.toList());
+                skillName = skillNames.get(0);
+            }
+            line.setOmschrijving(job.getStartDate() + " / " + "Project: " + job.getInvoiceNumber() + " / " + skillName);
+            line.setPrice(UtilFunctions.clientsRateOnEventTypeAndJobTime(job, sp));
+            line.setInvoice(invoice);
+            lines.add(line);
+        });
     }
 
     @Override
@@ -448,6 +485,20 @@ public class JobServiceImp implements JobService {
 
     public Invoice updateClientInvoice(Long invoiceId, Invoice invoice) {
         invoice.setId(invoiceId);
+        invoice.getMergedInvoices().forEach(inv -> {
+            inv.getInvoiceLines().forEach(invLn -> {
+                invoice.getInvoiceLines().forEach(pInvLn -> {
+                    if (Objects.equals(pInvLn.getId(), invLn.getId())) {
+                        invLn.setAantal(pInvLn.getAantal());
+                        invLn.setPrice(pInvLn.getPrice());
+                        invLn.setOmschrijving(pInvLn.getOmschrijving());
+                    }
+                });
+            });
+        });
+        invoice.getInvoiceLines().forEach(line -> {
+            line.setInvoice(invoice);
+        });
         return invoiceRepo.save(invoice);
     }
 
@@ -465,6 +516,9 @@ public class JobServiceImp implements JobService {
             if (invoice.getInvoiceType().equals(InvoiceType.INVOICE)) {
                 for (Invoice childInvoice : invoice.getMergedInvoices()) {
                     childInvoice.setParentInvoice(null);
+                    List<InvoiceLines> lines = new ArrayList<>();
+                    populateInvoiceLines(lines, childInvoice.getJob(), childInvoice);
+                    childInvoice.setInvoiceLines(lines);
                     invoiceRepo.save(childInvoice);
                 }
                 invoice.setMergedInvoices(new ArrayList<>());
@@ -480,7 +534,17 @@ public class JobServiceImp implements JobService {
 
     @Override
     public List<Invoice> getAllInvoices() {
-        return invoiceRepo.findAll().stream().filter(inv -> inv.getParentInvoice() == null).collect(Collectors.toList());
+        List<Invoice> initialList = invoiceRepo.findAll();
+        initialList.forEach(inv -> {
+            if (inv.getParentInvoice() != null) {
+                Invoice parentInvoice = inv.getParentInvoice();
+                parentInvoice.getInvoiceLines().addAll(inv.getInvoiceLines());
+            }
+        });
+        return initialList
+                .stream()
+                .filter(inv -> inv.getParentInvoice() == null)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -509,6 +573,279 @@ public class JobServiceImp implements JobService {
         return resources;
     }
 
+//    @Override
+//    public byte[] generateInvoicePdf(Long invoiceId) throws Exception {
+//        Document document = new Document(PageSize.A4, 50, 50, 50, 50);
+//        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+//        PdfWriter.getInstance(document, outputStream);
+//
+//        document.open();
+//
+//        // Fonts
+//        Font bold = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD);
+//        Font normal = new Font(Font.FontFamily.HELVETICA, 10, Font.NORMAL);
+//        Font headerFont = new Font(Font.FontFamily.HELVETICA, 16, Font.BOLD);
+//
+//        // Company Header
+//        Paragraph companyHeader = new Paragraph("EVENTICO", headerFont);
+//        companyHeader.setAlignment(Element.ALIGN_LEFT);
+//        document.add(companyHeader);
+//        document.add(new Paragraph("Eventico B.V.\nGewandeweg 39\n5345HM Oss\nT: 0648908818\nE: administratie@eventico.nl\nI: eventico.nl", normal));
+//        document.add(Chunk.NEWLINE);
+//
+//        // Customer Info
+//        document.add(new Paragraph("Factuur", bold));
+//        document.add(new Paragraph("Story Event Engineering\nZandkamp\n6626KV Alphen", normal));
+//        document.add(Chunk.NEWLINE);
+//
+//        // Payment Info Table
+//        PdfPTable paymentTable = new PdfPTable(2);
+//        paymentTable.setWidthPercentage(100);
+//        paymentTable.setWidths(new float[]{3, 7});
+//        paymentTable.addCell(getCell("Te betalen", bold));
+//        paymentTable.addCell(getCell("€ 1.060,15 (voor 20-04-2025)", normal));
+//        paymentTable.addCell(getCell("Naar IBAN", bold));
+//        paymentTable.addCell(getCell("NL90 KNAB 0510 4223 73", normal));
+//        paymentTable.addCell(getCell("Op naam van", bold));
+//        paymentTable.addCell(getCell("Eventico B.V.", normal));
+//        paymentTable.addCell(getCell("Omschrijving", bold));
+//        paymentTable.addCell(getCell("Factuur 250032", normal));
+//        document.add(paymentTable);
+//        document.add(Chunk.NEWLINE);
+//
+//        // Invoice Meta Info
+//        PdfPTable metaTable = new PdfPTable(2);
+//        metaTable.setWidthPercentage(100);
+//        metaTable.setWidths(new float[]{3, 3});
+//        metaTable.addCell(getCell("Factuurnummer: 250032", normal));
+//        metaTable.addCell(getCell("Factuurdatum: 21-03-2025", normal));
+//        metaTable.addCell(getCell("Betalingstermijn: 30 dagen", normal));
+//        metaTable.addCell(getCell("Klantnummer: 2", normal));
+//        metaTable.addCell(getCell("Leverdatum: 21-03-2025", normal));
+//        metaTable.addCell(getCell("", normal));
+//        document.add(metaTable);
+//        document.add(Chunk.NEWLINE);
+//
+//        // Line Items Table
+//        PdfPTable itemTable = new PdfPTable(4);
+//        itemTable.setWidthPercentage(100);
+//        itemTable.setWidths(new float[]{6, 1, 2, 2});
+//        itemTable.addCell(getCell("Omschrijving", bold));
+//        itemTable.addCell(getCell("Aantal", bold));
+//        itemTable.addCell(getCell("Prijs", bold));
+//        itemTable.addCell(getCell("Totaal", bold));
+//
+//        itemTable.addCell(getCell("Proj.nr. 20240832, d.d. 20-03-2025, locatie Dronten klu, medewerker 1", normal));
+//        itemTable.addCell(getCell("1,00", normal));
+//        itemTable.addCell(getCell("400,00", normal));
+//        itemTable.addCell(getCell("400,00", normal));
+//
+//        itemTable.addCell(getCell("Proj.nr. 20240832, d.d. 20-03-2025, locatie Dronten klu, medewerker 2", normal));
+//        itemTable.addCell(getCell("1,00", normal));
+//        itemTable.addCell(getCell("400,00", normal));
+//        itemTable.addCell(getCell("400,00", normal));
+//
+//        itemTable.addCell(getCell("Proj.nr. 20240832, d.d. 20-03-2025, locatie Dronten klu, reiskosten\nOss-Dronten-Oss (272 km)", normal));
+//        itemTable.addCell(getCell("1,00", normal));
+//        itemTable.addCell(getCell("76,16", normal));
+//        itemTable.addCell(getCell("76,16", normal));
+//
+//        document.add(itemTable);
+//        document.add(Chunk.NEWLINE);
+//
+//        // Totals Table
+//        PdfPTable totals = new PdfPTable(2);
+//        totals.setWidthPercentage(40);
+//        totals.setHorizontalAlignment(Element.ALIGN_RIGHT);
+//        totals.setWidths(new float[]{3, 2});
+//        totals.addCell(getCell("Totaal excl. btw", bold));
+//        totals.addCell(getCell("€ 876,16", normal));
+//        totals.addCell(getCell("Totaal btw", bold));
+//        totals.addCell(getCell("€ 183,99", normal));
+//        totals.addCell(getCell("Te betalen", bold));
+//        totals.addCell(getCell("€ 1.060,15", bold));
+//        document.add(totals);
+//
+//        document.close();
+//        return outputStream.toByteArray();
+//    }
+//
+//    private PdfPCell getCell(String text, Font font) {
+//        PdfPCell cell = new PdfPCell(new Phrase(text, font));
+//        cell.setPadding(5);
+//        cell.setBorder(Rectangle.NO_BORDER);
+//        return cell;
+//    }
+
+    public byte[] generateInvoicePdf(Long invoiceId) throws Exception {
+        Invoice invoice = invoiceRepo.findById(invoiceId).orElseThrow(() -> new ResourceNotFoundException("Invoice",invoiceId+"",""));
+
+
+
+        Document document = new Document(PageSize.A4, 50, 50, 50, 50);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        PdfWriter.getInstance(document, outputStream);
+        document.open();
+
+        InputStream imageStream = getClass().getClassLoader().getResourceAsStream("images/IMG-20250205-WA0007.jpg");
+        if (imageStream == null) {
+            throw new FileNotFoundException("Image not found: images/trioliet.jpg");
+        }
+
+        PdfPTable mainTable = new PdfPTable(2);
+        mainTable.setWidthPercentage(100.0F);
+        PdfPCell cell3 = new PdfPCell();
+
+        Image logoImage = Image.getInstance(ImageIO.read(imageStream), null);
+        logoImage.scaleToFit(150, 150);
+        logoImage.setAlignment(Element.ALIGN_CENTER);
+        cell3.addElement(logoImage);
+        cell3.setBorder(0);
+        mainTable.addCell(cell3);
+
+        mainTable.setSpacingAfter(10.0F);
+
+        document.add(mainTable);
+
+        // Fonts
+        Font bold = new Font(Font.FontFamily.HELVETICA, 11, Font.BOLD);
+        Font normal = new Font(Font.FontFamily.HELVETICA, 10, Font.NORMAL);
+        Font headerFont = new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD);
+
+        // Top-right Company Info
+        PdfPTable headerTable = new PdfPTable(1);
+        headerTable.setWidthPercentage(100);
+        headerTable.getDefaultCell().setBorder(Rectangle.NO_BORDER);
+        PdfPCell headerCell = new PdfPCell();
+        headerCell.setBorder(Rectangle.NO_BORDER);
+        headerCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        Paragraph companyHeader = new Paragraph("EVENTICO", headerFont);
+        Paragraph companyDetails = new Paragraph(
+                "Eventico B.V.\nGewandeweg 39\n5345HM Oss\nT: 0648908818\nE: administratie@eventico.nl\nI: eventico.nl",
+                normal
+        );
+        companyHeader.setAlignment(Element.ALIGN_RIGHT);
+        companyDetails.setAlignment(Element.ALIGN_RIGHT);
+        headerCell.addElement(companyHeader);
+        headerCell.addElement(companyDetails);
+        headerTable.addCell(headerCell);
+        document.add(headerTable);
+
+        document.add(Chunk.NEWLINE);
+
+        // Left-aligned invoice label and recipient
+        Paragraph factuurLabel = new Paragraph("Factuur", bold);
+        factuurLabel.setSpacingAfter(5);
+        document.add(factuurLabel);
+        document.add(new Paragraph("Story Event Engineering\nZandkamp\n6626KV Alphen", normal));
+
+        document.add(Chunk.NEWLINE);
+
+        // Payment Info block aligned to right
+        PdfPTable paymentInfo = new PdfPTable(2);
+        paymentInfo.setTotalWidth(300);
+        paymentInfo.setLockedWidth(true);
+        paymentInfo.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        paymentInfo.setWidths(new float[]{3f, 5f});
+        paymentInfo.addCell(getRightCell("Te betalen:", bold));
+        paymentInfo.addCell(getRightCell("€ 1.060,15 (voor 20-04-2025)", normal));
+        paymentInfo.addCell(getRightCell("Naar IBAN:", bold));
+        paymentInfo.addCell(getRightCell("NL90 KNAB 0510 4223 73", normal));
+        paymentInfo.addCell(getRightCell("Op naam van:", bold));
+        paymentInfo.addCell(getRightCell("Eventico B.V.", normal));
+        paymentInfo.addCell(getRightCell("Omschrijving:", bold));
+        paymentInfo.addCell(getRightCell("Factuur 250032", normal));
+        document.add(paymentInfo);
+
+        document.add(Chunk.NEWLINE);
+
+        // Meta info block aligned right
+        PdfPTable metaInfo = new PdfPTable(2);
+        metaInfo.setTotalWidth(300);
+        metaInfo.setLockedWidth(true);
+        metaInfo.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        metaInfo.setWidths(new float[]{3f, 4f});
+        metaInfo.addCell(getRightCell("Factuurnummer:", bold));
+        metaInfo.addCell(getRightCell("250032", normal));
+        metaInfo.addCell(getRightCell("Factuurdatum:", bold));
+        metaInfo.addCell(getRightCell("21-03-2025", normal));
+        metaInfo.addCell(getRightCell("Betalingstermijn:", bold));
+        metaInfo.addCell(getRightCell("30 dagen", normal));
+        metaInfo.addCell(getRightCell("Klantnummer:", bold));
+        metaInfo.addCell(getRightCell("2", normal));
+        metaInfo.addCell(getRightCell("Leverdatum:", bold));
+        metaInfo.addCell(getRightCell("21-03-2025", normal));
+        document.add(metaInfo);
+
+        document.add(Chunk.NEWLINE);
+
+        // Line Items Table
+        PdfPTable items = new PdfPTable(4);
+        items.setWidthPercentage(100);
+        items.setWidths(new float[]{6, 1, 2, 2});
+        items.addCell(getHeaderCell("Omschrijving"));
+        items.addCell(getHeaderCell("Aantal"));
+        items.addCell(getHeaderCell("Prijs"));
+        items.addCell(getHeaderCell("Totaal"));
+
+        items.addCell(getBodyCell("Proj.nr. 20240832, d.d. 20-03-2025, locatie Dronten klu, medewerker 1"));
+        items.addCell(getBodyCell("1,00"));
+        items.addCell(getBodyCell("400,00"));
+        items.addCell(getBodyCell("400,00"));
+
+        items.addCell(getBodyCell("Proj.nr. 20240832, d.d. 20-03-2025, locatie Dronten klu, medewerker 2"));
+        items.addCell(getBodyCell("1,00"));
+        items.addCell(getBodyCell("400,00"));
+        items.addCell(getBodyCell("400,00"));
+
+        items.addCell(getBodyCell("Proj.nr. 20240832, d.d. 20-03-2025, locatie Dronten klu, reiskosten\nOss-Dronten-Oss (272 km)"));
+        items.addCell(getBodyCell("1,00"));
+        items.addCell(getBodyCell("76,16"));
+        items.addCell(getBodyCell("76,16"));
+
+        document.add(items);
+        document.add(Chunk.NEWLINE);
+
+        // Totals Table aligned right
+        PdfPTable totals = new PdfPTable(2);
+        totals.setTotalWidth(200);
+        totals.setLockedWidth(true);
+        totals.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        totals.setWidths(new float[]{2f, 2f});
+        totals.addCell(getRightCell("Totaal excl. btw:", bold));
+        totals.addCell(getRightCell("€ 876,16", normal));
+        totals.addCell(getRightCell("Totaal btw:", bold));
+        totals.addCell(getRightCell("€ 183,99", normal));
+        totals.addCell(getRightCell("Te betalen:", bold));
+        totals.addCell(getRightCell("€ 1.060,15", bold));
+        document.add(totals);
+
+        document.close();
+        return outputStream.toByteArray();
+    }
+
+    private PdfPCell getRightCell(String text, Font font) {
+        PdfPCell cell = new PdfPCell(new Phrase(text, font));
+        cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        cell.setBorder(Rectangle.NO_BORDER);
+        return cell;
+    }
+
+    private PdfPCell getHeaderCell(String text) {
+        Font font = new Font(Font.FontFamily.HELVETICA, 10, Font.BOLD);
+        PdfPCell cell = new PdfPCell(new Phrase(text, font));
+        cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+        cell.setPadding(5);
+        return cell;
+    }
+
+    private PdfPCell getBodyCell(String text) {
+        Font font = new Font(Font.FontFamily.HELVETICA, 10, Font.NORMAL);
+        PdfPCell cell = new PdfPCell(new Phrase(text, font));
+        cell.setPadding(5);
+        return cell;
+    }
+
     public List<Invoice> createAllPurchaseOrders(Long jobId) throws Exception {
 
         List<Invoice> purchaseOrders = new ArrayList<>();
@@ -528,6 +865,18 @@ public class JobServiceImp implements JobService {
         Map<Long, Boolean> spReviewMap = job.getReviewedByServiceProvider();
         if (spReviewMap == null) {
             spReviewMap = new HashMap<>();
+        }
+        Optional<List<Invoice>> existingInvoice = invoiceRepo.findByJobId(jobId);
+        if (existingInvoice.isPresent()) {
+            List<Invoice> presentInvoices = existingInvoice.get();
+            Optional<Invoice> spInvoice = presentInvoices
+                    .stream()
+                    .filter(inv -> inv.getInvoiceType().equals(InvoiceType.PURCHASE) && inv.getServiceProvider().getId() == serviceProviderId)
+                    .findFirst();
+            if (spInvoice.isPresent()) {
+                return spInvoice.get();
+            }
+
         }
         Invoice invoice = new Invoice();
         if (isSpReview) {
@@ -661,4 +1010,6 @@ public class JobServiceImp implements JobService {
         }
         return cost;
     }
+
+
 }

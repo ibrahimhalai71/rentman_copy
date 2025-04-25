@@ -151,37 +151,6 @@ public class UtilFunctions {
             isEvent = false;
         }
 
-//        if (client.getRateType().equals(User.RateType.DAY)) {
-//            if (isWeekend && isEvent) {
-//                return client.getWeekendRate();
-//            } else if (isNight && isEvent) {
-//                return client.getNightRate();
-//            } else if (!isWeekend && !isNight && isEvent) {
-//                return client.getDiscussedRate();
-//            }
-//            if (isWeekend && isRailWork) {
-//                return client.getWeekendRateRW();
-//            } else if (isNight && isRailWork) {
-//                return client.getNightRateRW();
-//            } else if (!isWeekend && !isNight && isRailWork) {
-//                return client.getDiscussedRateRW();
-//            }
-//        } else if (client.getRateType().equals(User.RateType.HOURLY)) {
-//            if (isWeekend && isEvent) {
-//                return client.getWeekendRate();
-//            } else if (isNight && isEvent) {
-//                return client.getNightRate();
-//            } else if (!isWeekend && !isNight && isEvent) {
-//                return client.getHourRate();
-//            }
-//            if (isWeekend && isRailWork) {
-//                return client.getWeekendRateRW();
-//            } else if (isNight && isRailWork) {
-//                return client.getNightRateRW();
-//            } else if (!isWeekend && !isNight && isRailWork) {
-//                return client.getHourRateRW();
-//            }
-//        }
         if (client.getRateType().equals(User.RateType.DAY)) {
 
             if (isWeekend && isEvent) {

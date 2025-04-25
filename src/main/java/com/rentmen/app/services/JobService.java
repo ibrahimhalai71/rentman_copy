@@ -3,6 +3,7 @@ package com.rentmen.app.services;
 import com.rentmen.app.DTO.*;
 import com.rentmen.app.entities.Invoice;
 import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 import java.util.Set;
@@ -44,7 +45,7 @@ public interface JobService {
 
  Invoice createInvoice(Long jobId) throws Exception;
 
- Invoice mergeInvoices(Long invoiceNumber, List<Long> invoiceIds);
+ Invoice mergeInvoices(Long invoiceNumber, List<Long> jobIds);
 
  Invoice updateInvoice(Long invoiceId,Invoice invoice);
 
@@ -54,6 +55,7 @@ public interface JobService {
 
  List<Resource> getFilesForInvoice(Long invoiceId);
 
+ byte[] generateInvoicePdf(Long invoiceId) throws Exception;
  List<Invoice> createAllPurchaseOrders(Long jobId) throws Exception;
  void postReviewFormServiceProvider(String token, InvoiceDto invoiceDto) throws Exception;
 

@@ -5,8 +5,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.rentmen.app.entities.User;
 import com.rentmen.app.utils.AvailabilityOptions;
+import com.rentmen.app.utils.ClientEventRateType;
 import com.rentmen.app.utils.DriversLicense;
 
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
@@ -27,8 +30,6 @@ public class UserDto {
 			message = "Username must be at least 3 characters"
 	) String email;
 	private String VAT;
-	@JsonProperty("discussed_rate")
-	private Double discussedRate;
 	private @NotEmpty @Size(
 			min = 4,
 			max = 16,
@@ -53,12 +54,7 @@ public class UserDto {
 	private String sector;
 	@JsonProperty("kilometer_rate")
 	private Double kilometerRate;
-	@JsonProperty("day_rate")
-	private Double dayRate;
-	@JsonProperty("night_rate")
-	private Double nightRate;
-	@JsonProperty("weekend_rate")
-	private Double weekendRate;
+
 	private Boolean timeBasedRate;
 	@JsonProperty("discussed_rate_type")
 	private User.RateType rateType;
@@ -92,6 +88,31 @@ public class UserDto {
 	private List<LocalDate> unavailabilityDates;
 	@JsonProperty("unknown_dates")
 	private List<LocalDate> unknownDates;
+
+	@JsonProperty("minimum_payment_hour")
+	private Double minimumPaymentHour;
+	@JsonProperty("client_event_rate_type")
+	@Enumerated(EnumType.STRING)
+	private ClientEventRateType clientEventRateType;
+	@JsonProperty("discussed_rate")
+	private Double discussedRate;
+	@JsonProperty("discussed_rate_rw")
+	private Double discussedRateRW;
+	@JsonProperty("hour_rate")
+	private Double hourRate;
+	@JsonProperty("hour_rate_rw")
+	private Double hourRateRW;
+	@JsonProperty("night_rate")
+	private Double nightRate;
+	@JsonProperty("night_rate_rw")
+	private Double nightRateRW;
+	@JsonProperty("weekend_rate")
+	private Double weekendRate;
+	@JsonProperty("weekend_rate_rw")
+	private Double weekendRateRW;
+	@JsonProperty("day_rate")
+	private Double dayRate;
+
 
 	public UserDto() {
 	}
@@ -152,6 +173,46 @@ public class UserDto {
 
 	public void setStatus(Boolean status) {
 		this.status = status;
+	}
+
+	public Double getDiscussedRateRW() {
+		return discussedRateRW;
+	}
+
+	public void setDiscussedRateRW(Double discussedRateRW) {
+		this.discussedRateRW = discussedRateRW;
+	}
+
+	public Double getHourRate() {
+		return hourRate;
+	}
+
+	public void setHourRate(Double hourRate) {
+		this.hourRate = hourRate;
+	}
+
+	public Double getHourRateRW() {
+		return hourRateRW;
+	}
+
+	public void setHourRateRW(Double hourRateRW) {
+		this.hourRateRW = hourRateRW;
+	}
+
+	public Double getNightRateRW() {
+		return nightRateRW;
+	}
+
+	public void setNightRateRW(Double nightRateRW) {
+		this.nightRateRW = nightRateRW;
+	}
+
+	public Double getWeekendRateRW() {
+		return weekendRateRW;
+	}
+
+	public void setWeekendRateRW(Double weekendRateRW) {
+		this.weekendRateRW = weekendRateRW;
 	}
 
 	public String getProfileImage() {
@@ -432,6 +493,22 @@ public class UserDto {
 
 	public void setUnavailabilityDates(List<LocalDate> unavailabilityDates) {
 		this.unavailabilityDates = unavailabilityDates;
+	}
+
+	public Double getMinimumPaymentHour() {
+		return minimumPaymentHour;
+	}
+
+	public void setMinimumPaymentHour(Double minimumPaymentHour) {
+		this.minimumPaymentHour = minimumPaymentHour;
+	}
+
+	public ClientEventRateType getClientEventRateType() {
+		return clientEventRateType;
+	}
+
+	public void setClientEventRateType(ClientEventRateType clientEventRateType) {
+		this.clientEventRateType = clientEventRateType;
 	}
 
 	public List<LocalDate> getUnknownDates() {

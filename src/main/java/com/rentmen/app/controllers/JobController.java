@@ -11,9 +11,7 @@ import com.rentmen.app.services.imp.TwilioMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -206,8 +204,8 @@ public class JobController {
     }
 
     @PostMapping({"/merge-invoices/{invoiceNumber}"})
-    public ResponseEntity<?> mergeInvoice(@PathVariable("invoiceNumber") Long invoiceNumber, @RequestBody List<Long> invoiceIds) throws Exception {
-        Invoice mergedInvoice = this.jobService.mergeInvoices(invoiceNumber, invoiceIds);
+    public ResponseEntity<?> mergeInvoice(@PathVariable("invoiceNumber") Long invoiceNumber, @RequestBody List<Long> jobIds) throws Exception {
+        Invoice mergedInvoice = this.jobService.mergeInvoices(invoiceNumber, jobIds);
         return ResponseEntity.ok(mergedInvoice);
     }
 
@@ -249,6 +247,38 @@ public class JobController {
         return ResponseEntity.ok(files);
     }
 
+//    @GetMapping({"/invoice/printPdf/{invoiceId}"})
+//    public ResponseEntity<byte[]> generateInvoicePdf(@PathVariable("invoiceId") Long invoiceId) {
+//        byte[] pdfBytes = null;
+//        try {
+//            pdfBytes = this.jobService.generateInvoicePdf(invoiceId);
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+//        System.out.println("After PDF generation");
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setContentType(MediaType.APPLICATION_PDF);
+//        headers.setContentDispositionFormData("attachment", "invoice.pdf");
+//        headers.setContentLength((long)pdfBytes.length);
+//        return new ResponseEntity(pdfBytes, headers, 200);
+//    }
 
+    @GetMapping("/invoice/printPdf/{invoiceId}")
+    public ResponseEntity<byte[]> generateInvoicePdf(@PathVariable("invoiceId") Long invoiceId) {
+        try {
+            byte[] pdfBytes = jobService.generateInvoicePdf(invoiceId);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDisposition(ContentDisposition.builder("attachment")
+                    .filename("invoice-" + invoiceId + ".pdf")
+                    .build());
+            headers.setContentLength(pdfBytes.length);
+
+            return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to generate PDF", e);
+        }
+    }
 
 }

@@ -55,6 +55,8 @@ public class JobDto {
     private List<String> jobOtherSkills;
     @JsonProperty("is_expired")
     private Boolean isExpired;
+    @JsonProperty("invoice_number")
+    private Long invoiceNumber;
 
     public JobDto() {
     }
@@ -242,6 +244,14 @@ public class JobDto {
 
     public void setProjectLeadNumber(String projectLeadNumber) {
         this.projectLeadNumber = projectLeadNumber;
+    }
+
+    public Long getInvoiceNumber() {
+        return invoiceNumber;
+    }
+
+    public void setInvoiceNumber(Long invoiceNumber) {
+        this.invoiceNumber = invoiceNumber;
     }
 
     public List<String> getJobOtherSkills() {
