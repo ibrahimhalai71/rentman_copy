@@ -1,5 +1,7 @@
 package com.rentmen.app.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import javax.persistence.*;
 
 @Entity
@@ -10,6 +12,7 @@ import javax.persistence.*;
 public class PotentialJobOffer {
 	@Id
 	@ManyToOne
+	@JsonBackReference
 	private Job job;
 	@Id
 	@ManyToOne

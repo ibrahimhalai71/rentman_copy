@@ -29,7 +29,6 @@ public class Invoice {
     @JoinColumn(
             name = "job_id"
     )
-    @JsonIgnore
     private Job job;
     @ManyToOne
     @JoinColumn(
@@ -55,6 +54,13 @@ public class Invoice {
     private String dayOrHour;
     @Column(name = "invoice_number")
     private Long invoiceNumber;
+    @Column(name = "dagen")
+    private String dagen;
+    @Column(name = "percentage_switch")
+    private Boolean percentageSwitch;
+    @Column(name = "percentage_number")
+    private Long percentageNumber;
+
     @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "parent_invoice_id", nullable = true)
     @JsonBackReference
@@ -82,7 +88,8 @@ public class Invoice {
     @OneToMany(
             cascade = {CascadeType.ALL},
             mappedBy = "invoice",
-            fetch = FetchType.EAGER
+            fetch = FetchType.EAGER,
+            orphanRemoval = true
     )
     @Fetch(FetchMode.SUBSELECT)
     private List<InvoiceLines> invoiceLines;
@@ -90,6 +97,7 @@ public class Invoice {
     private Boolean reviewedBySP;
     @Transient
     private Boolean reviewedByClient;
+
 
     public Invoice() {
     }
@@ -267,5 +275,30 @@ public class Invoice {
 
     public void setReviewedByClient(Boolean reviewedByClient) {
         this.reviewedByClient = reviewedByClient;
+    }
+
+
+    public String getDagen() {
+        return dagen;
+    }
+
+    public void setDagen(String dagen) {
+        this.dagen = dagen;
+    }
+
+    public Boolean getPercentageSwitch() {
+        return percentageSwitch;
+    }
+
+    public void setPercentageSwitch(Boolean percentageSwitch) {
+        this.percentageSwitch = percentageSwitch;
+    }
+
+    public Long getPercentageNumber() {
+        return percentageNumber;
+    }
+
+    public void setPercentageNumber(Long percentageNumber) {
+        this.percentageNumber = percentageNumber;
     }
 }

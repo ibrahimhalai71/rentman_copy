@@ -55,7 +55,7 @@ public interface JobService {
 
  List<Resource> getFilesForInvoice(Long invoiceId);
 
- byte[] generateInvoicePdf(Long invoiceId) throws Exception;
+ byte[] generatePdf(Long invoiceId) throws Exception;
  List<Invoice> createAllPurchaseOrders(Long jobId) throws Exception;
  void postReviewFormServiceProvider(String token, InvoiceDto invoiceDto) throws Exception;
 

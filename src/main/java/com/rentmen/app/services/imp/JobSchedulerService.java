@@ -2,8 +2,10 @@ package com.rentmen.app.services.imp;
 
 import com.rentmen.app.configurations.JwtTokenHelper;
 import com.rentmen.app.entities.ArchiveJob;
+import com.rentmen.app.entities.Invoice;
 import com.rentmen.app.entities.Job;
 import com.rentmen.app.repositories.*;
+import com.rentmen.app.services.JobService;
 import com.rentmen.app.utils.JobStatus;
 import com.rentmen.app.utils.MessageTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,8 @@ public class JobSchedulerService {
 	private String clientURI;
 	@Autowired
 	private JobRepo jobRepo;
+	@Autowired
+	private JobService jobService;
 	@Autowired
 	EmailSendingService emailSendingService;
 	@Autowired
@@ -82,6 +86,7 @@ public class JobSchedulerService {
 
 					try {
 						job.getServiceProvidersList().forEach((sp) -> {
+							System.out.println("info@eventico.nl Review Form for Job: " + job.getTitle() + "Dear " + sp.getFirstName() + "Het werk is voltooid, vul alstublieft het formulier in via de volgende link: " + spTinyURL + "Dank u wel");
 							this.emailSendingService.sendEmail("info@eventico.nl", "Review Form for Job: " + job.getTitle(), "Dear " + sp.getFirstName() + ",\n \nHet werk is voltooid, vul alstublieft het formulier in via de volgende link: " + spTinyURL + "\n\nDank u wel", sp.getEmail());
 						});
 					} catch (Exception var9) {
@@ -90,6 +95,7 @@ public class JobSchedulerService {
 					}
 
 					try {
+						System.out.println("\"info@eventico.nl\", \"Review Form for Job: \" + job.getTitle(), \"Dear \" + job.getClient().getFirstName() + \",\\n \\nHet werk is voltooid, vul alstublieft het formulier in via de volgende link: \" + clientTinyURL + \"\\n\\nDank u wel\", job.getClient().getEmail()");
 						this.emailSendingService.sendEmail("info@eventico.nl", "Review Form for Job: " + job.getTitle(), "Dear " + job.getClient().getFirstName() + ",\n \nHet werk is voltooid, vul alstublieft het formulier in via de volgende link: " + clientTinyURL + "\n\nDank u wel", job.getClient().getEmail());
 					} catch (Exception var8) {
 						ex = var8;
@@ -111,6 +117,13 @@ public class JobSchedulerService {
 
 				ArchiveJob archiveJob = new ArchiveJob(job);
 				this.archiveJobRepo.save(archiveJob);
+
+				try {
+					Invoice clientInvoice = this.jobService.createInvoice(job.getId());
+					List<Invoice> serviceProvidersInvoices = this.jobService.createAllPurchaseOrders(job.getId());
+				}catch (Exception e){
+					System.out.println("Exception while creating invoice: " + e);
+				}
 			}
 
 		});

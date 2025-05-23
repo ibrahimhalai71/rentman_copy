@@ -1,6 +1,7 @@
 package com.rentmen.app.entities;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonValue;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -139,12 +140,24 @@ public class User implements UserDetails {
 		this.roles = roles;
 	}
 
+	@JsonIgnore
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		List<SimpleGrantedAuthority> authorities = (List)this.roles.stream().map((role) -> {
 			return new SimpleGrantedAuthority(role.getName());
 		}).collect(Collectors.toList());
 		return authorities;
 	}
+
+//	@Override
+//	public Collection<? extends GrantedAuthority> getAuthorities() {
+//		if (roles == null || roles.isEmpty()) return List.of();
+//
+//		return roles.stream()
+//				.map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))
+//				.collect(Collectors.toList());
+//	}
+
+
 
 	public boolean isAccountNonExpired() {
 		return true;

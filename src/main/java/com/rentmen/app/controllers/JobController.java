@@ -1,6 +1,7 @@
 
 package com.rentmen.app.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rentmen.app.DTO.*;
 import com.rentmen.app.configurations.JwtTokenHelper;
 import com.rentmen.app.entities.Invoice;
@@ -9,12 +10,15 @@ import com.rentmen.app.services.UserService;
 import com.rentmen.app.services.imp.EmailSendingService;
 import com.rentmen.app.services.imp.TwilioMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -92,12 +96,15 @@ public class JobController {
 
     @GetMapping({"/getAllJobs"})
     public ResponseEntity<List<JobDto>> getAllJobs() {
-        return ResponseEntity.ok(this.jobService.getAllJobs());
+        List<JobDto> dto = this.jobService.getAllJobs();
+        System.out.println("something");
+        return ResponseEntity.ok(dto);
     }
 
     @GetMapping({"/getAllJobsByClientId/{clientId}"})
     public ResponseEntity<List<JobDto>> getAllJobsByClientId(@PathVariable("clientId") Long clientId) {
-        return ResponseEntity.ok(this.jobService.getAllJobsByClientId(clientId));
+        List<JobDto> dto = this.jobService.getAllJobsByClientId(clientId);
+        return ResponseEntity.ok(dto);
     }
 
     @GetMapping({"/getAllJobsByModeratorId/{moderatorId}"})
@@ -172,21 +179,50 @@ public class JobController {
         return ResponseEntity.ok(this.jwtTokenHelper.generateTokenForReviewForm(jobId));
     }
 
-    @GetMapping({"/review-form/service-provider-is-filled/{token}/{spId}"})
-    public ResponseEntity<?> isReviewedServiceProviderReviewForm(@PathVariable("token") String token, @PathVariable("spId") Long spId) throws Exception {
+    @GetMapping({"/review-form/service-provider-is-filled/{spId}"})
+    public ResponseEntity<?> isReviewedServiceProviderReviewForm(@RequestParam("token") String token, @PathVariable("spId") Long spId) throws Exception {
         return ResponseEntity.ok(this.jobService.isReviewedServiceProviderReviewForm(token, spId));
     }
 
-    @GetMapping({"/review-form/service-provider-is-overridden/{token}/{spId}"})
-    public ResponseEntity<?> isOverriddenByClientServiceProviderReviewForm(@PathVariable("token") String token, @PathVariable("spId") Long spId) throws Exception {
+    @GetMapping({"/review-form/service-provider-is-overridden/{spId}"})
+    public ResponseEntity<?> isOverriddenByClientServiceProviderReviewForm(@RequestParam("token") String token, @PathVariable("spId") Long spId) throws Exception {
         return ResponseEntity.ok(this.jobService.isOverriddenByClientBeforeServiceProviderReviewForm(token, spId));
     }
 
-    @PostMapping({"/review-form/service-provider"})
-    public ResponseEntity<?> postReviewFormServiceProvider(@RequestParam("token") String token, @RequestBody InvoiceDto invoice) throws Exception {
-        this.jobService.postReviewFormServiceProvider(token, invoice);
-        return ResponseEntity.ok("Sucsess: review form posted successfully");
+//    @PostMapping({"/review-form/service-provider"})
+//    public ResponseEntity<?> postReviewFormServiceProvider(@RequestParam("token") String token, @RequestBody InvoiceDto invoice) throws Exception {
+//        this.jobService.postReviewFormServiceProvider(token, invoice);
+//        return ResponseEntity.ok("Sucsess: review form posted successfully");
+//    }
+
+
+    @PostMapping(value = "/review-form/service-provider", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> postReviewFormServiceProvider(
+            @RequestParam("token") String token,
+            @RequestPart("invoice") String invoiceJson,
+            @RequestPart("files") List<MultipartFile> files) throws Exception {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        InvoiceDto invoice = objectMapper.readValue(invoiceJson, InvoiceDto.class);
+
+        invoice.setFiles(files);
+        jobService.postReviewFormServiceProvider(token, invoice);
+        return ResponseEntity.ok("Success: review form posted successfully");
     }
+
+//    @PostMapping(value = "/review-form/service-provider/{token}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    public ResponseEntity<?> postReviewFormServiceProvider(
+//            @RequestParam("token") String token,
+//            @RequestPart("invoice") String invoiceJson,
+//            @RequestPart("files") List<MultipartFile> files) throws Exception {
+//
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        InvoiceDto invoice = objectMapper.readValue(invoiceJson, InvoiceDto.class);
+//
+//        invoice.setFiles(files);
+//        jobService.postReviewFormServiceProvider(token, invoice);
+//        return ResponseEntity.ok("Success: review form posted successfully");
+//    }
 
     @GetMapping({"/generateInvoice/{jobId}"})
     public ResponseEntity<?> generateInvoice(@PathVariable("jobId") Long jobId) throws Exception {
@@ -247,26 +283,10 @@ public class JobController {
         return ResponseEntity.ok(files);
     }
 
-//    @GetMapping({"/invoice/printPdf/{invoiceId}"})
-//    public ResponseEntity<byte[]> generateInvoicePdf(@PathVariable("invoiceId") Long invoiceId) {
-//        byte[] pdfBytes = null;
-//        try {
-//            pdfBytes = this.jobService.generateInvoicePdf(invoiceId);
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
-//        System.out.println("After PDF generation");
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.setContentType(MediaType.APPLICATION_PDF);
-//        headers.setContentDispositionFormData("attachment", "invoice.pdf");
-//        headers.setContentLength((long)pdfBytes.length);
-//        return new ResponseEntity(pdfBytes, headers, 200);
-//    }
-
-    @GetMapping("/invoice/printPdf/{invoiceId}")
+    @GetMapping("/invoice/print-pdf/{invoiceId}")
     public ResponseEntity<byte[]> generateInvoicePdf(@PathVariable("invoiceId") Long invoiceId) {
         try {
-            byte[] pdfBytes = jobService.generateInvoicePdf(invoiceId);
+            byte[] pdfBytes = jobService.generatePdf(invoiceId);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);
@@ -281,4 +301,20 @@ public class JobController {
         }
     }
 
+
+    @GetMapping("/file/{imageName}")
+    public ResponseEntity<Resource> getImage(@PathVariable String imageName) throws IOException {
+        // Load the image from the classpath resources
+        Resource resource = new ClassPathResource("uploads/" + imageName);
+
+        // Check if the resource exists
+        if (!resource.exists()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // Return the image as a response
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_JPEG) // You can dynamically set the correct content type
+                .body(resource);
+    }
 }

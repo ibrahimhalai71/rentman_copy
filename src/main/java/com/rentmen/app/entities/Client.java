@@ -1,5 +1,6 @@
 package com.rentmen.app.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.rentmen.app.utils.Billable;
 import com.rentmen.app.utils.ClientEventRateType;
 
@@ -28,6 +29,7 @@ public class Client extends User {
 			mappedBy = "client",
 			cascade = {CascadeType.ALL}
 	)
+	@JsonManagedReference
 	private List<Job> jobs = new ArrayList<>();
 
 

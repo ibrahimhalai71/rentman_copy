@@ -23,6 +23,12 @@ public class WebMvcConfig implements WebMvcConfigurer {
     this.key = "RntMn";
   }
 
+  @Override
+  public void addResourceHandlers(org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry registry) {
+    registry.addResourceHandler("/uploads/**")
+            .addResourceLocations("file:uploads/");
+  }
+
   @Bean
   public EntityManager getEntityManager() {
       return entityManager;

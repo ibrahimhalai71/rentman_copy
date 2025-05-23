@@ -20,8 +20,8 @@ public class TwilioMessageService {
 
 	public String sendSMS(String To, String message) {
 
-//		Twilio.init(accountSid, authToken);
-//
+		Twilio.init(accountSid, authToken);
+
 //		Message.creator(new PhoneNumber(To),
 //				new PhoneNumber(fromPhoneNumber), message).create();
 

@@ -5,9 +5,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.rentmen.app.utils.InvoiceType;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.persistence.Column;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.validation.constraints.NotEmpty;
+import java.time.LocalDate;
 import java.util.List;
 
 public class InvoiceDto {
@@ -25,6 +27,13 @@ public class InvoiceDto {
 	@JsonProperty("invoice_type")
 	private InvoiceType invoiceType;
 	List<MultipartFile> files;
+	private LocalDate jobDate;
+
+	private String dagen;
+	@JsonProperty("percentage_switch")
+	private Boolean percentageSwitch;
+	@JsonProperty("percentage_number")
+	private Long percentageNumber;
 
 	public InvoiceDto() {
 	}
@@ -73,6 +82,14 @@ public class InvoiceDto {
 		return invoiceType;
 	}
 
+	public LocalDate getJobDate() {
+		return jobDate;
+	}
+
+	public void setJobDate(LocalDate jobDate) {
+		this.jobDate = jobDate;
+	}
+
 	public void setInvoiceType(InvoiceType invoiceType) {
 		this.invoiceType = invoiceType;
 	}
@@ -107,5 +124,29 @@ public class InvoiceDto {
 
 	public void setReviewedByClient(Boolean reviewedByClient) {
 		this.reviewedByClient = reviewedByClient;
+	}
+
+	public String getDagen() {
+		return dagen;
+	}
+
+	public void setDagen(String dagen) {
+		this.dagen = dagen;
+	}
+
+	public Boolean getPercentageSwitch() {
+		return percentageSwitch;
+	}
+
+	public void setPercentageSwitch(Boolean percentageSwitch) {
+		this.percentageSwitch = percentageSwitch;
+	}
+
+	public Long getPercentageNumber() {
+		return percentageNumber;
+	}
+
+	public void setPercentageNumber(Long percentageNumber) {
+		this.percentageNumber = percentageNumber;
 	}
 }

@@ -1,5 +1,7 @@
 package com.rentmen.app.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.rentmen.app.utils.JobStatus;
 import com.rentmen.app.utils.StringListConverter;
 import com.rentmen.app.utils.StringMapConverter;
@@ -24,6 +26,7 @@ public class Job {
 	@JoinColumn(
 			name = "client_id"
 	)
+	@JsonBackReference
 	private Client client;
 	@ManyToOne
 	@JoinColumn(
@@ -69,6 +72,7 @@ public class Job {
 			fetch = FetchType.LAZY,
 			orphanRemoval = true
 	)
+	@JsonManagedReference
 	private List<PotentialJobOffer> potentialJobOffers;
 	private Boolean active;
 	@DateTimeFormat(
