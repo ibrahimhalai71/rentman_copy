@@ -1,0 +1,453 @@
+{
+	"info": {
+		"_postman_id": "3b23a347-ab27-4b82-96a4-0cb96b7762f8",
+		"name": "enetico invoice",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "42961081"
+	},
+	"item": [
+		{
+			"name": "create invoice and purchase order",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJuZXdNb2RlcmF0b3JUZXN0QGdtYWlsLmNvbSIsImV4cCI6MTc0NDA3MjgzNSwiaWF0IjoxNzQ0MDU0ODM1fQ.fUpgAlyUcqukW2vZz67GeTvznGGGhyFw9O0pXF0vcnWPTvsyPF0ev4CBw0brOvr3o3HvOB2thZOfmqK7Ea11yQ",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:9091/api/job/create-invoices-po/85",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9091",
+					"path": [
+						"api",
+						"job",
+						"create-invoices-po",
+						"85"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "merge the invoices",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJuZXdNb2RlcmF0b3JUZXN0QGdtYWlsLmNvbSIsImV4cCI6MTc0NDA3MjgzNSwiaWF0IjoxNzQ0MDU0ODM1fQ.fUpgAlyUcqukW2vZz67GeTvznGGGhyFw9O0pXF0vcnWPTvsyPF0ev4CBw0brOvr3o3HvOB2thZOfmqK7Ea11yQ",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[85,86]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:9091/api/job/merge-invoices/123",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9091",
+					"path": [
+						"api",
+						"job",
+						"merge-invoices",
+						"123"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update invoice or purchase order",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJuZXdNb2RlcmF0b3JUZXN0QGdtYWlsLmNvbSIsImV4cCI6MTc0NDA3MjgzNSwiaWF0IjoxNzQ0MDU0ODM1fQ.fUpgAlyUcqukW2vZz67GeTvznGGGhyFw9O0pXF0vcnWPTvsyPF0ev4CBw0brOvr3o3HvOB2thZOfmqK7Ea11yQ",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "\r\n    {\r\n        \"id\": 40,\r\n        \"serviceProvider\": null,\r\n        \"hoursWorked\": 0.0,\r\n        \"spRate\": null,\r\n        \"jobDate\": null,\r\n        \"kilometer\": null,\r\n        \"extraCost\": null,\r\n        \"extraCostDescription\": null,\r\n        \"invoiceType\": \"INVOICE\",\r\n        \"dayOrHour\": null,\r\n        \"invoiceNumber\": 25042322249,\r\n        \"mergedInvoices\": [\r\n            {\r\n                \"id\": 24,\r\n                \"serviceProvider\": null,\r\n                \"hoursWorked\": 0.0,\r\n                \"spRate\": null,\r\n                \"jobDate\": null,\r\n                \"kilometer\": null,\r\n                \"extraCost\": null,\r\n                \"extraCostDescription\": null,\r\n                \"invoiceType\": \"INVOICE\",\r\n                \"dayOrHour\": \"Day\",\r\n                \"invoiceNumber\": 123,\r\n                \"mergedInvoices\": [],\r\n                \"invoiceDate\": [\r\n                    2025,\r\n                    4,\r\n                    8\r\n                ],\r\n                \"files\": null,\r\n                \"filePath\": [],\r\n                \"invoiceDescription\": null,\r\n                \"invoiceLines\": [\r\n                    {\r\n                        \"id\": 9,\r\n                        \"aantal\": 1.0,\r\n                        \"omschrijving\": \"2025-03-05 / Project: null / Audio A\",\r\n                        \"price\": 350.0\r\n                    }\r\n                ],\r\n                \"reviewedBySP\": null,\r\n                \"reviewedByClient\": null\r\n            },\r\n            {\r\n                \"id\": 31,\r\n                \"serviceProvider\": null,\r\n                \"hoursWorked\": 1.0,\r\n                \"spRate\": null,\r\n                \"jobDate\": null,\r\n                \"kilometer\": null,\r\n                \"extraCost\": null,\r\n                \"extraCostDescription\": null,\r\n                \"invoiceType\": \"INVOICE\",\r\n                \"dayOrHour\": \"Day\",\r\n                \"invoiceNumber\": 123,\r\n                \"mergedInvoices\": [],\r\n                \"invoiceDate\": [\r\n                    2025,\r\n                    4,\r\n                    8\r\n                ],\r\n                \"files\": null,\r\n                \"filePath\": [],\r\n                \"invoiceDescription\": null,\r\n                \"invoiceLines\": [\r\n                    {\r\n                        \"id\": 10,\r\n                        \"aantal\": 1.0,\r\n                        \"omschrijving\": \"2025-03-05 / Project: null / Audio A\",\r\n                        \"price\": 350.0\r\n                    }\r\n                ],\r\n                \"reviewedBySP\": null,\r\n                \"reviewedByClient\": null\r\n            }\r\n        ],\r\n        \"invoiceDate\": [\r\n            2025,\r\n            4,\r\n            23\r\n        ],\r\n        \"files\": null,\r\n        \"filePath\": [],\r\n        \"invoiceDescription\": null,\r\n        \"invoiceLines\": [\r\n            {\r\n                \"id\": 9,\r\n                \"aantal\": 2.0,\r\n                \"omschrijving\": \"2025-03-05 / Project: null / Audio A\",\r\n                \"price\": 350.0\r\n            },\r\n            {\r\n                \"id\": 10,\r\n                \"aantal\": 3.0,\r\n                \"omschrijving\": \"2025-03-05 / Project: null / Audio A\",\r\n                \"price\": 350.0\r\n            }\r\n        ],\r\n        \"reviewedBySP\": null,\r\n        \"reviewedByClient\": null\r\n    }\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:9091/api/job/update-invoice/39",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9091",
+					"path": [
+						"api",
+						"job",
+						"update-invoice",
+						"39"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete invoice",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJuZXdNb2RlcmF0b3JUZXN0QGdtYWlsLmNvbSIsImV4cCI6MTc0NDA3MjgzNSwiaWF0IjoxNzQ0MDU0ODM1fQ.fUpgAlyUcqukW2vZz67GeTvznGGGhyFw9O0pXF0vcnWPTvsyPF0ev4CBw0brOvr3o3HvOB2thZOfmqK7Ea11yQ",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": 34,\r\n    \"serviceProvider\": null,\r\n    \"hoursWorked\": 0.0,\r\n    \"spRate\": null,\r\n    \"jobDate\": null,\r\n    \"kilometer\": null,\r\n    \"extraCost\": null,\r\n    \"extraCostDescription\": null,\r\n    \"invoiceType\": \"INVOICE\",\r\n    \"dayOrHour\": null,\r\n    \"invoiceNumber\": null,\r\n    \"mergedInvoices\": [\r\n        {\r\n            \"id\": 24,\r\n            \"serviceProvider\": null,\r\n            \"hoursWorked\": 0.0,\r\n            \"spRate\": null,\r\n            \"jobDate\": null,\r\n            \"kilometer\": null,\r\n            \"extraCost\": null,\r\n            \"extraCostDescription\": null,\r\n            \"invoiceType\": \"INVOICE\",\r\n            \"dayOrHour\": \"Day\",\r\n            \"invoiceNumber\": 123,\r\n            \"mergedInvoices\": [],\r\n            \"invoiceDate\": [\r\n                2025,\r\n                4,\r\n                8\r\n            ],\r\n            \"files\": null,\r\n            \"filePath\": [],\r\n            \"invoiceDescription\": null,\r\n            \"invoiceLines\": [\r\n                {\r\n                    \"id\": 8,\r\n                    \"aantal\": 1.0,\r\n                    \"omschrijving\": \"2025-03-05 / Project: null / Audio A\",\r\n                    \"price\": 350.0\r\n                }\r\n            ],\r\n            \"reviewedBySP\": null,\r\n            \"reviewedByClient\": null\r\n        },\r\n        {\r\n            \"id\": 31,\r\n            \"serviceProvider\": null,\r\n            \"hoursWorked\": 1.0,\r\n            \"spRate\": null,\r\n            \"jobDate\": null,\r\n            \"kilometer\": null,\r\n            \"extraCost\": null,\r\n            \"extraCostDescription\": null,\r\n            \"invoiceType\": \"INVOICE\",\r\n            \"dayOrHour\": \"Day\",\r\n            \"invoiceNumber\": 123,\r\n            \"mergedInvoices\": [],\r\n            \"invoiceDate\": [\r\n                2025,\r\n                4,\r\n                8\r\n            ],\r\n            \"files\": null,\r\n            \"filePath\": [],\r\n            \"invoiceDescription\": null,\r\n            \"invoiceLines\": [\r\n                {\r\n                    \"id\": 9,\r\n                    \"aantal\": 1.0,\r\n                    \"omschrijving\": \"2025-03-05 / Project: null / Audio A\",\r\n                    \"price\": 350.0\r\n                }\r\n            ],\r\n            \"reviewedBySP\": null,\r\n            \"reviewedByClient\": null\r\n        }\r\n    ],\r\n    \"invoiceDate\": [\r\n        2025,\r\n        4,\r\n        8\r\n    ],\r\n    \"files\": null,\r\n    \"filePath\": null,\r\n    \"invoiceDescription\": null,\r\n    \"invoiceLines\": [\r\n        {\r\n            \"id\": 8,\r\n            \"aantal\": 1.0,\r\n            \"omschrijving\": \"2025-03-05 / Project: null / Audio A\",\r\n            \"price\": 350.0\r\n        },\r\n        {\r\n            \"id\": 9,\r\n            \"aantal\": 1.0,\r\n            \"omschrijving\": \"2025-03-05 / Project: null / Audio A\",\r\n            \"price\": 350.0\r\n        },\r\n        {\r\n            \"aantal\": 1.0,\r\n            \"omschrijving\": \"2025-03-05 / Project: null / Audio A\",\r\n            \"price\": 350.0\r\n        }\r\n    ],\r\n    \"reviewedBySP\": null,\r\n    \"reviewedByClient\": null\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:9091/api/job/delete-invoice/40",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9091",
+					"path": [
+						"api",
+						"job",
+						"delete-invoice",
+						"40"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get all",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJuZXdNb2RlcmF0b3JUZXN0QGdtYWlsLmNvbSIsImV4cCI6MTc0NDA3MjgzNSwiaWF0IjoxNzQ0MDU0ODM1fQ.fUpgAlyUcqukW2vZz67GeTvznGGGhyFw9O0pXF0vcnWPTvsyPF0ev4CBw0brOvr3o3HvOB2thZOfmqK7Ea11yQ",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": 34,\r\n    \"serviceProvider\": null,\r\n    \"hoursWorked\": 0.0,\r\n    \"spRate\": null,\r\n    \"jobDate\": null,\r\n    \"kilometer\": null,\r\n    \"extraCost\": null,\r\n    \"extraCostDescription\": null,\r\n    \"invoiceType\": \"INVOICE\",\r\n    \"dayOrHour\": null,\r\n    \"invoiceNumber\": null,\r\n    \"mergedInvoices\": [\r\n        {\r\n            \"id\": 24,\r\n            \"serviceProvider\": null,\r\n            \"hoursWorked\": 0.0,\r\n            \"spRate\": null,\r\n            \"jobDate\": null,\r\n            \"kilometer\": null,\r\n            \"extraCost\": null,\r\n            \"extraCostDescription\": null,\r\n            \"invoiceType\": \"INVOICE\",\r\n            \"dayOrHour\": \"Day\",\r\n            \"invoiceNumber\": 123,\r\n            \"mergedInvoices\": [],\r\n            \"invoiceDate\": [\r\n                2025,\r\n                4,\r\n                8\r\n            ],\r\n            \"files\": null,\r\n            \"filePath\": [],\r\n            \"invoiceDescription\": null,\r\n            \"invoiceLines\": [\r\n                {\r\n                    \"id\": 8,\r\n                    \"aantal\": 1.0,\r\n                    \"omschrijving\": \"2025-03-05 / Project: null / Audio A\",\r\n                    \"price\": 350.0\r\n                }\r\n            ],\r\n            \"reviewedBySP\": null,\r\n            \"reviewedByClient\": null\r\n        },\r\n        {\r\n            \"id\": 31,\r\n            \"serviceProvider\": null,\r\n            \"hoursWorked\": 1.0,\r\n            \"spRate\": null,\r\n            \"jobDate\": null,\r\n            \"kilometer\": null,\r\n            \"extraCost\": null,\r\n            \"extraCostDescription\": null,\r\n            \"invoiceType\": \"INVOICE\",\r\n            \"dayOrHour\": \"Day\",\r\n            \"invoiceNumber\": 123,\r\n            \"mergedInvoices\": [],\r\n            \"invoiceDate\": [\r\n                2025,\r\n                4,\r\n                8\r\n            ],\r\n            \"files\": null,\r\n            \"filePath\": [],\r\n            \"invoiceDescription\": null,\r\n            \"invoiceLines\": [\r\n                {\r\n                    \"id\": 9,\r\n                    \"aantal\": 1.0,\r\n                    \"omschrijving\": \"2025-03-05 / Project: null / Audio A\",\r\n                    \"price\": 350.0\r\n                }\r\n            ],\r\n            \"reviewedBySP\": null,\r\n            \"reviewedByClient\": null\r\n        }\r\n    ],\r\n    \"invoiceDate\": [\r\n        2025,\r\n        4,\r\n        8\r\n    ],\r\n    \"files\": null,\r\n    \"filePath\": null,\r\n    \"invoiceDescription\": null,\r\n    \"invoiceLines\": [\r\n        {\r\n            \"id\": 8,\r\n            \"aantal\": 1.0,\r\n            \"omschrijving\": \"2025-03-05 / Project: null / Audio A\",\r\n            \"price\": 350.0\r\n        },\r\n        {\r\n            \"id\": 9,\r\n            \"aantal\": 1.0,\r\n            \"omschrijving\": \"2025-03-05 / Project: null / Audio A\",\r\n            \"price\": 350.0\r\n        },\r\n        {\r\n            \"aantal\": 1.0,\r\n            \"omschrijving\": \"2025-03-05 / Project: null / Audio A\",\r\n            \"price\": 350.0\r\n        }\r\n    ],\r\n    \"reviewedBySP\": null,\r\n    \"reviewedByClient\": null\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:9091/api/job/list",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9091",
+					"path": [
+						"api",
+						"job",
+						"list"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "print pdf",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJuZXdNb2RlcmF0b3JUZXN0QGdtYWlsLmNvbSIsImV4cCI6MTc0NDA3MjgzNSwiaWF0IjoxNzQ0MDU0ODM1fQ.fUpgAlyUcqukW2vZz67GeTvznGGGhyFw9O0pXF0vcnWPTvsyPF0ev4CBw0brOvr3o3HvOB2thZOfmqK7Ea11yQ",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": 34,\r\n    \"serviceProvider\": null,\r\n    \"hoursWorked\": 0.0,\r\n    \"spRate\": null,\r\n    \"jobDate\": null,\r\n    \"kilometer\": null,\r\n    \"extraCost\": null,\r\n    \"extraCostDescription\": null,\r\n    \"invoiceType\": \"INVOICE\",\r\n    \"dayOrHour\": null,\r\n    \"invoiceNumber\": null,\r\n    \"mergedInvoices\": [\r\n        {\r\n            \"id\": 24,\r\n            \"serviceProvider\": null,\r\n            \"hoursWorked\": 0.0,\r\n            \"spRate\": null,\r\n            \"jobDate\": null,\r\n            \"kilometer\": null,\r\n            \"extraCost\": null,\r\n            \"extraCostDescription\": null,\r\n            \"invoiceType\": \"INVOICE\",\r\n            \"dayOrHour\": \"Day\",\r\n            \"invoiceNumber\": 123,\r\n            \"mergedInvoices\": [],\r\n            \"invoiceDate\": [\r\n                2025,\r\n                4,\r\n                8\r\n            ],\r\n            \"files\": null,\r\n            \"filePath\": [],\r\n            \"invoiceDescription\": null,\r\n            \"invoiceLines\": [\r\n                {\r\n                    \"id\": 8,\r\n                    \"aantal\": 1.0,\r\n                    \"omschrijving\": \"2025-03-05 / Project: null / Audio A\",\r\n                    \"price\": 350.0\r\n                }\r\n            ],\r\n            \"reviewedBySP\": null,\r\n            \"reviewedByClient\": null\r\n        },\r\n        {\r\n            \"id\": 31,\r\n            \"serviceProvider\": null,\r\n            \"hoursWorked\": 1.0,\r\n            \"spRate\": null,\r\n            \"jobDate\": null,\r\n            \"kilometer\": null,\r\n            \"extraCost\": null,\r\n            \"extraCostDescription\": null,\r\n            \"invoiceType\": \"INVOICE\",\r\n            \"dayOrHour\": \"Day\",\r\n            \"invoiceNumber\": 123,\r\n            \"mergedInvoices\": [],\r\n            \"invoiceDate\": [\r\n                2025,\r\n                4,\r\n                8\r\n            ],\r\n            \"files\": null,\r\n            \"filePath\": [],\r\n            \"invoiceDescription\": null,\r\n            \"invoiceLines\": [\r\n                {\r\n                    \"id\": 9,\r\n                    \"aantal\": 1.0,\r\n                    \"omschrijving\": \"2025-03-05 / Project: null / Audio A\",\r\n                    \"price\": 350.0\r\n                }\r\n            ],\r\n            \"reviewedBySP\": null,\r\n            \"reviewedByClient\": null\r\n        }\r\n    ],\r\n    \"invoiceDate\": [\r\n        2025,\r\n        4,\r\n        8\r\n    ],\r\n    \"files\": null,\r\n    \"filePath\": null,\r\n    \"invoiceDescription\": null,\r\n    \"invoiceLines\": [\r\n        {\r\n            \"id\": 8,\r\n            \"aantal\": 1.0,\r\n            \"omschrijving\": \"2025-03-05 / Project: null / Audio A\",\r\n            \"price\": 350.0\r\n        },\r\n        {\r\n            \"id\": 9,\r\n            \"aantal\": 1.0,\r\n            \"omschrijving\": \"2025-03-05 / Project: null / Audio A\",\r\n            \"price\": 350.0\r\n        },\r\n        {\r\n            \"aantal\": 1.0,\r\n            \"omschrijving\": \"2025-03-05 / Project: null / Audio A\",\r\n            \"price\": 350.0\r\n        }\r\n    ],\r\n    \"reviewedBySP\": null,\r\n    \"reviewedByClient\": null\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:9091/api/job/invoice/print-pdf/60",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9091",
+					"path": [
+						"api",
+						"job",
+						"invoice",
+						"print-pdf",
+						"60"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "review form sp",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJuZXdNb2RlcmF0b3JUZXN0QGdtYWlsLmNvbSIsImV4cCI6MTc0NDA3MjgzNSwiaWF0IjoxNzQ0MDU0ODM1fQ.fUpgAlyUcqukW2vZz67GeTvznGGGhyFw9O0pXF0vcnWPTvsyPF0ev4CBw0brOvr3o3HvOB2thZOfmqK7Ea11yQ",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "invoice",
+							"value": "{\"extra_cost_description\":\"123213\",\"extra_cost\":123,\"kilometer\":12,\"service_provider\":{\"id\":115}}",
+							"type": "text"
+						},
+						{
+							"key": "files",
+							"type": "file",
+							"src": [
+								"/D:/Work/prjcts/prjct2/IMG-20250205-WA0007.jpg",
+								"/D:/Work/prjcts/prjct2/IMG-20250424-WA0004.jpg"
+							]
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:9091/api/job/review-form/service-provider?token=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI5MSIsInJldmlld19mb3JtIjp0cnVlLCJleHAiOjE3NDYzNzc5MzgsImlhdCI6MTc0NTk0NTkzOH0.0CIq6K5lgDwCICM1ETM00A9akNwRumdU0yBopp-cOx1UauQs4kBUiJRJCn5wdvo5linXsn-uvzVPf8wOoB-lMQ",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9091",
+					"path": [
+						"api",
+						"job",
+						"review-form",
+						"service-provider"
+					],
+					"query": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI5MSIsInJldmlld19mb3JtIjp0cnVlLCJleHAiOjE3NDYzNzc5MzgsImlhdCI6MTc0NTk0NTkzOH0.0CIq6K5lgDwCICM1ETM00A9akNwRumdU0yBopp-cOx1UauQs4kBUiJRJCn5wdvo5linXsn-uvzVPf8wOoB-lMQ"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "review form sp filled",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJuZXdNb2RlcmF0b3JUZXN0QGdtYWlsLmNvbSIsImV4cCI6MTc0NDA3MjgzNSwiaWF0IjoxNzQ0MDU0ODM1fQ.fUpgAlyUcqukW2vZz67GeTvznGGGhyFw9O0pXF0vcnWPTvsyPF0ev4CBw0brOvr3o3HvOB2thZOfmqK7Ea11yQ",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": 34,\r\n    \"serviceProvider\": null,\r\n    \"hoursWorked\": 0.0,\r\n    \"spRate\": null,\r\n    \"jobDate\": null,\r\n    \"kilometer\": null,\r\n    \"extraCost\": null,\r\n    \"extraCostDescription\": null,\r\n    \"invoiceType\": \"INVOICE\",\r\n    \"dayOrHour\": null,\r\n    \"invoiceNumber\": null,\r\n    \"mergedInvoices\": [\r\n        {\r\n            \"id\": 24,\r\n            \"serviceProvider\": null,\r\n            \"hoursWorked\": 0.0,\r\n            \"spRate\": null,\r\n            \"jobDate\": null,\r\n            \"kilometer\": null,\r\n            \"extraCost\": null,\r\n            \"extraCostDescription\": null,\r\n            \"invoiceType\": \"INVOICE\",\r\n            \"dayOrHour\": \"Day\",\r\n            \"invoiceNumber\": 123,\r\n            \"mergedInvoices\": [],\r\n            \"invoiceDate\": [\r\n                2025,\r\n                4,\r\n                8\r\n            ],\r\n            \"files\": null,\r\n            \"filePath\": [],\r\n            \"invoiceDescription\": null,\r\n            \"invoiceLines\": [\r\n                {\r\n                    \"id\": 8,\r\n                    \"aantal\": 1.0,\r\n                    \"omschrijving\": \"2025-03-05 / Project: null / Audio A\",\r\n                    \"price\": 350.0\r\n                }\r\n            ],\r\n            \"reviewedBySP\": null,\r\n            \"reviewedByClient\": null\r\n        },\r\n        {\r\n            \"id\": 31,\r\n            \"serviceProvider\": null,\r\n            \"hoursWorked\": 1.0,\r\n            \"spRate\": null,\r\n            \"jobDate\": null,\r\n            \"kilometer\": null,\r\n            \"extraCost\": null,\r\n            \"extraCostDescription\": null,\r\n            \"invoiceType\": \"INVOICE\",\r\n            \"dayOrHour\": \"Day\",\r\n            \"invoiceNumber\": 123,\r\n            \"mergedInvoices\": [],\r\n            \"invoiceDate\": [\r\n                2025,\r\n                4,\r\n                8\r\n            ],\r\n            \"files\": null,\r\n            \"filePath\": [],\r\n            \"invoiceDescription\": null,\r\n            \"invoiceLines\": [\r\n                {\r\n                    \"id\": 9,\r\n                    \"aantal\": 1.0,\r\n                    \"omschrijving\": \"2025-03-05 / Project: null / Audio A\",\r\n                    \"price\": 350.0\r\n                }\r\n            ],\r\n            \"reviewedBySP\": null,\r\n            \"reviewedByClient\": null\r\n        }\r\n    ],\r\n    \"invoiceDate\": [\r\n        2025,\r\n        4,\r\n        8\r\n    ],\r\n    \"files\": null,\r\n    \"filePath\": null,\r\n    \"invoiceDescription\": null,\r\n    \"invoiceLines\": [\r\n        {\r\n            \"id\": 8,\r\n            \"aantal\": 1.0,\r\n            \"omschrijving\": \"2025-03-05 / Project: null / Audio A\",\r\n            \"price\": 350.0\r\n        },\r\n        {\r\n            \"id\": 9,\r\n            \"aantal\": 1.0,\r\n            \"omschrijving\": \"2025-03-05 / Project: null / Audio A\",\r\n            \"price\": 350.0\r\n        },\r\n        {\r\n            \"aantal\": 1.0,\r\n            \"omschrijving\": \"2025-03-05 / Project: null / Audio A\",\r\n            \"price\": 350.0\r\n        }\r\n    ],\r\n    \"reviewedBySP\": null,\r\n    \"reviewedByClient\": null\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:9091/api/job/review-form/service-provider-is-filled/115?token=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI5MSIsInJldmlld19mb3JtIjp0cnVlLCJleHAiOjE3NDYzNzc5MzgsImlhdCI6MTc0NTk0NTkzOH0.0CIq6K5lgDwCICM1ETM00A9akNwRumdU0yBopp-cOx1UauQs4kBUiJRJCn5wdvo5linXsn-uvzVPf8wOoB-lMQ",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9091",
+					"path": [
+						"api",
+						"job",
+						"review-form",
+						"service-provider-is-filled",
+						"115"
+					],
+					"query": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI5MSIsInJldmlld19mb3JtIjp0cnVlLCJleHAiOjE3NDYzNzc5MzgsImlhdCI6MTc0NTk0NTkzOH0.0CIq6K5lgDwCICM1ETM00A9akNwRumdU0yBopp-cOx1UauQs4kBUiJRJCn5wdvo5linXsn-uvzVPf8wOoB-lMQ"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "review form sp overriden",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJuZXdNb2RlcmF0b3JUZXN0QGdtYWlsLmNvbSIsImV4cCI6MTc0NDA3MjgzNSwiaWF0IjoxNzQ0MDU0ODM1fQ.fUpgAlyUcqukW2vZz67GeTvznGGGhyFw9O0pXF0vcnWPTvsyPF0ev4CBw0brOvr3o3HvOB2thZOfmqK7Ea11yQ",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": 34,\r\n    \"serviceProvider\": null,\r\n    \"hoursWorked\": 0.0,\r\n    \"spRate\": null,\r\n    \"jobDate\": null,\r\n    \"kilometer\": null,\r\n    \"extraCost\": null,\r\n    \"extraCostDescription\": null,\r\n    \"invoiceType\": \"INVOICE\",\r\n    \"dayOrHour\": null,\r\n    \"invoiceNumber\": null,\r\n    \"mergedInvoices\": [\r\n        {\r\n            \"id\": 24,\r\n            \"serviceProvider\": null,\r\n            \"hoursWorked\": 0.0,\r\n            \"spRate\": null,\r\n            \"jobDate\": null,\r\n            \"kilometer\": null,\r\n            \"extraCost\": null,\r\n            \"extraCostDescription\": null,\r\n            \"invoiceType\": \"INVOICE\",\r\n            \"dayOrHour\": \"Day\",\r\n            \"invoiceNumber\": 123,\r\n            \"mergedInvoices\": [],\r\n            \"invoiceDate\": [\r\n                2025,\r\n                4,\r\n                8\r\n            ],\r\n            \"files\": null,\r\n            \"filePath\": [],\r\n            \"invoiceDescription\": null,\r\n            \"invoiceLines\": [\r\n                {\r\n                    \"id\": 8,\r\n                    \"aantal\": 1.0,\r\n                    \"omschrijving\": \"2025-03-05 / Project: null / Audio A\",\r\n                    \"price\": 350.0\r\n                }\r\n            ],\r\n            \"reviewedBySP\": null,\r\n            \"reviewedByClient\": null\r\n        },\r\n        {\r\n            \"id\": 31,\r\n            \"serviceProvider\": null,\r\n            \"hoursWorked\": 1.0,\r\n            \"spRate\": null,\r\n            \"jobDate\": null,\r\n            \"kilometer\": null,\r\n            \"extraCost\": null,\r\n            \"extraCostDescription\": null,\r\n            \"invoiceType\": \"INVOICE\",\r\n            \"dayOrHour\": \"Day\",\r\n            \"invoiceNumber\": 123,\r\n            \"mergedInvoices\": [],\r\n            \"invoiceDate\": [\r\n                2025,\r\n                4,\r\n                8\r\n            ],\r\n            \"files\": null,\r\n            \"filePath\": [],\r\n            \"invoiceDescription\": null,\r\n            \"invoiceLines\": [\r\n                {\r\n                    \"id\": 9,\r\n                    \"aantal\": 1.0,\r\n                    \"omschrijving\": \"2025-03-05 / Project: null / Audio A\",\r\n                    \"price\": 350.0\r\n                }\r\n            ],\r\n            \"reviewedBySP\": null,\r\n            \"reviewedByClient\": null\r\n        }\r\n    ],\r\n    \"invoiceDate\": [\r\n        2025,\r\n        4,\r\n        8\r\n    ],\r\n    \"files\": null,\r\n    \"filePath\": null,\r\n    \"invoiceDescription\": null,\r\n    \"invoiceLines\": [\r\n        {\r\n            \"id\": 8,\r\n            \"aantal\": 1.0,\r\n            \"omschrijving\": \"2025-03-05 / Project: null / Audio A\",\r\n            \"price\": 350.0\r\n        },\r\n        {\r\n            \"id\": 9,\r\n            \"aantal\": 1.0,\r\n            \"omschrijving\": \"2025-03-05 / Project: null / Audio A\",\r\n            \"price\": 350.0\r\n        },\r\n        {\r\n            \"aantal\": 1.0,\r\n            \"omschrijving\": \"2025-03-05 / Project: null / Audio A\",\r\n            \"price\": 350.0\r\n        }\r\n    ],\r\n    \"reviewedBySP\": null,\r\n    \"reviewedByClient\": null\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:9091/api/job/review-form/service-provider-is-overridden/115?token=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI5MSIsInJldmlld19mb3JtIjp0cnVlLCJleHAiOjE3NDYzNzc5MzgsImlhdCI6MTc0NTk0NTkzOH0.0CIq6K5lgDwCICM1ETM00A9akNwRumdU0yBopp-cOx1UauQs4kBUiJRJCn5wdvo5linXsn-uvzVPf8wOoB-lMQ",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9091",
+					"path": [
+						"api",
+						"job",
+						"review-form",
+						"service-provider-is-overridden",
+						"115"
+					],
+					"query": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI5MSIsInJldmlld19mb3JtIjp0cnVlLCJleHAiOjE3NDYzNzc5MzgsImlhdCI6MTc0NTk0NTkzOH0.0CIq6K5lgDwCICM1ETM00A9akNwRumdU0yBopp-cOx1UauQs4kBUiJRJCn5wdvo5linXsn-uvzVPf8wOoB-lMQ"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get file",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJuZXdNb2RlcmF0b3JUZXN0QGdtYWlsLmNvbSIsImV4cCI6MTc0NDA3MjgzNSwiaWF0IjoxNzQ0MDU0ODM1fQ.fUpgAlyUcqukW2vZz67GeTvznGGGhyFw9O0pXF0vcnWPTvsyPF0ev4CBw0brOvr3o3HvOB2thZOfmqK7Ea11yQ",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": 34,\r\n    \"serviceProvider\": null,\r\n    \"hoursWorked\": 0.0,\r\n    \"spRate\": null,\r\n    \"jobDate\": null,\r\n    \"kilometer\": null,\r\n    \"extraCost\": null,\r\n    \"extraCostDescription\": null,\r\n    \"invoiceType\": \"INVOICE\",\r\n    \"dayOrHour\": null,\r\n    \"invoiceNumber\": null,\r\n    \"mergedInvoices\": [\r\n        {\r\n            \"id\": 24,\r\n            \"serviceProvider\": null,\r\n            \"hoursWorked\": 0.0,\r\n            \"spRate\": null,\r\n            \"jobDate\": null,\r\n            \"kilometer\": null,\r\n            \"extraCost\": null,\r\n            \"extraCostDescription\": null,\r\n            \"invoiceType\": \"INVOICE\",\r\n            \"dayOrHour\": \"Day\",\r\n            \"invoiceNumber\": 123,\r\n            \"mergedInvoices\": [],\r\n            \"invoiceDate\": [\r\n                2025,\r\n                4,\r\n                8\r\n            ],\r\n            \"files\": null,\r\n            \"filePath\": [],\r\n            \"invoiceDescription\": null,\r\n            \"invoiceLines\": [\r\n                {\r\n                    \"id\": 8,\r\n                    \"aantal\": 1.0,\r\n                    \"omschrijving\": \"2025-03-05 / Project: null / Audio A\",\r\n                    \"price\": 350.0\r\n                }\r\n            ],\r\n            \"reviewedBySP\": null,\r\n            \"reviewedByClient\": null\r\n        },\r\n        {\r\n            \"id\": 31,\r\n            \"serviceProvider\": null,\r\n            \"hoursWorked\": 1.0,\r\n            \"spRate\": null,\r\n            \"jobDate\": null,\r\n            \"kilometer\": null,\r\n            \"extraCost\": null,\r\n            \"extraCostDescription\": null,\r\n            \"invoiceType\": \"INVOICE\",\r\n            \"dayOrHour\": \"Day\",\r\n            \"invoiceNumber\": 123,\r\n            \"mergedInvoices\": [],\r\n            \"invoiceDate\": [\r\n                2025,\r\n                4,\r\n                8\r\n            ],\r\n            \"files\": null,\r\n            \"filePath\": [],\r\n            \"invoiceDescription\": null,\r\n            \"invoiceLines\": [\r\n                {\r\n                    \"id\": 9,\r\n                    \"aantal\": 1.0,\r\n                    \"omschrijving\": \"2025-03-05 / Project: null / Audio A\",\r\n                    \"price\": 350.0\r\n                }\r\n            ],\r\n            \"reviewedBySP\": null,\r\n            \"reviewedByClient\": null\r\n        }\r\n    ],\r\n    \"invoiceDate\": [\r\n        2025,\r\n        4,\r\n        8\r\n    ],\r\n    \"files\": null,\r\n    \"filePath\": null,\r\n    \"invoiceDescription\": null,\r\n    \"invoiceLines\": [\r\n        {\r\n            \"id\": 8,\r\n            \"aantal\": 1.0,\r\n            \"omschrijving\": \"2025-03-05 / Project: null / Audio A\",\r\n            \"price\": 350.0\r\n        },\r\n        {\r\n            \"id\": 9,\r\n            \"aantal\": 1.0,\r\n            \"omschrijving\": \"2025-03-05 / Project: null / Audio A\",\r\n            \"price\": 350.0\r\n        },\r\n        {\r\n            \"aantal\": 1.0,\r\n            \"omschrijving\": \"2025-03-05 / Project: null / Audio A\",\r\n            \"price\": 350.0\r\n        }\r\n    ],\r\n    \"reviewedBySP\": null,\r\n    \"reviewedByClient\": null\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:9091/api/job/file/81f7d5ca-92d8-48a8-92d7-4d46f107ee61_IMG-20250205-WA0007.jpg",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9091",
+					"path": [
+						"api",
+						"job",
+						"file",
+						"81f7d5ca-92d8-48a8-92d7-4d46f107ee61_IMG-20250205-WA0007.jpg"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "twilio check",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		}
+	]
+}
