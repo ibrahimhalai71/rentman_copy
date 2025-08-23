@@ -16,7 +16,7 @@ import com.rentmen.app.services.JobService;
 import com.rentmen.app.utils.InvoiceType;
 import com.rentmen.app.utils.JobStatus;
 import com.rentmen.app.utils.UtilFunctions;
-import net.bytebuddy.implementation.bytecode.ShiftLeft;
+import io.jsonwebtoken.Claims;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +34,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.time.LocalDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,9 +43,6 @@ import java.util.UUID;
 import javax.imageio.ImageIO;
 import javax.transaction.Transactional;
 import java.lang.reflect.Type;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -89,11 +86,25 @@ public class JobServiceImp implements JobService {
     @Value("${upload.dir}")
     private String uploadDir;
 
+    @Transactional
     @Override
     public JobDto createJob(JobDto jobDto) {
         Job job = setFeilds(jobDto);
         job = jobRepo.save(job);
-        return modelMapper.map(job, JobDto.class);
+        acceptingNewJobs(job);
+        return getJobById(job.getId());
+        //return modelMapper.map(updatedJb, JobDto.class);
+    }
+
+    @Transactional
+    public void acceptingNewJobs(Job job) {
+        List<Long> jobIds = Collections.singletonList(job.getId());
+        List<Long> serviceProviderIds = job.getPotentialJobOffers()
+                .stream()
+                .map(PotentialJobOffer::getServiceProvider)
+                .map(ServiceProvider::getId)
+                .collect(Collectors.toList());
+        acceptNewJobOffers(jobIds, serviceProviderIds);
     }
 
     @Override
@@ -199,6 +210,16 @@ public class JobServiceImp implements JobService {
         return pjoRepo.acceptJobOffers(jobIds, serviceProviderId);
     }
 
+    @Transactional
+    public void acceptNewJobOffers(List<Long> jobIds, List<Long> serviceProviderIds) {
+        for (Long jobId : jobIds) {
+            for (Long serviceProviderId : serviceProviderIds) {
+                jobRepo.addToServiceProvidersList(jobId, serviceProviderId);
+            }
+        }
+        pjoRepo.acceptNewJobOffers(jobIds, serviceProviderIds);
+    }
+
     @Override
     public int rejectJobOffers(List<Long> jobIds, Long serviceProviderId) {
         return pjoRepo.rejectJobOffers(jobIds, serviceProviderId);
@@ -257,24 +278,6 @@ public class JobServiceImp implements JobService {
                     return new PotentialJobOffer(job, sp);
                 }).collect(Collectors.toList());
             } else {
-//				List<PotentialJobOfferId> pjoIds = jobDto.getPotentialJobOffers().stream()
-//						.filter(pjo -> jobDto.getId() != null)
-//						.map(pjo -> new PotentialJobOfferId(jobDto.getId(), pjo.getServiceProviderId()))
-//						.collect(Collectors.toList());
-//				pjos = pjoRepo.findAllById(pjoIds);
-
-//				HashMap<Long,PotentialJobOffer> mapSpToPjos = new HashMap<Long,PotentialJobOffer>();
-//				for(PotentialJobOffer pjo : pjos) {
-//					mapSpToPjos.put(pjo.getServiceProvider().getId(), pjo);
-//				}
-//				for(PotentialJobOfferDto pjoDto : jobDto.getPotentialJobOffers()) {
-//					if(!mapSpToPjos.containsKey(pjoDto.getServiceProviderId())) {
-//						ServiceProvider sp = serviceProviderRepo.findById(pjoDto.getServiceProviderId()).orElseThrow(
-//								() -> new ResourceNotFoundException("ServiceProvider", "id", pjoDto.getServiceProviderId()));
-//						PotentialJobOffer pjo = new PotentialJobOffer(job, sp);
-//						pjos.add(pjo);
-//					}
-//				}
 
                 for (PotentialJobOfferDto pjoDto : jobDto.getPotentialJobOffers()) {
                     PotentialJobOfferId pjoId = new PotentialJobOfferId(jobDto.getId(), pjoDto.getServiceProviderId());
@@ -292,7 +295,7 @@ public class JobServiceImp implements JobService {
             }
             job.setPotentialJobOffers(pjos);
         }
-
+        job.setModeratorApproval(1);
         return job;
     }
 
@@ -484,6 +487,20 @@ public class JobServiceImp implements JobService {
         }
     }
 
+    @Override
+    public InvoiceDto updateInvoiceTimesheet(InvoiceDto invoiceDto) {
+        Invoice invoice = invoiceRepo.findById((long) invoiceDto.getId()).get();
+        invoice.setAttention(invoiceDto.getAttention());
+        invoice.setStatus(invoiceDto.getStatus());
+        invoice.setWorkedtime(invoiceDto.getWorkedtime());
+        invoice.setOvertime(invoiceDto.getOvertime());
+        invoice.setKilometer(invoiceDto.getKilometer());
+        invoice.setTraveltime(invoiceDto.getTraveltime());
+        invoice.setExtraCostDescription(invoiceDto.getExtraCostDescription());
+        Invoice updatedInvoice = invoiceRepo.save(invoice);
+        return modelMapper.map(updatedInvoice, InvoiceDto.class);
+    }
+
     public Invoice updateClientInvoice(Long invoiceId, Invoice invoice) {
         invoice.getInvoiceLines().removeIf(Objects::isNull);
         Invoice invoice1 = invoiceRepo.findById(invoiceId).get();
@@ -629,6 +646,7 @@ public class JobServiceImp implements JobService {
         PdfWriter.getInstance(document, outputStream);
         document.open();
 
+        Font reallyBigBoldFont = new Font(Font.FontFamily.HELVETICA, 17, Font.BOLD);
         Font bigBoldFont = new Font(Font.FontFamily.HELVETICA, 15, Font.BOLD);
         Font boldFont = new Font(Font.FontFamily.HELVETICA, 10, Font.BOLD);
         Font regularFont = new Font(Font.FontFamily.HELVETICA, 10);
@@ -650,55 +668,73 @@ public class JobServiceImp implements JobService {
         }
         headerTable.addCell(logoCell);
 
-        PdfPCell addressCell = getRightCell("Eventico B.V.\nT.a.v\nGroenestraat 10\n5345 KM OSS", regularFont);
+//        PdfPCell addressCell = getRightCell("Eventico B.V.\nRomeinenweg 110-E\n5349AL Oss", regularFont);
+//        headerTable.addCell(addressCell);
+
+        PdfPCell addressCell = getRightCell("\n \nINKOOPOPDRACHT", reallyBigBoldFont);
         headerTable.addCell(addressCell);
 
         document.add(headerTable);
         document.add(Chunk.NEWLINE);
 
         // Title
-        Paragraph title = new Paragraph("INKOOPOPDRACHT", bigBoldFont);
-        title.setSpacingBefore(26);
-        title.setAlignment(1);
-        document.add(title);
+//        Paragraph title = new Paragraph("INKOOPOPDRACHT", bigBoldFont);
+//        title.setSpacingBefore(26);
+//        title.setAlignment(1);
+//        document.add(title);
+//        document.add(Chunk.NEWLINE);
+
+        Paragraph add1 = new Paragraph("         Eventico B.V.", boldFont);
+        add1.setSpacingBefore(20);
+        Paragraph add2 = new Paragraph("   Romeinenweg 110-E", boldFont);
+        Paragraph add3 = new Paragraph("          5349AL Oss", boldFont);
+
+//        title.setSpacingBefore(26);
+//        title.setAlignment(1);
+        document.add(add1);
+        document.add(add2);
+        document.add(add3);
         document.add(Chunk.NEWLINE);
 
         // Metadata table
         PdfPTable infoTable = new PdfPTable(2);
         infoTable.setWidthPercentage(40);
-        infoTable.setSpacingAfter(10);
-
+        infoTable.setSpacingAfter(8);
+        infoTable.setHorizontalAlignment(Element.ALIGN_RIGHT);
         infoTable.addCell(getLeftCell("Crediteurnummer", boldFont));
         infoTable.addCell(getLeftCell("0", regularFont));
         infoTable.addCell(getLeftCell("Inkoopopdracht", boldFont));
         infoTable.addCell(getLeftCell("0", regularFont));
         infoTable.addCell(getLeftCell("Datum", boldFont));
-        infoTable.addCell(getLeftCell(invoice.getInvoiceDate()+"", regularFont));
+        infoTable.addCell(getLeftCell(invoice.getInvoiceDate() + "", regularFont));
         infoTable.addCell(getLeftCell("Weeknummer", boldFont));
         infoTable.addCell(getLeftCell("Inkooporder week 2025-05\nWeek 20", regularFont));
 
         document.add(infoTable);
 
         // Items table
-        PdfPTable items = new PdfPTable(7);
+        PdfPTable items = new PdfPTable(6);
         items.setWidthPercentage(100);
-        items.setWidths(new float[]{2, 1.2f, 1.2f, 2.2f, 2.5f, 1.5f, 1.8f});
+//        items.setWidths(new float[]{2, 1.2f, 1.2f, 2.2f, 2.5f, 1.5f, 1.8f});
+        items.setWidths(new float[]{2, 1.2f, 1.2f, 2.5f, 1.5f, 1.8f});
 
         items.addCell(getHeaderCell("Leverdatum"));
         items.addCell(getHeaderCell("Aantal"));
         items.addCell(getHeaderCell("Tarief"));
-        items.addCell(getHeaderCell("Artikel Omschr."));
+//        items.addCell(getHeaderCell("Artikel Omschr."));
         items.addCell(getHeaderCell("Omschrijving"));
         items.addCell(getHeaderCell("Projectnr."));
         items.addCell(getHeaderCell("Totaal ex BTW"));
 
-        items.addCell(getBodyCell(""+invoice.getInvoiceDate()));
-        items.addCell(getBodyCell(""+invoice.getHoursWorked()));
-        items.addCell(getBodyCell(""+invoice.getSpRate()));
-        items.addCell(getBodyCell(""+invoice.getJob().getRequiredSkills().stream().findFirst().map(Skill::getName).orElse("")));
-        items.addCell(getBodyCell(""+invoice.getServiceProvider().getFirstName()+" "+invoice.getServiceProvider().getLastName()));
-        items.addCell(getBodyCell("INF"+invoice.getJob().getId()));
-        items.addCell(getBodyCell("€ "+(invoice.getHoursWorked() * invoice.getSpRate())));
+        items.addCell(getBodyCell("" + invoice.getInvoiceDate()));
+        items.addCell(getBodyCell("" + invoice.getHoursWorked()));
+        String formattedRate = "€" + String.valueOf(invoice.getSpRate()).replace('.', ',');
+        items.addCell(getBodyCell(formattedRate));
+//        items.addCell(getBodyCell(""+invoice.getJob().getRequiredSkills().stream().findFirst().map(Skill::getName).orElse("")));
+        items.addCell(getBodyCell("" + invoice.getServiceProvider().getFirstName() + " " + invoice.getServiceProvider().getLastName()));
+        items.addCell(getBodyCell("INF" + invoice.getJob().getId()));
+        double total = invoice.getHoursWorked() * invoice.getSpRate();
+        items.addCell(getBodyCell("€ " + String.format("%.2f", total).replace('.', ',')));
 
         document.add(items);
 
@@ -708,17 +744,19 @@ public class JobServiceImp implements JobService {
         totals.setWidthPercentage(30);
         totals.setHorizontalAlignment(Element.ALIGN_RIGHT);
         totals.setWidths(new float[]{2, 1});
-        if(invoice.getExtraCost() == null){
+        if (invoice.getExtraCost() == null) {
             invoice.setExtraCost(0.00);
         }
         totals.addCell(getLeftCell("Valuta", regularFont));
         totals.addCell(getRightCell("Euro", regularFont));
         totals.addCell(getLeftCell("Subtotaal", regularFont));
-        totals.addCell(getRightCell("€ "+((invoice.getHoursWorked() * invoice.getSpRate()) + invoice.getExtraCost()), regularFont));
-        totals.addCell(getLeftCell("BTW bedrag", regularFont));
-        totals.addCell(getRightCell("€ 0.00", regularFont));
+        double employeeTotal = ((invoice.getHoursWorked() * invoice.getSpRate()) + invoice.getExtraCost());
+        double btwAmount = employeeTotal * 0.21;
+        totals.addCell(getRightCell("€ " + String.format("%.2f", employeeTotal).replace('.', ','), regularFont));
+        totals.addCell(getLeftCell("21% BTW bedrag", regularFont));
+        totals.addCell(getRightCell("€ " + String.format("%.2f", btwAmount).replace('.', ','), regularFont));
         totals.addCell(getLeftCell("Factuurbedrag", boldFont));
-        totals.addCell(getRightCell("€ "+((invoice.getHoursWorked() * invoice.getSpRate()) + invoice.getExtraCost()), boldFont));
+        totals.addCell(getRightCell("€ " + String.format("%.2f", (btwAmount + employeeTotal)).replace('.', ','), regularFont));
 
         document.add(totals);
 
@@ -728,12 +766,10 @@ public class JobServiceImp implements JobService {
         footer.add(new Chunk("Facturering\n", boldFont));
         footer.add(new Chunk(
                 "De factuur dient uitsluitend te worden aangeleverd in PDF-formaat en mag alleen op deze inkoopopdracht betrekking hebben. " +
-                        "Facturen moeten worden gestuurd naar inkoop@atrinfra.nl met vermelding van het inkoopopdrachtnummer. Zonder dit nummer kan de factuur niet in behandeling worden genomen.\n\n",
+                        "Facturen moeten worden gestuurd naar ap-nl@eventico.nl met vermelding van het inkoopopdrachtnummer. Zonder dit nummer kan de factuur niet in behandeling worden genomen.\n\n",
                 regularFont));
 //        footer.add(new Chunk("ATR Infra-Services | KVK: 82017455 | BTW: NL862354562B01 | IBAN: NL94 ABNA 0838 8774 76 | BIC: ABNANL2A", regularFont));
         footer.add(new Chunk("ATR Infra-Services | KVK: 0 | BTW: 0 | IBAN: 0 | BIC: 0", regularFont));
-
-
 
 
         document.add(footer);
@@ -1008,7 +1044,7 @@ public class JobServiceImp implements JobService {
                     .filter(inv -> inv.getInvoiceType().equals(InvoiceType.PURCHASE) && inv.getServiceProvider().getId() == serviceProviderId)
                     .findFirst();
             if (spInvoice.isPresent()) {
-                if(!isSpReview) {
+                if (!isSpReview) {
                     return spInvoice.get();
                 }
             }
@@ -1024,29 +1060,31 @@ public class JobServiceImp implements JobService {
                 String strSPReviewMap = UtilFunctions.convertWithStream(spReviewMap);
                 this.jobRepo.setReviewedByServiceProviderTrue(strSPReviewMap, jobId);
                 List<String> savedPaths = new ArrayList<>();
-                for (MultipartFile file : invoiceDto.getFiles()) {
+                if (invoiceDto.getFiles() != null) {
+                    for (MultipartFile file : invoiceDto.getFiles()) {
 
-                    if (!file.isEmpty()) {
-                        String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();
-                        Path filePath = Paths.get(uploadDir, filename);
+                        if (!file.isEmpty()) {
+                            String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();
+                            Path filePath = Paths.get(uploadDir, filename);
 
-                        try {
-                            Files.createDirectories(filePath.getParent());
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
+                            try {
+                                Files.createDirectories(filePath.getParent());
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+
+                            try {
+                                Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+
+                            // Save relative path
+                            savedPaths.add(filename);
                         }
-
-                        try {
-                            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-
-                        // Save relative path
-                        savedPaths.add(filename);
                     }
+                    invoice.setFilePath(savedPaths);
                 }
-                invoice.setFilePath(savedPaths);
             } else {
                 spReviewMap.put(serviceProviderId, false);
                 String strSPReviewMap = UtilFunctions.convertWithStream(spReviewMap);
@@ -1058,16 +1096,26 @@ public class JobServiceImp implements JobService {
             invoice.setServiceProvider(sp);
             invoice.setInvoiceType(InvoiceType.PURCHASE);
             invoice.setJobDate(job.getEndDate());
+            invoice.setCreatedDateTime(LocalDateTime.now());
             double hoursWorked = ChronoUnit.MINUTES.between(job.getStartTime(), job.getEndTime()) / 60.0;
             if (job.getClient().getRateType().equals(RateType.HOURLY)) {
                 invoice.setHoursWorked(hoursWorked);
             } else {
                 invoice.setHoursWorked(1);
             }
+
+            LocalTime startTime = invoice.getStartTime();
+            LocalTime endTime = invoice.getEndTime();
+
+            Duration duration = Duration.between(startTime, endTime);
+            double workedTime = duration.toMinutes() / 60.0;
+            workedTime = Math.round(workedTime * 100.0) / 100.0;
+            invoice.setWorkedtime(workedTime);
+
             invoice.setInvoiceDate(LocalDate.now());
             invoice.setDayOrHour(job.getClient().getRateType().equals(RateType.HOURLY) ? "Hour" : "Day");
             invoice.setSpRate(UtilFunctions.studentsRateBasedOnEventTypeAndJobTime(job, sp));
-            if(isSpReview && spInvoice.isPresent()){
+            if (isSpReview && spInvoice.isPresent()) {
                 invoice.setId(spInvoice.get().getId());
             }
             return this.invoiceRepo.save(invoice);
@@ -1079,11 +1127,12 @@ public class JobServiceImp implements JobService {
 
     @Override
     public void postReviewFormServiceProvider(String token, InvoiceDto invoiceDto) throws Exception {
+        String serviceProviderId = this.jwtTokenHelper.getSpIdFromToken(token);
 
-        Long serviceProviderId = invoiceDto.getServiceProvider().getId();
-        if (!isReviewedServiceProviderReviewForm(token, serviceProviderId)) {
+        //Long serviceProviderId = invoiceDto.getServiceProvider().getId();
+        if (!isReviewedServiceProviderReviewForm(token, Long.parseLong(serviceProviderId))) {
             Long jobId = jwtTokenHelper.getJobIdFromToken(token);
-            createPurchaseOrder(jobId, serviceProviderId, invoiceDto, true);
+            createPurchaseOrder(jobId, Long.parseLong(serviceProviderId), invoiceDto, true);
         } else {
             throw new Exception("Error: review form already filled");
         }

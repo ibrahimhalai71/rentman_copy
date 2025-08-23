@@ -17,15 +17,20 @@ import java.util.function.Function;
 
 @Component
 public class JwtTokenHelper {
-	 @Autowired
-	    private UserRepo userRepo;
-	 @Autowired
-	 private JobRepo jobRepo;
+    @Autowired
+    private UserRepo userRepo;
+    @Autowired
+    private JobRepo jobRepo;
     public static final long JWT_TOKEN_VALIDITY = 18000L;
     private String secret = "jwtTokenKey";
 
     public String getUsernameFromToken(String token) {
         return getClaimFromToken(token, Claims::getSubject);
+    }
+
+
+    public String getSpIdFromToken(String token) {
+        return getClaimFromToken(token, claims -> claims.get("spId", String.class));
     }
 
     public Date getExpirationDateFromToken(String token) {
@@ -40,9 +45,10 @@ public class JwtTokenHelper {
     private Claims getAllClaimsFromToken(String token) {
         return (Claims) Jwts.parser().setSigningKey(this.secret).parseClaimsJws(token).getBody();
     }
+
     private Boolean isReviewFormToken(String token) {
-    	Claims claims = getAllClaimsFromToken(token);
-    	return (Boolean) claims.get("review_form");
+        Claims claims = getAllClaimsFromToken(token);
+        return (Boolean) claims.get("review_form");
     }
 
     private Boolean isTokenExpired(String token) {
@@ -67,25 +73,28 @@ public class JwtTokenHelper {
         //&& !isTokenExpired(token).booleanValue()
         return Boolean.valueOf((username.equals(getEmailFromUserDetails(userDetails))));
     }
-    
+
     private String getEmailFromUserDetails(UserDetails userDetails) {
-    	return this.userRepo.findByFirstName(userDetails.getUsername()).orElseThrow(() -> new ResourceNotFoundException("User", "name", userDetails.getUsername())).getEmail();
-    }
-    
-    public Long getJobIdFromToken(String token) {
-    	return Long.parseLong(getUsernameFromToken(token));
+        return this.userRepo.findByFirstName(userDetails.getUsername()).orElseThrow(() -> new ResourceNotFoundException("User", "name", userDetails.getUsername())).getEmail();
     }
 
-	public String generateTokenForReviewForm(String jobId) {
-		Map<String, Object> claims = new HashMap<>();
-		long currentTimeMillis = System.currentTimeMillis();
-		long expirationTimeMillis = currentTimeMillis + 5L * 24 * 60 * 60 * 1000;
-		claims.put("review_form", true);
-		return doGenerateToken(claims, jobId, expirationTimeMillis);
-	}
-    
-	public Boolean validateTokenForReviewForm(String token) {
-		return Boolean.valueOf(this.jobRepo.existsById(getJobIdFromToken(token))
-				&& !isTokenExpired(token).booleanValue() && isReviewFormToken(token).booleanValue());
-	}
+    public Long getJobIdFromToken(String token) {
+        return Long.parseLong(getUsernameFromToken(token));
+    }
+
+    public String generateTokenForReviewForm(String jobId, String spId) {
+        Map<String, Object> claims = new HashMap<>();
+        long currentTimeMillis = System.currentTimeMillis();
+        long expirationTimeMillis = currentTimeMillis + 5L * 24 * 60 * 60 * 1000;
+        claims.put("review_form", true);
+        if (spId != null) {
+            claims.put("spId", spId);
+        }
+        return doGenerateToken(claims, jobId, expirationTimeMillis);
+    }
+
+    public Boolean validateTokenForReviewForm(String token) {
+        return Boolean.valueOf(this.jobRepo.existsById(getJobIdFromToken(token))
+                && !isTokenExpired(token).booleanValue() && isReviewFormToken(token).booleanValue());
+    }
 }

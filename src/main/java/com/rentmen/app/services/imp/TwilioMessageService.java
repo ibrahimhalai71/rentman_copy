@@ -22,8 +22,8 @@ public class TwilioMessageService {
 
 		Twilio.init(accountSid, authToken);
 
-//		Message.creator(new PhoneNumber(To),
-//				new PhoneNumber(fromPhoneNumber), message).create();
+		Message.creator(new PhoneNumber(To),
+				new PhoneNumber(fromPhoneNumber), message).create();
 
 		return "Message sent successfully";
 	}

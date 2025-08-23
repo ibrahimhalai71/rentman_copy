@@ -49,6 +49,8 @@ public interface JobService {
 
  Invoice updateInvoice(Long invoiceId,Invoice invoice);
 
+ InvoiceDto updateInvoiceTimesheet(InvoiceDto invoice);
+
  Boolean deleteInvoice(Long invoiceId);
 
  List<Invoice> getAllInvoices();

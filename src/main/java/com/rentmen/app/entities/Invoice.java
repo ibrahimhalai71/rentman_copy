@@ -3,6 +3,8 @@ package com.rentmen.app.entities;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.rentmen.app.utils.InvoiceStatus;
 import com.rentmen.app.utils.InvoiceType;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
@@ -10,6 +12,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -47,6 +51,12 @@ public class Invoice {
     private Double extraCost;
     @Column(name = "extra_cost_description")
     private String extraCostDescription;
+    @Column(name = "break_minutes")
+    private Double breakMinutes;
+    @Column(name = "end_time")
+    private LocalTime endTime;
+    @Column(name = "start_time")
+    private LocalTime startTime;
     @Enumerated(EnumType.STRING)
     @Column(name = "invoice_type")
     private InvoiceType invoiceType;
@@ -84,6 +94,25 @@ public class Invoice {
 
     @Column(name = "invoice_description")
     private String invoiceDescription;
+
+    @Column(name = "created_date_time")
+    private LocalDateTime createdDateTime;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "invoice_status")
+    private InvoiceStatus status;
+
+    @Column(name = "over_time")
+    private Double overtime;
+
+    @Column(name = "travel_time")
+    private Double traveltime;
+
+    @Column(name = "total_time_worked")
+    private Double workedtime;
+
+    @Column(name = "aandacht")
+    private Boolean attention;
 
     @OneToMany(
             cascade = {CascadeType.ALL},
@@ -251,6 +280,78 @@ public class Invoice {
 
     public void setExtraCost(Double extraCost) {
         this.extraCost = extraCost;
+    }
+
+    public Double getOvertime() {
+        return overtime;
+    }
+
+    public void setOvertime(Double overtime) {
+        this.overtime = overtime;
+    }
+
+    public Double getTraveltime() {
+        return traveltime;
+    }
+
+    public void setTraveltime(Double traveltime) {
+        this.traveltime = traveltime;
+    }
+
+    public Double getWorkedtime() {
+        return workedtime;
+    }
+
+    public void setWorkedtime(Double workedtime) {
+        this.workedtime = workedtime;
+    }
+
+    public LocalDateTime getCreatedDateTime() {
+        return createdDateTime;
+    }
+
+    public void setCreatedDateTime(LocalDateTime createdDateTime) {
+        this.createdDateTime = createdDateTime;
+    }
+
+    public InvoiceStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(InvoiceStatus status) {
+        this.status = status;
+    }
+
+    public Boolean getAttention() {
+        return attention;
+    }
+
+    public void setAttention(Boolean attention) {
+        this.attention = attention;
+    }
+
+    public Double getBreakMinutes() {
+        return breakMinutes;
+    }
+
+    public void setBreakMinutes(Double breakMinutes) {
+        this.breakMinutes = breakMinutes;
+    }
+
+    public LocalTime getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(LocalTime endTime) {
+        this.endTime = endTime;
+    }
+
+    public LocalTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalTime startTime) {
+        this.startTime = startTime;
     }
 
     public String getExtraCostDescription() {

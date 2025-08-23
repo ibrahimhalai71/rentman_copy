@@ -26,6 +26,11 @@ public interface PotentialJobOfferRepo extends JpaRepository<PotentialJobOffer, 
 
 	@Transactional
 	@Modifying
+	@Query(value = "UPDATE PotentialJobOffer pjo set pjo.accepted = 1 WHERE pjo.job.id IN :jobIds and pjo.serviceProvider.id IN :serviceProviderIds")
+	int acceptNewJobOffers(@Param("jobIds") Collection<Long> jobIds,@Param("serviceProviderIds") Collection<Long> serviceProviderIds);
+
+	@Transactional
+	@Modifying
 	@Query(value = "UPDATE PotentialJobOffer pjo set pjo.accepted = -1 WHERE pjo.job.id IN :jobIds and pjo.serviceProvider.id = :serviceProviderId")
 	int rejectJobOffers(@Param("jobIds") Collection<Long> jobIds,@Param("serviceProviderId") Long serviceProviderId);
 	

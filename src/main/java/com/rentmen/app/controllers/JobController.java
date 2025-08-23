@@ -2,6 +2,7 @@
 package com.rentmen.app.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.rentmen.app.DTO.*;
 import com.rentmen.app.configurations.JwtTokenHelper;
 import com.rentmen.app.entities.Invoice;
@@ -48,6 +49,27 @@ public class JobController {
     @PostMapping({"/createJob"})
     public ResponseEntity<?> createJob(@RequestBody JobDto job) {
         JobDto createdJob = this.jobService.createJob(job);
+
+        createdJob.getPotentialJobOffers().forEach((sp) -> {
+            UserDto spData = this.userService.getServiceProvider(sp.getServiceProviderId());
+
+            Exception e;
+            try {
+                //this.twilioMessageService.sendSMS(spData.getContact(), "Beste gebruiker, \nU heeft een werkverzoek ontvangen. \nTitel: " + createdJob.getTitle() + " \nDatum/Tijd: " + createdJob.getStartDate() + " " + createdJob.getStartTime() + ", \nLog alstublieft in om te accepteren.");
+            } catch (Exception var6) {
+                e = var6;
+                e.printStackTrace();
+            }
+
+            try {
+                //this.emailSendingService.sendEmail("info@eventico.nl", "Job Request " + createdJob.getTitle(), spData.getEmail(), createdJob.getId(), sp.getServiceProviderId(), createdJob);
+            } catch (Exception var5) {
+                e = var5;
+                e.printStackTrace();
+            }
+
+        });
+
         return new ResponseEntity(createdJob, HttpStatus.CREATED);
     }
 
@@ -72,14 +94,14 @@ public class JobController {
 
             Exception e;
             try {
-                this.twilioMessageService.sendSMS(spData.getContact(), "Beste gebruiker, \nU heeft een werkverzoek ontvangen. \nTitel: " + updatedJob.getTitle() + " \nDatum/Tijd: " + updatedJob.getStartDate() + " " + updatedJob.getStartTime() + ", \nLog alstublieft in om te accepteren.");
+                //this.twilioMessageService.sendSMS(spData.getContact(), "Beste gebruiker, \nU heeft een werkverzoek ontvangen. \nTitel: " + updatedJob.getTitle() + " \nDatum/Tijd: " + updatedJob.getStartDate() + " " + updatedJob.getStartTime() + ", \nLog alstublieft in om te accepteren.");
             } catch (Exception var6) {
                 e = var6;
                 e.printStackTrace();
             }
 
             try {
-                this.emailSendingService.sendEmail("info@eventico.nl", "Job Request" + updatedJob.getTitle(), spData.getEmail(), updatedJob.getId(), sp.getServiceProviderId(), updatedJob);
+                //this.emailSendingService.sendEmail("info@eventico.nl", "Job Request " + updatedJob.getTitle(), spData.getEmail(), updatedJob.getId(), sp.getServiceProviderId(), updatedJob);
             } catch (Exception var5) {
                 e = var5;
                 e.printStackTrace();
@@ -176,7 +198,7 @@ public class JobController {
 
     @GetMapping({"/review-form/getToken/{jobId}"})
     public ResponseEntity<?> getReviewToken(@PathVariable("jobId") String jobId) {
-        return ResponseEntity.ok(this.jwtTokenHelper.generateTokenForReviewForm(jobId));
+        return ResponseEntity.ok(this.jwtTokenHelper.generateTokenForReviewForm(jobId, null));
     }
 
     @GetMapping({"/review-form/service-provider-is-filled/{spId}"})
@@ -200,9 +222,10 @@ public class JobController {
     public ResponseEntity<?> postReviewFormServiceProvider(
             @RequestParam("token") String token,
             @RequestPart("invoice") String invoiceJson,
-            @RequestPart("files") List<MultipartFile> files) throws Exception {
+            @RequestPart(value = "files", required = false) List<MultipartFile> files) throws Exception {
 
         ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
         InvoiceDto invoice = objectMapper.readValue(invoiceJson, InvoiceDto.class);
 
         invoice.setFiles(files);
@@ -248,6 +271,12 @@ public class JobController {
     @PutMapping({"/update-invoice/{invoiceId}"})
     public ResponseEntity<?> updateInvoice(@PathVariable("invoiceId") Long invoiceId, @RequestBody Invoice invoice) throws Exception {
         Invoice updatedInvoice = this.jobService.updateInvoice(invoiceId, invoice);
+        return ResponseEntity.ok(updatedInvoice);
+    }
+
+    @PutMapping({"/update-invoice-timesheet/"})
+    public ResponseEntity<?> updateInvoiceTimesheet(@RequestBody InvoiceDto invoiceDto) throws Exception {
+        InvoiceDto updatedInvoice = this.jobService.updateInvoiceTimesheet(invoiceDto);
         return ResponseEntity.ok(updatedInvoice);
     }
 
