@@ -1,5 +1,9 @@
 package com.rentmen.app.services.imp;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
 
@@ -7,6 +11,7 @@ import java.io.ByteArrayOutputStream;
 
 import com.rentmen.app.Constants.Constants;
 import com.rentmen.app.DTO.*;
+import com.rentmen.app.client.FormClient;
 import com.rentmen.app.configurations.JwtTokenHelper;
 import com.rentmen.app.entities.*;
 import com.rentmen.app.entities.User.RateType;
@@ -23,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -86,12 +92,25 @@ public class JobServiceImp implements JobService {
     @Value("${upload.dir}")
     private String uploadDir;
 
+    @Autowired
+    private KafkaTemplate<String, Object> kafkaTemplate;
+
+    @Autowired
+    private FormClient formClient;
+
+    @Autowired
+    TwilioMessageService twilioMessageService;
+
+    @Autowired
+    PunchesDetailsRepo punchesDetailsRepo;
+
     @Transactional
     @Override
     public JobDto createJob(JobDto jobDto) {
         Job job = setFeilds(jobDto);
         job = jobRepo.save(job);
         acceptingNewJobs(job);
+        twilioMessageService.sendJobIdSMS(job.getId());
         return getJobById(job.getId());
         //return modelMapper.map(updatedJb, JobDto.class);
     }
@@ -108,11 +127,19 @@ public class JobServiceImp implements JobService {
     }
 
     @Override
+    @Transactional
     public JobDto updateJob(JobDto jobDto) {
-//		Job oldJob= jobRepo.findById(jobDto.getId()).orElseThrow(() -> new ResourceNotFoundException("Job", "id", jobDto.getId()));
+        Job oldJob = jobRepo.findById(jobDto.getId()).orElseThrow(() -> new ResourceNotFoundException("Job", "id", jobDto.getId()));
+        if (oldJob.getReviewedByClient() != null) {
+            jobDto.setReviewedByClient(oldJob.getReviewedByClient());
+        }
+        if (oldJob.getReviewedByServiceProvider() != null) {
+            jobDto.setReviewedByServiceProvider(oldJob.getReviewedByServiceProvider());
+        }
         Job updatedJob = setFeilds(jobDto);
 //		updatedJob.setId(oldJob.getId());
         updatedJob = jobRepo.save(updatedJob);
+        acceptingNewJobs(updatedJob);
         return modelMapper.map(updatedJob, JobDto.class);
     }
 
@@ -129,6 +156,30 @@ public class JobServiceImp implements JobService {
         }.getType();
         return modelMapper.map(jobList, listType);
     }
+
+//    @Override
+//    public List<JobDto> getAllJobs() {
+//        List<Job> jobList = jobRepo.findAll();
+//
+//        jobList.forEach(job -> {
+//            try {
+//                if (job.getReviewedByServiceProvider() != null) {
+//                    System.out.println("Job ID: " + job.getId() +
+//                            ", ReviewedByServiceProvider: '" +
+//                            job.getReviewedByServiceProvider() + "'");
+//
+//                }
+//            } catch (Exception e) {
+//                System.out.println("Found problematic job with ID: " + job.getId() +
+//                        ", ReviewedByServiceProvider value: '" +
+//                        job.getReviewedByServiceProvider() + "'");
+//                throw e;
+//            }
+//        });
+//
+//        Type listType = new TypeToken<List<JobDto>>() {}.getType();
+//        return modelMapper.map(jobList, listType);
+//    }
 
     @Override
     @Transactional
@@ -214,7 +265,9 @@ public class JobServiceImp implements JobService {
     public void acceptNewJobOffers(List<Long> jobIds, List<Long> serviceProviderIds) {
         for (Long jobId : jobIds) {
             for (Long serviceProviderId : serviceProviderIds) {
-                jobRepo.addToServiceProvidersList(jobId, serviceProviderId);
+                if (!jobRepo.existsJobServiceProvider(jobId, serviceProviderId)) {
+                    jobRepo.addToServiceProvidersList(jobId, serviceProviderId);
+                }
             }
         }
         pjoRepo.acceptNewJobOffers(jobIds, serviceProviderIds);
@@ -246,14 +299,43 @@ public class JobServiceImp implements JobService {
             job.setModerator(moderator);
         }
 
-        if (jobDto.getServiceProvidersList() != null && !jobDto.getServiceProvidersList().isEmpty()) {
-            List<ServiceProvider> serviceProviderList = jobDto.getServiceProvidersList().stream()
-                    .map(sp -> serviceProviderRepo.findById(sp.getId())
-                            .orElseThrow(() -> new ResourceNotFoundException("ServiceProvider", "id", sp.getId())))
-                    .collect(Collectors.toList());
+//        if (jobDto.getServiceProvidersList() != null && !jobDto.getServiceProvidersList().isEmpty()) {
+//            List<ServiceProvider> serviceProviderList = jobDto.getServiceProvidersList().stream()
+//                    .map(sp -> serviceProviderRepo.findById(sp.getId())
+//                            .orElseThrow(() -> new ResourceNotFoundException("ServiceProvider", "id", sp.getId())))
+//                    .collect(Collectors.toList());
+//
+//            job.setServiceProvidersList(serviceProviderList);
+//        }
 
-            job.setServiceProvidersList(serviceProviderList);
-        }
+//        if (jobDto.getServiceProvidersList() != null && !jobDto.getServiceProvidersList().isEmpty()) {
+//            List<ServiceProvider> serviceProviderList = jobDto.getPotentialJobOffers().stream()
+//                    .map(psp -> serviceProviderRepo.findById(psp.getServiceProviderId())
+//                            .orElseThrow(() -> new ResourceNotFoundException("ServiceProvider", "id", psp.getServiceProviderId())))
+//                    .collect(Collectors.toList());
+//
+//            job.setServiceProvidersList(serviceProviderList);
+//        }
+
+//        if (jobDto.getServiceProvidersList() != null && !jobDto.getServiceProvidersList().isEmpty()) {
+//            List<ServiceProvider> serviceProviderList = jobDto.getPotentialJobOffers().stream()
+//                    .map(psp -> serviceProviderRepo.findById(psp.getServiceProviderId())
+//                            .orElseThrow(() -> new ResourceNotFoundException("ServiceProvider", "id", psp.getServiceProviderId())))
+//                    .collect(Collectors.toList());
+//
+//            // Clear old associations
+//            job.getServiceProvidersList().clear();
+//
+//            // Add the new ones
+//            job.getServiceProvidersList().addAll(serviceProviderList);
+//        }
+
+        job.getServiceProvidersList().clear();
+        List<ServiceProvider> serviceProviderList = jobDto.getPotentialJobOffers().stream()
+                .map(psp -> serviceProviderRepo.findById(psp.getServiceProviderId())
+                        .orElseThrow(() -> new ResourceNotFoundException("ServiceProvider", "id", psp.getServiceProviderId())))
+                .collect(Collectors.toList());
+        job.getServiceProvidersList().addAll(serviceProviderList);
 
         if (jobDto.getCreatedBy().getId() == client.getId()) {
             job.setCreatedBy((User) client);
@@ -268,7 +350,12 @@ public class JobServiceImp implements JobService {
                     .collect(Collectors.toSet());
             job.setRequiredSkills(requiredSkills);
         }
+        setPotentialJobOffers(jobDto, job);
+        job.setModeratorApproval(1);
+        return job;
+    }
 
+    public void setPotentialJobOffers(JobDto jobDto, Job job) {
         if (!jobDto.getPotentialJobOffers().isEmpty()) {
             List<PotentialJobOffer> pjos = new ArrayList<PotentialJobOffer>();
             if (jobDto.getId() == null) {
@@ -295,8 +382,6 @@ public class JobServiceImp implements JobService {
             }
             job.setPotentialJobOffers(pjos);
         }
-        job.setModeratorApproval(1);
-        return job;
     }
 
     @Override
@@ -342,27 +427,33 @@ public class JobServiceImp implements JobService {
     }
 
     @Override
+    @Transactional
     public Boolean isReviewedServiceProviderReviewForm(String token, Long serviceProviderId) throws Exception {
         if (jwtTokenHelper.validateTokenForReviewForm(token)) {
             Long jobId = jwtTokenHelper.getJobIdFromToken(token);
-            Job job = this.jobRepo.findById(jobId).orElseThrow(() -> new ResourceNotFoundException("Job", "id", jobId));
-            Map<Long, Boolean> spReviewMap = job.getReviewedByServiceProvider();
-            List<ServiceProvider> spList = job.getServiceProvidersList();
-            if (!spList.stream().anyMatch(sp -> sp.getId() == serviceProviderId)) {
-                throw new Exception("Error: Service-provider/student not present in job");
-            }
-            if (spReviewMap != null) {
-                if (spReviewMap.containsKey(serviceProviderId)) {
-                    return spReviewMap.get(serviceProviderId);
-                } else {
-                    return false;
-                }
+            return checkSpReviewFormStatus(jobId, serviceProviderId);
+        } else {
+            throw new Exception("Error: invalid token or token expired");
+        }
+    }
+
+
+    @Transactional
+    public Boolean checkSpReviewFormStatus(Long jobId, Long serviceProviderId) throws Exception {
+        Job job = this.jobRepo.findById(jobId).orElseThrow(() -> new ResourceNotFoundException("Job", "id", jobId));
+        Map<Long, Boolean> spReviewMap = job.getReviewedByServiceProvider();
+        List<ServiceProvider> spList = job.getServiceProvidersList();
+        if (!spList.stream().anyMatch(sp -> sp.getId() == serviceProviderId)) {
+            throw new Exception("Error: Service-provider/student not present in job");
+        }
+        if (spReviewMap != null) {
+            if (spReviewMap.containsKey(serviceProviderId)) {
+                return spReviewMap.get(serviceProviderId);
             } else {
                 return false;
             }
         } else {
-            throw new Exception("Error: invalid token or token expired");
-
+            return false;
         }
     }
 
@@ -454,12 +545,19 @@ public class JobServiceImp implements JobService {
         job.getServiceProvidersList().stream().forEach(sp -> {
             InvoiceLines line = new InvoiceLines();
             double hoursWorked = ChronoUnit.MINUTES.between(job.getStartTime(), job.getEndTime()) / 60.0;
-            if (job.getClient().getRateType().equals(RateType.HOURLY) && hoursWorked < job.getClient().getMinimumPaymentHour()) {
-                line.setAantal(job.getClient().getMinimumPaymentHour());
-                invoice.setHoursWorked(job.getClient().getMinimumPaymentHour());
-            } else if (job.getClient().getRateType().equals(RateType.HOURLY) && hoursWorked >= job.getClient().getMinimumPaymentHour()) {
+            Double minimumPaymentHour = 0.0;
+            if (job.getClient().getMinimumPaymentHour() != null) {
+                minimumPaymentHour = job.getClient().getMinimumPaymentHour();
+                minimumPaymentHour = (double) minimumPaymentHour.intValue();
+            }
+            if (job.getClient().getRateType().equals(RateType.HOURLY) && hoursWorked < minimumPaymentHour) {
+                line.setAantal(minimumPaymentHour);
+                invoice.setHoursWorked(minimumPaymentHour);
+            } else if (job.getClient().getRateType().equals(RateType.HOURLY) && hoursWorked >= minimumPaymentHour) {
                 line.setAantal(hoursWorked);
                 invoice.setHoursWorked(hoursWorked);
+                double intValue = invoice.getHoursWorked();
+                invoice.setHoursWorked((int) intValue);
             } else if (job.getClient().getRateType().equals(RateType.DAY)) {
                 line.setAantal(1);
             }
@@ -492,13 +590,40 @@ public class JobServiceImp implements JobService {
         Invoice invoice = invoiceRepo.findById((long) invoiceDto.getId()).get();
         invoice.setAttention(invoiceDto.getAttention());
         invoice.setStatus(invoiceDto.getStatus());
-        invoice.setWorkedtime(invoiceDto.getWorkedtime());
-        invoice.setOvertime(invoiceDto.getOvertime());
+        invoice.setWorkedtime(0D);
+        invoice.setOvertime(0D);
         invoice.setKilometer(invoiceDto.getKilometer());
-        invoice.setTraveltime(invoiceDto.getTraveltime());
+        invoice.setTraveltime(0D);
         invoice.setExtraCostDescription(invoiceDto.getExtraCostDescription());
+        invoice.setStartTime(invoiceDto.getStartTime());
+        invoice.setBreakMinutes(invoiceDto.getBreakMinutes());
+        invoice.setEndTime(invoiceDto.getEndTime());
+        invoice.setExtraCost(invoiceDto.getExtraCost());
+
         Invoice updatedInvoice = invoiceRepo.save(invoice);
+
+        if ((invoiceDto.getExtraCost() != null && invoiceDto.getExtraCost() == 0.0) ||
+                (invoiceDto.getKilometer() != null && invoiceDto.getKilometer() == 0.0) ||
+                (invoiceDto.getStartTime() != null && invoiceDto.getStartTime().equals(LocalTime.MIDNIGHT)) ||
+                (invoiceDto.getEndTime() != null && invoiceDto.getEndTime().equals(LocalTime.MIDNIGHT)) ||
+                (invoiceDto.getBreakMinutes() != null && invoiceDto.getBreakMinutes().equals(LocalTime.MIDNIGHT))) {
+
+            try {
+                if (!checkSpReviewFormStatus(invoice.getJob().getId(), invoice.getServiceProvider().getId())) {
+                    publishInvoiceEvent(invoice.getJob().getId(), invoice.getServiceProvider().getId());
+                    System.out.println("SUCCESS");
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+        }
         return modelMapper.map(updatedInvoice, InvoiceDto.class);
+    }
+
+    public void publishInvoiceEvent(Long jobId, Long serviceProviderId) {
+        String payload = jobId + "," + serviceProviderId;
+        kafkaTemplate.send("invoice-events", payload);
     }
 
     public Invoice updateClientInvoice(Long invoiceId, Invoice invoice) {
@@ -510,7 +635,11 @@ public class JobServiceImp implements JobService {
                 invoice.getInvoiceLines().forEach(pInvLn -> {
                     if (Objects.equals(pInvLn.getId(), invLn.getId())) {
                         invLn.setAantal(pInvLn.getAantal());
-                        invLn.setPrice(pInvLn.getPrice());
+                        if (pInvLn.getPrice() != null) {
+                            invLn.setPrice(pInvLn.getPrice());
+                        } else {
+                            invLn.setPrice(0D);
+                        }
                         invLn.setOmschrijving(pInvLn.getOmschrijving());
                     }
                 });
@@ -552,7 +681,11 @@ public class JobServiceImp implements JobService {
             invoice.getInvoiceLines().forEach(pInvLn -> {
                 if (Objects.equals(pInvLn.getId(), invLn.getId())) {
                     invLn.setAantal(pInvLn.getAantal());
-                    invLn.setPrice(pInvLn.getPrice());
+                    if (invLn.getPrice() != null) {
+                        invLn.setPrice(pInvLn.getPrice());
+                    } else {
+                        invLn.setPrice(0D);
+                    }
                     invLn.setOmschrijving(pInvLn.getOmschrijving());
                 }
             });
@@ -615,7 +748,7 @@ public class JobServiceImp implements JobService {
                 .collect(Collectors.toList());
 
         for (String filePath : filePaths) {
-            Path path = Paths.get("src/main/resources/").resolve(filePath);
+            Path path = Paths.get(uploadDir).resolve(filePath);
             Resource resource = null;
             try {
                 resource = new UrlResource(path.toUri());
@@ -781,8 +914,9 @@ public class JobServiceImp implements JobService {
 
 
     public byte[] generateInvoicePdf(Invoice invoice) throws Exception {
-        double invTotal = invoice.getInvoiceLines().stream()
-                .mapToDouble(i -> i.getPrice() * i.getAantal()) // Map to double for each invoice line
+
+        double invTotal = invoice.getInvoiceLines().stream().filter(i -> i.getPrice() != null)
+                .mapToDouble(i -> i.getPrice() * i.getAantal())
                 .sum();
         double invTotalTax = invTotal * 0.21;
 
@@ -957,8 +1091,13 @@ public class JobServiceImp implements JobService {
         invoice.getInvoiceLines().forEach(il -> {
             items.addCell(getBodyCell(il.getOmschrijving()));
             items.addCell(getBodyCell(il.getAantal() + ""));
-            items.addCell(getBodyCell(il.getPrice() + ""));
-            items.addCell(getBodyCell(il.getPrice() * il.getAantal() + ""));
+            if (il.getPrice() != null) {
+                items.addCell(getBodyCell(il.getPrice() + ""));
+                items.addCell(getBodyCell(il.getPrice() * il.getAantal() + ""));
+            } else {
+                items.addCell(getBodyCell("0"));
+                items.addCell(getBodyCell("0"));
+            }
         });
 
         document.add(items);
@@ -1021,7 +1160,8 @@ public class JobServiceImp implements JobService {
         Job job = this.jobRepo.findById(jobId).orElseThrow(() -> new ResourceNotFoundException("Job", "id", jobId));
         if (job.getStatus().equals(JobStatus.COMPLETED)) {
             job.getServiceProvidersList().forEach(sp -> {
-                purchaseOrders.add(createPurchaseOrder(job.getId(), sp.getId(), null, false));
+                purchaseOrders.add(createPurchaseOrder(job.getId(), sp.getId(),
+                        null, false, null));
             });
             return purchaseOrders;
         } else {
@@ -1029,7 +1169,8 @@ public class JobServiceImp implements JobService {
         }
     }
 
-    private Invoice createPurchaseOrder(Long jobId, Long serviceProviderId, InvoiceDto invoiceDto, boolean isSpReview) {
+    @Transactional
+    private Invoice createPurchaseOrder(Long jobId, Long serviceProviderId, InvoiceDto invoiceDto, boolean isSpReview, PunchesDetails punchesDetails) {
         Job job = this.jobRepo.findById(jobId).orElseThrow(() -> new ResourceNotFoundException("Job", "id", jobId));
         Map<Long, Boolean> spReviewMap = job.getReviewedByServiceProvider();
         if (spReviewMap == null) {
@@ -1043,7 +1184,21 @@ public class JobServiceImp implements JobService {
                     .stream()
                     .filter(inv -> inv.getInvoiceType().equals(InvoiceType.PURCHASE) && inv.getServiceProvider().getId() == serviceProviderId)
                     .findFirst();
+
             if (spInvoice.isPresent()) {
+
+                if (punchesDetails != null) {
+                    ZoneId zone = ZoneId.systemDefault();
+                    LocalTime utcTime = punchesDetails.getTimestamp()
+                            .atZone(ZoneOffset.UTC)
+                            .toLocalTime();
+
+                    if ("CLOCK_OUT".equals(punchesDetails.getAction())) {
+                        spInvoice.get().setEndTime(utcTime);
+                        this.invoiceRepo.save(spInvoice.get());
+                    }
+                }
+
                 if (!isSpReview) {
                     return spInvoice.get();
                 }
@@ -1100,12 +1255,27 @@ public class JobServiceImp implements JobService {
             double hoursWorked = ChronoUnit.MINUTES.between(job.getStartTime(), job.getEndTime()) / 60.0;
             if (job.getClient().getRateType().equals(RateType.HOURLY)) {
                 invoice.setHoursWorked(hoursWorked);
+                double intValue = invoice.getHoursWorked();
+                invoice.setHoursWorked((int) intValue);
             } else {
                 invoice.setHoursWorked(1);
             }
 
-            LocalTime startTime = invoice.getStartTime();
-            LocalTime endTime = invoice.getEndTime();
+            LocalTime startTime = job.getStartTime();
+            LocalTime endTime = job.getEndTime();
+
+            if (punchesDetails != null) {
+                ZoneId zone = ZoneId.systemDefault();
+                LocalTime utcTime = punchesDetails.getTimestamp()
+                        .atZone(ZoneOffset.UTC)
+                        .toLocalTime();
+
+                if ("CLOCK_IN".equals(punchesDetails.getAction())) {
+                    invoice.setStartTime(utcTime);
+                } else {
+                    invoice.setEndTime(utcTime);
+                }
+            }
 
             Duration duration = Duration.between(startTime, endTime);
             double workedTime = duration.toMinutes() / 60.0;
@@ -1117,6 +1287,7 @@ public class JobServiceImp implements JobService {
             invoice.setSpRate(UtilFunctions.studentsRateBasedOnEventTypeAndJobTime(job, sp));
             if (isSpReview && spInvoice.isPresent()) {
                 invoice.setId(spInvoice.get().getId());
+                invoice.setInvoiceLines(spInvoice.get().getInvoiceLines());
             }
             return this.invoiceRepo.save(invoice);
         } else {
@@ -1124,15 +1295,80 @@ public class JobServiceImp implements JobService {
         }
     }
 
+    public List<PunchesDetails> getPunchedDetailsByJobIds(List<Long> jobIds){
+        return punchesDetailsRepo.findAllByJobIdIn(jobIds);
+    }
+
+    public void processFormFiles(Long jobId, Long serviceProviderId, Long poId) {
+        List<String> files = formClient.getFilePaths(jobId, serviceProviderId);
+        files.forEach(System.out::println);
+        System.out.println("");
+        List<String> savedPaths = new ArrayList<>();
+        Invoice invoice = invoiceRepo.findById(poId).get();
+        invoice.setFilePath(files);
+        invoiceRepo.save(invoice);
+    }
+
+    @Transactional
+    @Override
+    public void savePunchDetails(PunchesDetails punchesDetails) {
+        PunchesDetails pd = punchesDetailsRepo.save(punchesDetails);
+        jobPunchedServiceProvider(pd);
+        this.createPurchaseOrder(pd.getJobId(), pd.getSpId(), null, false, punchesDetails);
+    }
+
+    @Transactional
+    public void jobPunchedServiceProvider(PunchesDetails punchesDetails) {
+        Job job = jobRepo.findById(punchesDetails.getJobId())
+                .orElseThrow(() -> new ResourceNotFoundException("Job", "id", punchesDetails.getJobId()));
+        ServiceProvider serviceProvider = serviceProviderRepo.findById(punchesDetails.getSpId())
+                .orElseThrow(() -> new ResourceNotFoundException("ServiceProvider", "id", punchesDetails.getSpId()));
+
+        List<ServiceProvider> serviceProviderList = job.getServiceProvidersList();
+        List<PotentialJobOffer> potentialJobOffers = job.getPotentialJobOffers();
+
+        boolean punchedSpExist = serviceProviderList.stream().anyMatch(sp -> sp.getId() == punchesDetails.getSpId());
+        if (!punchedSpExist) {
+            job.getServiceProvidersList().add(serviceProvider);
+        }
+
+        boolean punchedSpPotentialExist = potentialJobOffers.stream()
+                .anyMatch(pjo -> pjo.getServiceProvider().getId() == punchesDetails.getSpId());
+        if (!punchedSpPotentialExist) {
+            PotentialJobOffer potentialJobOffer = new PotentialJobOffer();
+            potentialJobOffer.setJob(job);
+            potentialJobOffer.setServiceProvider(serviceProvider);
+            potentialJobOffer.setAccepted(1);
+            job.getPotentialJobOffers().add(potentialJobOffer);
+        }
+
+        jobRepo.save(job);
+    }
+
 
     @Override
+    @Transactional
     public void postReviewFormServiceProvider(String token, InvoiceDto invoiceDto) throws Exception {
         String serviceProviderId = this.jwtTokenHelper.getSpIdFromToken(token);
 
         //Long serviceProviderId = invoiceDto.getServiceProvider().getId();
         if (!isReviewedServiceProviderReviewForm(token, Long.parseLong(serviceProviderId))) {
             Long jobId = jwtTokenHelper.getJobIdFromToken(token);
-            createPurchaseOrder(jobId, Long.parseLong(serviceProviderId), invoiceDto, true);
+            Invoice po = createPurchaseOrder(jobId, Long.parseLong(serviceProviderId), invoiceDto, true, null);
+        } else {
+            throw new Exception("Error: review form already filled");
+        }
+    }
+
+    @Override
+    @Transactional
+    public Invoice postReviewFormServiceProviderEvent(String token, InvoiceDto invoiceDto) throws Exception {
+        String serviceProviderId = this.jwtTokenHelper.getSpIdFromToken(token);
+
+        //Long serviceProviderId = invoiceDto.getServiceProvider().getId();
+        if (!isReviewedServiceProviderReviewForm(token, Long.parseLong(serviceProviderId))) {
+            Long jobId = jwtTokenHelper.getJobIdFromToken(token);
+            return createPurchaseOrder(jobId, Long.parseLong(serviceProviderId), invoiceDto, true, null);
         } else {
             throw new Exception("Error: review form already filled");
         }

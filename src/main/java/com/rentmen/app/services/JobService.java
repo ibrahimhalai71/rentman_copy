@@ -2,6 +2,7 @@ package com.rentmen.app.services;
 
 import com.rentmen.app.DTO.*;
 import com.rentmen.app.entities.Invoice;
+import com.rentmen.app.entities.PunchesDetails;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 
@@ -14,6 +15,8 @@ public interface JobService {
  JobDto updateJob(JobDto jobDto);
 
  JobDto getJobById(Long id);
+
+ List<PunchesDetails> getPunchedDetailsByJobIds(List<Long> jobIds);
 
  List<JobDto> getAllJobs();
 
@@ -61,5 +64,10 @@ public interface JobService {
  List<Invoice> createAllPurchaseOrders(Long jobId) throws Exception;
  void postReviewFormServiceProvider(String token, InvoiceDto invoiceDto) throws Exception;
 
+ Invoice postReviewFormServiceProviderEvent(String token, InvoiceDto invoiceDto) throws Exception;
  GeneratedInvoiceDto getInvoice(Long jobId) throws Exception;
+
+ void processFormFiles(Long jobId, Long serviceProviderId, Long poId);
+
+ void savePunchDetails(PunchesDetails punchesDetails);
 }

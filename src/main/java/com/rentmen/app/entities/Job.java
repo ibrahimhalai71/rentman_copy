@@ -33,7 +33,7 @@ public class Job {
 			name = "moderator_id"
 	)
 	private Moderator moderator;
-	@ManyToMany
+	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(
 			name = "job_service_provider_ids",
 			joinColumns = {@JoinColumn(
@@ -354,8 +354,15 @@ public class Job {
 		this.reviewedByClient = reviewedByClient;
 	}
 
+//	public Map<Long, Boolean> getReviewedByServiceProvider() {
+//		return this.reviewedByServiceProvider;
+//	}
+
 	public Map<Long, Boolean> getReviewedByServiceProvider() {
-		return this.reviewedByServiceProvider;
+		if (reviewedByServiceProvider == null) {
+			reviewedByServiceProvider = new HashMap<>();
+		}
+		return reviewedByServiceProvider;
 	}
 
 	public void setReviewedByServiceProvider(Map<Long, Boolean> reviewedByServiceProvider) {

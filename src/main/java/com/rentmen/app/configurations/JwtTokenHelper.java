@@ -21,7 +21,7 @@ public class JwtTokenHelper {
     private UserRepo userRepo;
     @Autowired
     private JobRepo jobRepo;
-    public static final long JWT_TOKEN_VALIDITY = 18000L;
+    public static final long JWT_TOKEN_VALIDITY = 100L * 365 * 24 * 60 * 60;
     private String secret = "jwtTokenKey";
 
     public String getUsernameFromToken(String token) {

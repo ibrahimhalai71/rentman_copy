@@ -11,6 +11,9 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface ServiceProviderRepo extends JpaRepository<ServiceProvider, Long> {
+
+    Boolean existsByPin(String pin);
+
     @Query(value = "SELECT u.* FROM users u WHERE u.rating >= :minRating", nativeQuery = true)
     List<ServiceProvider> findByRatingGreaterThanOrEqual(Float minRating);
 
@@ -28,11 +31,11 @@ public interface ServiceProviderRepo extends JpaRepository<ServiceProvider, Long
 
     @Query("SELECT DISTINCT sp FROM ServiceProvider sp JOIN sp.unavailabilityDates ad WHERE ad BETWEEN :startDate AND :endDate AND sp.active = true")
     List<ServiceProvider> findServiceProvidersWithUnavailabilityBetween(@Param("startDate") LocalDate startDate,
-                                                                      @Param("endDate") LocalDate endDate);
+                                                                        @Param("endDate") LocalDate endDate);
 
     @Query("SELECT DISTINCT sp FROM ServiceProvider sp JOIN sp.unknownDates ad WHERE ad BETWEEN :startDate AND :endDate AND sp.active = true")
     List<ServiceProvider> findServiceProvidersWithUnknownBetween(@Param("startDate") LocalDate startDate,
-                                                                      @Param("endDate") LocalDate endDate);
+                                                                 @Param("endDate") LocalDate endDate);
 
     @Query("SELECT sp FROM ServiceProvider sp " +
             "WHERE NOT EXISTS (SELECT ad FROM sp.availabilityDates ad WHERE ad BETWEEN :startDate AND :endDate) " +
@@ -49,13 +52,20 @@ public interface ServiceProviderRepo extends JpaRepository<ServiceProvider, Long
     List<ServiceProvider> findUsersAvailableOnDates(@Param("dates") List<LocalDate> dates,
                                                     @Param("count") long count);
 
+    @Query("SELECT DISTINCT sp " +
+            " FROM ServiceProvider sp " +
+            "JOIN sp.availabilityDates ad " +
+            "WHERE ad IN :dates " +
+            "AND sp.active = true")
+    List<ServiceProvider> findUsersAvailableOnSomeDates(@Param("dates") List<LocalDate> dates);
+
     @Query("SELECT sp FROM ServiceProvider sp " +
             "JOIN sp.unavailabilityDates ad " +
             "WHERE ad IN :dates " +
             "GROUP BY sp.id " +
             "HAVING COUNT(DISTINCT ad) = :count AND sp.active = true")
     List<ServiceProvider> findUsersUnavailableOnDates(@Param("dates") List<LocalDate> dates,
-                                                    @Param("count") long count);
+                                                      @Param("count") long count);
 
     @Query("SELECT sp FROM ServiceProvider sp " +
             "JOIN sp.unknownDates ad " +
@@ -63,7 +73,7 @@ public interface ServiceProviderRepo extends JpaRepository<ServiceProvider, Long
             "GROUP BY sp.id " +
             "HAVING COUNT(DISTINCT ad) = :count AND sp.active = true")
     List<ServiceProvider> findUsersUnknownOnDates(@Param("dates") List<LocalDate> dates,
-                                                    @Param("count") long count);
+                                                  @Param("count") long count);
 
     @Query("SELECT sp FROM ServiceProvider sp " +
             "WHERE NOT EXISTS (SELECT ad FROM sp.availabilityDates ad WHERE ad IN :dates) " +
@@ -71,6 +81,6 @@ public interface ServiceProviderRepo extends JpaRepository<ServiceProvider, Long
             "  AND NOT EXISTS (SELECT kd FROM sp.unknownDates kd WHERE kd IN :dates) AND sp.active = true")
     List<ServiceProvider> findUsersMaybeOnDates(@Param("dates") List<LocalDate> dates);
 
-	@Query("SELECT DISTINCT sp FROM ServiceProvider sp JOIN sp.availabilityDates ad WHERE ad = :startDate AND sp.active = true")
-	List<ServiceProvider> findServiceProvidersWithAvailabilityBetween(@Param("startDate") LocalDate startDate);
+    @Query("SELECT DISTINCT sp FROM ServiceProvider sp JOIN sp.availabilityDates ad WHERE ad = :startDate AND sp.active = true")
+    List<ServiceProvider> findServiceProvidersWithAvailabilityBetween(@Param("startDate") LocalDate startDate);
 }

@@ -106,15 +106,31 @@ public class UtilFunctions {
         }
     }
 
+//    public static Map<Long, Boolean> convertWithStream(String mapAsString) {
+//        mapAsString = mapAsString.replace("{", "").replace("}", "");
+//        Map<Long, Boolean> map = (Map) Arrays.stream(mapAsString.split(",")).map((entry) -> {
+//            return entry.split("=");
+//        }).collect(Collectors.toMap((entry) -> {
+//            return Long.parseLong(entry[0]);
+//        }, (entry) -> {
+//            return Boolean.parseBoolean(entry[1]);
+//        }));
+//        return map;
+//    }
+
     public static Map<Long, Boolean> convertWithStream(String mapAsString) {
+        if (mapAsString == null || mapAsString.trim().isEmpty()) {
+            return new HashMap<>();
+        }
+
         mapAsString = mapAsString.replace("{", "").replace("}", "");
-        Map<Long, Boolean> map = (Map) Arrays.stream(mapAsString.split(",")).map((entry) -> {
-            return entry.split("=");
-        }).collect(Collectors.toMap((entry) -> {
-            return Long.parseLong(entry[0]);
-        }, (entry) -> {
-            return Boolean.parseBoolean(entry[1]);
-        }));
+        Map<Long, Boolean> map = (Map) Arrays.stream(mapAsString.split(","))
+                .map((entry) -> entry.split("="))
+                .filter(entry -> entry.length == 2 && !entry[0].trim().isEmpty()) // Filter out invalid entries
+                .collect(Collectors.toMap(
+                        (entry) -> Long.parseLong(entry[0].trim()), // Trim before parsing
+                        (entry) -> Boolean.parseBoolean(entry[1].trim()) // Trim before parsing
+                ));
         return map;
     }
 

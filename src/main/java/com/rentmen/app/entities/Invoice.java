@@ -52,7 +52,7 @@ public class Invoice {
     @Column(name = "extra_cost_description")
     private String extraCostDescription;
     @Column(name = "break_minutes")
-    private Double breakMinutes;
+    private LocalTime breakMinutes;
     @Column(name = "end_time")
     private LocalTime endTime;
     @Column(name = "start_time")
@@ -330,14 +330,13 @@ public class Invoice {
         this.attention = attention;
     }
 
-    public Double getBreakMinutes() {
+    public LocalTime getBreakMinutes() {
         return breakMinutes;
     }
 
-    public void setBreakMinutes(Double breakMinutes) {
+    public void setBreakMinutes(LocalTime breakMinutes) {
         this.breakMinutes = breakMinutes;
     }
-
     public LocalTime getEndTime() {
         return endTime;
     }

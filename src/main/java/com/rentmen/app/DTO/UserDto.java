@@ -39,6 +39,7 @@ public class UserDto {
 	private Integer depId;
 	private Boolean active;
 	private Boolean status;
+	private String pin;
 	@JsonProperty("profile_image")
 	private String profileImage;
 	private String address;
@@ -173,6 +174,14 @@ public class UserDto {
 
 	public void setStatus(Boolean status) {
 		this.status = status;
+	}
+
+	public String getPin() {
+		return pin;
+	}
+
+	public void setPin(String pin) {
+		this.pin = pin;
 	}
 
 	public Double getDiscussedRateRW() {

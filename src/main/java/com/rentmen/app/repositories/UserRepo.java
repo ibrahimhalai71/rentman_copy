@@ -19,4 +19,8 @@ public interface UserRepo extends JpaRepository<User, Long> {
   void deleteUserReferencesInJobs(@Param("userId") Long userId);
 
   Optional<User> findByFirstName(String paramString);
+
+  @Query("SELECT CASE WHEN COUNT(sp) > 0 THEN true ELSE false END FROM ServiceProvider sp WHERE sp.pin = :pin")
+  boolean existsByPin(@Param("pin") String pin);
+
 }

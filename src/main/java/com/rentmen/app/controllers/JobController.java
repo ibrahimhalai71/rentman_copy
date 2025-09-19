@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.rentmen.app.DTO.*;
 import com.rentmen.app.configurations.JwtTokenHelper;
 import com.rentmen.app.entities.Invoice;
+import com.rentmen.app.entities.PunchesDetails;
 import com.rentmen.app.services.JobService;
 import com.rentmen.app.services.UserService;
 import com.rentmen.app.services.imp.EmailSendingService;
@@ -50,27 +51,27 @@ public class JobController {
     public ResponseEntity<?> createJob(@RequestBody JobDto job) {
         JobDto createdJob = this.jobService.createJob(job);
 
-        createdJob.getPotentialJobOffers().forEach((sp) -> {
-            UserDto spData = this.userService.getServiceProvider(sp.getServiceProviderId());
+//        createdJob.getPotentialJobOffers().forEach((sp) -> {
+//            UserDto spData = this.userService.getServiceProvider(sp.getServiceProviderId());
+//
+//            Exception e;
+//            try {
+//                //this.twilioMessageService.sendSMS(spData.getContact(), "Beste gebruiker, \nU heeft een werkverzoek ontvangen. \nTitel: " + createdJob.getTitle() + " \nDatum/Tijd: " + createdJob.getStartDate() + " " + createdJob.getStartTime() + ", \nLog alstublieft in om te accepteren.");
+//            } catch (Exception var6) {
+//                e = var6;
+//                e.printStackTrace();
+//            }
+//
+//            try {
+//                //this.emailSendingService.sendEmail("info@eventico.nl", "Job Request " + createdJob.getTitle(), spData.getEmail(), createdJob.getId(), sp.getServiceProviderId(), createdJob);
+//            } catch (Exception var5) {
+//                e = var5;
+//                e.printStackTrace();
+//            }
+//
+//        });
 
-            Exception e;
-            try {
-                //this.twilioMessageService.sendSMS(spData.getContact(), "Beste gebruiker, \nU heeft een werkverzoek ontvangen. \nTitel: " + createdJob.getTitle() + " \nDatum/Tijd: " + createdJob.getStartDate() + " " + createdJob.getStartTime() + ", \nLog alstublieft in om te accepteren.");
-            } catch (Exception var6) {
-                e = var6;
-                e.printStackTrace();
-            }
-
-            try {
-                //this.emailSendingService.sendEmail("info@eventico.nl", "Job Request " + createdJob.getTitle(), spData.getEmail(), createdJob.getId(), sp.getServiceProviderId(), createdJob);
-            } catch (Exception var5) {
-                e = var5;
-                e.printStackTrace();
-            }
-
-        });
-
-        return new ResponseEntity(createdJob, HttpStatus.CREATED);
+        return new ResponseEntity<>(createdJob, HttpStatus.CREATED);
     }
 
     @GetMapping({"/delete-job/{id}"})
@@ -247,6 +248,12 @@ public class JobController {
 //        return ResponseEntity.ok("Success: review form posted successfully");
 //    }
 
+
+    @GetMapping({"/get-punches/{jobIds}"})
+    public ResponseEntity<?> generateInvoice(@PathVariable("jobIds") List<Long> jobIds) throws Exception {
+        return ResponseEntity.ok(this.jobService.getPunchedDetailsByJobIds(jobIds));
+    }
+
     @GetMapping({"/generateInvoice/{jobId}"})
     public ResponseEntity<?> generateInvoice(@PathVariable("jobId") Long jobId) throws Exception {
         return ResponseEntity.ok(this.jobService.getInvoice(jobId));
@@ -307,7 +314,6 @@ public class JobController {
 
     @GetMapping("/files/invoice/{invoiceId}")
     public ResponseEntity<List<Resource>> getFilesByInvoiceId(@PathVariable Long invoiceId) throws IOException {
-
         List<Resource> files = jobService.getFilesForInvoice(invoiceId);
         return ResponseEntity.ok(files);
     }

@@ -20,6 +20,7 @@ public class ServiceProvider extends User {
 	private Float rating;
 	private Double kilometerRate;
 	private String contact;
+	private String pin;
 	@DateTimeFormat(
 			pattern = "yyyy-MM-dd"
 	)
@@ -108,6 +109,14 @@ public class ServiceProvider extends User {
 
 	public void setKilometerRate(Double kilometerRate) {
 		this.kilometerRate = kilometerRate;
+	}
+
+	public String getPin() {
+		return pin;
+	}
+
+	public void setPin(String pin) {
+		this.pin = pin;
 	}
 
 	public Set<Skill> getSkills() {

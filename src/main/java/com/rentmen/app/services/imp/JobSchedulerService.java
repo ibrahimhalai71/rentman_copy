@@ -1,5 +1,7 @@
 package com.rentmen.app.services.imp;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rentmen.app.configurations.JwtTokenHelper;
 import com.rentmen.app.entities.ArchiveJob;
 import com.rentmen.app.entities.Invoice;
@@ -10,6 +12,7 @@ import com.rentmen.app.utils.JobStatus;
 import com.rentmen.app.utils.MessageTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +36,8 @@ public class JobSchedulerService {
     @Autowired
     private ArchiveRepo archiveJobRepo;
     @Autowired
+    private PunchesDetailsRepo punchesDetailsRepo;
+    @Autowired
     private JobServiceProviderRepository jobServiceProviderRepository;
     @Autowired
     private PotentialJobOfferRepo potentialJobOfferRepository;
@@ -42,6 +47,9 @@ public class JobSchedulerService {
     private JwtTokenHelper jwtTokenHelper;
     @Autowired
     private TwilioMessageService twilioMessageService;
+    @Autowired
+    private KafkaTemplate<String, Object> kafkaTemplate;
+
 
     public JobSchedulerService(JobRepo jobRepo, ArchiveRepo archiveJobRepo) {
         this.jobRepo = jobRepo;
@@ -55,7 +63,7 @@ public class JobSchedulerService {
     public void checkAndArchiveExpiredJobs() {
         LocalDate currentDate = LocalDate.now();
         LocalTime currentTime = LocalTime.now();
-        List<Job> expiredJobs = this.jobRepo.findExpiredJobs(currentDate, currentTime);
+        List<Job> expiredJobs = this.jobRepo.findRecentlyExpiredJobs(currentDate, currentTime);
         expiredJobs.forEach((job) -> {
             if ((job.getStatus() == JobStatus.ACCEPTED || job.getStatus() == JobStatus.STARTED) && job.getPotentialJobOffers().stream().allMatch((sp) -> {
                 return sp.getAccepted() == 1;
@@ -67,7 +75,7 @@ public class JobSchedulerService {
                 Exception ex1;
 
                 try {
-                    this.twilioMessageService.sendSMS(job.getProjectLeadNumber(), MessageTemplate.getMessageTemplate(job.getTitle(), job.getEndDate().toString(), job.getEndTime().toString(), job.getDescription(), clientTinyURL));
+                    //this.twilioMessageService.sendSMS(job.getProjectLeadNumber(), MessageTemplate.getMessageTemplate(job.getTitle(), job.getEndDate().toString(), job.getEndTime().toString(), job.getDescription(), clientTinyURL));
                 } catch (Exception var10) {
                     ex1 = var10;
                     ex1.printStackTrace();
@@ -82,19 +90,18 @@ public class JobSchedulerService {
                 }
 
                 try {
-                    job.getServiceProvidersList().forEach((sp) -> {
+                    job.getServiceProvidersList().stream()
+                            .filter(sp -> !punchesDetailsRepo.existsByJobIdAndSpId(job.getId(), sp.getId()))
+                            .forEach(sp -> {
                         String spToken = this.jwtTokenHelper.generateTokenForReviewForm(job.getId().toString(), String.valueOf(sp.getId()));
                         String spTinyURL = UrlShortenerService.shortenUrl(this.spUI + spToken);
                         Exception ex;
-
                         try {
-                            this.twilioMessageService.sendSMS(sp.getContact(), MessageTemplate.getMessageTemplate(job.getTitle(), job.getEndDate().toString(), job.getEndTime().toString(), job.getDescription(), spTinyURL));
+                            this.twilioMessageService.sendSMS(sp.getContact(), MessageTemplate.getMessageTemplate(sp.getFirstName() + " " + sp.getLastName(), job.getEndDate().toString(), job.getEndTime().toString(), job.getDescription(), spTinyURL));
                         } catch (Exception var11) {
                             ex = var11;
                             ex.printStackTrace();
                         }
-
-
                         try {
                             System.out.println("info@eventico.nl Review Form for Job: " + job.getTitle() + "Dear " + sp.getFirstName() + "Het werk is voltooid, vul alstublieft het formulier in via de volgende link: " + spTinyURL + "Dank u wel");
                             this.emailSendingService.sendEmail("info@eventico.nl", "Review Form for Job: " + job.getTitle(), "Dear " + sp.getFirstName() + ",\n \nHet werk is voltooid, vul alstublieft het formulier in via de volgende link: " + spTinyURL + "\n\nDank u wel", sp.getEmail());
@@ -102,7 +109,6 @@ public class JobSchedulerService {
                             ex = var9;
                             ex.printStackTrace();
                         }
-
                     });
                 } catch (Exception var12) {
                     Exception e = var12;
@@ -120,6 +126,9 @@ public class JobSchedulerService {
 
                 ArchiveJob archiveJob = new ArchiveJob(job);
                 this.archiveJobRepo.save(archiveJob);
+                if(punchesDetailsRepo.existsByJobId(job.getId())) {
+                    sendJobExpiringEvent(job.getId());
+                }
 
                 try {
                     Invoice clientInvoice = this.jobService.createInvoice(job.getId());
@@ -131,4 +140,16 @@ public class JobSchedulerService {
 
         });
     }
+
+    public void sendJobExpiringEvent(Long jobId) {
+        ObjectMapper mapper = new ObjectMapper();
+        String message = null;
+        try {
+            message = mapper.writeValueAsString(jobId);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        kafkaTemplate.send("job-expire-event", message);
+    }
+
 }

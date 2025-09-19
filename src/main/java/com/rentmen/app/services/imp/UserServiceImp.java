@@ -1,6 +1,11 @@
 package com.rentmen.app.services.imp;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.rentmen.app.DTO.SkillDto;
+import com.rentmen.app.DTO.TimeClockUserDto;
 import com.rentmen.app.DTO.UserDto;
 import com.rentmen.app.entities.*;
 import com.rentmen.app.exceptions.CustomException;
@@ -13,6 +18,7 @@ import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.transaction.Transactional;
 import javax.validation.ConstraintViolationException;
 import java.lang.reflect.Type;
+import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,9 +61,15 @@ public class UserServiceImp implements UserService {
     @Autowired
     private SkillRepo skillRepo;
 
+    @Autowired
+    private KafkaTemplate<String, Object> kafkaTemplate;
+
+    private final SecureRandom random = new SecureRandom();
+
     @Override
     public UserDto createUser(UserDto userDto) {
         try {
+
             User user = dtoToUser(userDto);
             user.setPassword(passwordEncoder.encode(userDto.getPassword()));
             User savedUser = userRepo.save(user);
@@ -67,6 +80,31 @@ public class UserServiceImp implements UserService {
             }
             throw new CustomException("An error occurred!");
         }
+    }
+
+    public String generateUniquePin() {
+        String pin;
+        do {
+            pin = String.format("%04d", random.nextInt(10000));
+        } while (serviceProviderRepo.existsByPin(pin));
+        return pin;
+    }
+
+    public void assignPinToUser(ServiceProvider sp) {
+        String uniquePin = generateUniquePin();
+        sp.setPin(uniquePin);
+    }
+
+    public void publishUserEvent(ServiceProvider userDto){
+        ObjectMapper mapper = new ObjectMapper();
+        TimeClockUserDto tcUser = new TimeClockUserDto(userDto.getFirstName() + " " + userDto.getLastName(), userDto.getId(), userDto.getPin());
+        String message = null;
+        try {
+            message = mapper.writeValueAsString(tcUser);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        kafkaTemplate.send("user-events", message);
     }
 
     @Override
@@ -155,6 +193,8 @@ public class UserServiceImp implements UserService {
 
             return modelMapper.map(client, UserDto.class);
         } else if (user.getDepId() == 2) {
+            role = (Role)this.roleRepo.findById(2).get();
+
             Moderator moderator = modelMapper.map(userDto, Moderator.class);
             moderator.setPassword(passwordEncoder.encode(moderator.getPassword()));
             moderator.getRoles().add(role);
@@ -162,14 +202,18 @@ public class UserServiceImp implements UserService {
 
             return modelMapper.map(moderator, UserDto.class);
         } else if (user.getDepId() == 3) {
+            role = (Role)this.roleRepo.findById(2).get();
+
             ServiceProvider sp = modelMapper.map(userDto, ServiceProvider.class);
             if (!userDto.getSkills().isEmpty()) {
                 sp.setSkills(getSkillSet(userDto.getSkills()));
             }
             sp.setPassword(passwordEncoder.encode(sp.getPassword()));
             sp.getRoles().add(role);
-            sp = serviceProviderRepo.save(sp);
+            assignPinToUser(sp);
 
+            sp = serviceProviderRepo.save(sp);
+            publishUserEvent(sp);
             return modelMapper.map(sp, UserDto.class);
         }
 
@@ -295,7 +339,9 @@ public class UserServiceImp implements UserService {
                     .limit(java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate) + 1)
                     .collect(Collectors.toList());
             long size = dates.size();
-            serviceProviders = serviceProviderRepo.findUsersAvailableOnDates(dates,size);
+//            serviceProviders = serviceProviderRepo.findUsersAvailableOnDates(dates,size);
+            serviceProviders = serviceProviderRepo.findUsersAvailableOnSomeDates(dates);
+
         }
 
         return modelMapper.map(serviceProviders, listType);
@@ -314,7 +360,7 @@ public class UserServiceImp implements UserService {
                     .limit(java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate) + 1)
                     .collect(Collectors.toList());
             long size = dates.size();
-            serviceProviders = serviceProviderRepo.findUsersUnavailableOnDates(dates,size);
+            serviceProviders = serviceProviderRepo.findUsersUnavailableOnDates(dates, size);
         }
 
         return modelMapper.map(serviceProviders, listType);
@@ -333,7 +379,7 @@ public class UserServiceImp implements UserService {
                     .limit(java.time.temporal.ChronoUnit.DAYS.between(startDate, endDate) + 1)
                     .collect(Collectors.toList());
             long size = dates.size();
-            serviceProviders = serviceProviderRepo.findUsersUnknownOnDates(dates,size);
+            serviceProviders = serviceProviderRepo.findUsersUnknownOnDates(dates, size);
         }
 
         return modelMapper.map(serviceProviders, listType);

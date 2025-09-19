@@ -1,6 +1,7 @@
 
 package com.rentmen.app.DTO;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.rentmen.app.utils.InvoiceStatus;
 import com.rentmen.app.utils.InvoiceType;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class InvoiceDto {
     private int id;
     private @NotEmpty JobDto job;
@@ -39,7 +41,7 @@ public class InvoiceDto {
     private Long percentageNumber;
 
     @JsonProperty("break_minutes")
-    private Double breakMinutes;
+    private LocalTime breakMinutes;
 
     @JsonProperty("end_time")
     private LocalTime endTime;
@@ -123,11 +125,11 @@ public class InvoiceDto {
         this.invoiceType = invoiceType;
     }
 
-    public Double getBreakMinutes() {
+    public LocalTime getBreakMinutes() {
         return breakMinutes;
     }
 
-    public void setBreakMinutes(Double breakMinutes) {
+    public void setBreakMinutes(LocalTime breakMinutes) {
         this.breakMinutes = breakMinutes;
     }
 
