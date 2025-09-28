@@ -2,6 +2,7 @@
 package com.rentmen.app.DTO;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.rentmen.app.entities.Projects;
 import com.rentmen.app.utils.JobStatus;
 import com.rentmen.app.utils.UtilFunctions;
 
@@ -51,6 +52,8 @@ public class JobDto {
     private String projectLeadName;
     @JsonProperty("project_lead_number")
     private String projectLeadNumber;
+    @JsonProperty("project")
+    private ProjectsDto project;
     @JsonProperty("job_other_skills")
     private List<String> jobOtherSkills;
     @JsonProperty("is_expired")
@@ -216,6 +219,14 @@ public class JobDto {
 
     public String getProjectLeadNumber() {
         return this.projectLeadNumber;
+    }
+
+    public ProjectsDto getProject() {
+        return project;
+    }
+
+    public void setProject(ProjectsDto project) {
+        this.project = project;
     }
 
     public void setServiceProvidersList(List<UserDto> serviceProvidersList) {

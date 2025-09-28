@@ -67,6 +67,8 @@ public interface JobService {
  Invoice postReviewFormServiceProviderEvent(String token, InvoiceDto invoiceDto) throws Exception;
  GeneratedInvoiceDto getInvoice(Long jobId) throws Exception;
 
+ Boolean sendManualMessageToSP(Long jobId);
+
  void processFormFiles(Long jobId, Long serviceProviderId, Long poId);
 
  void savePunchDetails(PunchesDetails punchesDetails);

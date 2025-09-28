@@ -20,22 +20,22 @@ public class TwilioMessageService {
 
     public String sendSMS(String To, String message) {
 
-//        Twilio.init(accountSid, authToken);
-//
-//		Message.creator(new PhoneNumber(To),
-//				new PhoneNumber(fromPhoneNumber), message).create();
-//
-//		Message.creator(new PhoneNumber("+31648908818"),
-//				new PhoneNumber(fromPhoneNumber), message).create();
+        Twilio.init(accountSid, authToken);
 
-        return "Message sent successfully";
+		Message.creator(new PhoneNumber(To),
+				new PhoneNumber(fromPhoneNumber), message).create();
+
+		Message.creator(new PhoneNumber("+31648908818"),
+				new PhoneNumber(fromPhoneNumber), message).create();
+
+         return "Message sent successfully";
     }
 
-    public void sendJobIdSMS(Long jobId) {
+    public void sendProjectInfoSMS(Long projectId, String name) {
 
-//        Twilio.init(accountSid, authToken);
-//				Message.creator(new PhoneNumber("+31648908818"),
-//				new PhoneNumber(fromPhoneNumber), "JobID For TimeClock Config: "+jobId).create();
+        Twilio.init(accountSid, authToken);
+				Message.creator(new PhoneNumber("+31648908818"),
+				new PhoneNumber(fromPhoneNumber), "ProjectID For " + name + " - " + "TimeClock Config: "+projectId).create();
         System.out.println("JOB ID SENT");
 
     }

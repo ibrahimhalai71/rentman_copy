@@ -13,8 +13,8 @@ public class PunchesDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "job_id", nullable = false)
-    private Long jobId;
+    @Column(name = "project_id", nullable = false)
+    private Long projectId;
 
     @Column(name = "sp_id", nullable = false)
     private Long spId;
@@ -34,12 +34,12 @@ public class PunchesDetails {
         this.id = id;
     }
 
-    public Long getJobId() {
-        return jobId;
+    public Long getProjectId() {
+        return projectId;
     }
 
-    public void setJobId(Long jobId) {
-        this.jobId = jobId;
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
     }
 
     public Long getSpId() {

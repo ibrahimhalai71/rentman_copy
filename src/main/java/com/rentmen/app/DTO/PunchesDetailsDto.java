@@ -7,7 +7,7 @@ public class PunchesDetailsDto {
 
     private Long id;
 
-    private Long jobId;
+    private Long projectId;
 
     private Long spId;
 
@@ -24,12 +24,12 @@ public class PunchesDetailsDto {
         this.id = id;
     }
 
-    public Long getJobId() {
-        return jobId;
+    public Long getProjectId() {
+        return projectId;
     }
 
-    public void setJobId(Long jobId) {
-        this.jobId = jobId;
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
     }
 
     public Long getSpId() {

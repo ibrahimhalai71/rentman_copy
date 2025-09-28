@@ -121,6 +121,11 @@ public class Job {
 			name = "project_lead_number"
 	)
 	private String projectLeadNumber;
+
+	@ManyToOne
+	@JoinColumn(name = "project_id", referencedColumnName = "id")
+	private Projects project;
+
 	@Convert(
 			converter = StringListConverter.class
 	)
@@ -142,6 +147,7 @@ public class Job {
 	private Long invoiceNumber;
 
 	private Boolean isExpired;
+
 
 	public Job() {
 	}
@@ -336,6 +342,14 @@ public class Job {
 
 	public void setProjectLeadNumber(String projectLeadNumber) {
 		this.projectLeadNumber = projectLeadNumber;
+	}
+
+	public Projects getProject() {
+		return project;
+	}
+
+	public void setProject(Projects project) {
+		this.project = project;
 	}
 
 	public List<String> getJobOtherSkills() {

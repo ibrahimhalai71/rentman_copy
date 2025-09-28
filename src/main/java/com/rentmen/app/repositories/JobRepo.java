@@ -2,6 +2,7 @@ package com.rentmen.app.repositories;
 
 import com.rentmen.app.entities.Job;
 import com.rentmen.app.entities.PotentialJobOffer;
+import com.rentmen.app.entities.Projects;
 import com.rentmen.app.entities.ServiceProvider;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -75,4 +76,9 @@ public interface JobRepo extends JpaRepository<Job, Long> {
       "AND j.status <> 'COMPLETED'", nativeQuery = true)
 	List<Job> findRecentlyExpiredJobs(@Param("currentDate") LocalDate currentDate,
 									  @Param("currentTime") LocalTime currentTime);
+
+	List<Job> findByProject(Projects project);
+
+	List<Job> findByProjectId(Long projectId);
+
 }

@@ -36,6 +36,10 @@ public class UserDto {
 			message = "Password should be between 4-16 characters"
 	) String password;
 	private String about;
+	private String street;
+	private String city;
+	private String zip;
+
 	private Integer depId;
 	private Boolean active;
 	private Boolean status;
@@ -150,6 +154,30 @@ public class UserDto {
 
 	public void setAbout(String about) {
 		this.about = about;
+	}
+
+	public String getStreet() {
+		return street;
+	}
+
+	public void setStreet(String street) {
+		this.street = street;
+	}
+
+	public String getCity() {
+		return city;
+	}
+
+	public void setCity(String city) {
+		this.city = city;
+	}
+
+	public String getZip() {
+		return zip;
+	}
+
+	public void setZip(String zip) {
+		this.zip = zip;
 	}
 
 	public Boolean getActive() {

@@ -275,6 +275,12 @@ public class JobController {
         return ResponseEntity.ok(mergedInvoice);
     }
 
+    @GetMapping({"/manual-sms/{jobId}"})
+    public ResponseEntity<?> manualMessage(@PathVariable("jobId") Long jobId) throws Exception {
+        Boolean messageSent = this.jobService.sendManualMessageToSP(jobId);
+        return ResponseEntity.ok(Collections.singletonMap("success", messageSent));
+    }
+
     @PutMapping({"/update-invoice/{invoiceId}"})
     public ResponseEntity<?> updateInvoice(@PathVariable("invoiceId") Long invoiceId, @RequestBody Invoice invoice) throws Exception {
         Invoice updatedInvoice = this.jobService.updateInvoice(invoiceId, invoice);

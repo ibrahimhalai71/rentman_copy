@@ -6,8 +6,10 @@ import com.rentmen.app.configurations.JwtTokenHelper;
 import com.rentmen.app.entities.ArchiveJob;
 import com.rentmen.app.entities.Invoice;
 import com.rentmen.app.entities.Job;
+import com.rentmen.app.entities.PunchesDetails;
 import com.rentmen.app.repositories.*;
 import com.rentmen.app.services.JobService;
+import com.rentmen.app.services.MessageService;
 import com.rentmen.app.utils.JobStatus;
 import com.rentmen.app.utils.MessageTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.List;
 
 @Service
@@ -49,6 +52,8 @@ public class JobSchedulerService {
     private TwilioMessageService twilioMessageService;
     @Autowired
     private KafkaTemplate<String, Object> kafkaTemplate;
+    @Autowired
+    private MessageService messageService;
 
 
     public JobSchedulerService(JobRepo jobRepo, ArchiveRepo archiveJobRepo) {
@@ -90,26 +95,7 @@ public class JobSchedulerService {
                 }
 
                 try {
-                    job.getServiceProvidersList().stream()
-                            .filter(sp -> !punchesDetailsRepo.existsByJobIdAndSpId(job.getId(), sp.getId()))
-                            .forEach(sp -> {
-                        String spToken = this.jwtTokenHelper.generateTokenForReviewForm(job.getId().toString(), String.valueOf(sp.getId()));
-                        String spTinyURL = UrlShortenerService.shortenUrl(this.spUI + spToken);
-                        Exception ex;
-                        try {
-                            this.twilioMessageService.sendSMS(sp.getContact(), MessageTemplate.getMessageTemplate(sp.getFirstName() + " " + sp.getLastName(), job.getEndDate().toString(), job.getEndTime().toString(), job.getDescription(), spTinyURL));
-                        } catch (Exception var11) {
-                            ex = var11;
-                            ex.printStackTrace();
-                        }
-                        try {
-                            System.out.println("info@eventico.nl Review Form for Job: " + job.getTitle() + "Dear " + sp.getFirstName() + "Het werk is voltooid, vul alstublieft het formulier in via de volgende link: " + spTinyURL + "Dank u wel");
-                            this.emailSendingService.sendEmail("info@eventico.nl", "Review Form for Job: " + job.getTitle(), "Dear " + sp.getFirstName() + ",\n \nHet werk is voltooid, vul alstublieft het formulier in via de volgende link: " + spTinyURL + "\n\nDank u wel", sp.getEmail());
-                        } catch (Exception var9) {
-                            ex = var9;
-                            ex.printStackTrace();
-                        }
-                    });
+                    messageService.sendMessageToSp(job);
                 } catch (Exception var12) {
                     Exception e = var12;
                     e.printStackTrace();
@@ -126,7 +112,24 @@ public class JobSchedulerService {
 
                 ArchiveJob archiveJob = new ArchiveJob(job);
                 this.archiveJobRepo.save(archiveJob);
-                if(punchesDetailsRepo.existsByJobId(job.getId())) {
+
+                LocalDate today = LocalDate.now();
+
+                boolean allOlder = false;
+
+                if (job.getProject() != null) {
+                    allOlder = punchesDetailsRepo.findByProjectId(job.getProject().getId())
+                            .stream()
+                            .allMatch(pd ->
+                                    pd.getTimestamp()
+                                            .atZone(ZoneId.systemDefault())
+                                            .toLocalDate()
+                                            .isBefore(today)
+                            );
+                } else {
+                    System.out.println("Job has no associated project: " + job);
+                }
+                if (allOlder) {
                     sendJobExpiringEvent(job.getId());
                 }
 

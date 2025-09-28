@@ -18,6 +18,7 @@ import com.rentmen.app.entities.User.RateType;
 import com.rentmen.app.exceptions.ResourceNotFoundException;
 import com.rentmen.app.repositories.*;
 import com.rentmen.app.services.JobService;
+import com.rentmen.app.services.MessageService;
 import com.rentmen.app.utils.InvoiceType;
 import com.rentmen.app.utils.JobStatus;
 import com.rentmen.app.utils.UtilFunctions;
@@ -40,8 +41,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.WeekFields;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -99,10 +103,10 @@ public class JobServiceImp implements JobService {
     private FormClient formClient;
 
     @Autowired
-    TwilioMessageService twilioMessageService;
+    PunchesDetailsRepo punchesDetailsRepo;
 
     @Autowired
-    PunchesDetailsRepo punchesDetailsRepo;
+    MessageService messageService;
 
     @Transactional
     @Override
@@ -110,9 +114,7 @@ public class JobServiceImp implements JobService {
         Job job = setFeilds(jobDto);
         job = jobRepo.save(job);
         acceptingNewJobs(job);
-        twilioMessageService.sendJobIdSMS(job.getId());
         return getJobById(job.getId());
-        //return modelMapper.map(updatedJb, JobDto.class);
     }
 
     @Transactional
@@ -137,7 +139,6 @@ public class JobServiceImp implements JobService {
             jobDto.setReviewedByServiceProvider(oldJob.getReviewedByServiceProvider());
         }
         Job updatedJob = setFeilds(jobDto);
-//		updatedJob.setId(oldJob.getId());
         updatedJob = jobRepo.save(updatedJob);
         acceptingNewJobs(updatedJob);
         return modelMapper.map(updatedJob, JobDto.class);
@@ -545,6 +546,7 @@ public class JobServiceImp implements JobService {
         job.getServiceProvidersList().stream().forEach(sp -> {
             InvoiceLines line = new InvoiceLines();
             double hoursWorked = ChronoUnit.MINUTES.between(job.getStartTime(), job.getEndTime()) / 60.0;
+            hoursWorked = Math.round(hoursWorked * 100.0) / 100.0;
             Double minimumPaymentHour = 0.0;
             if (job.getClient().getMinimumPaymentHour() != null) {
                 minimumPaymentHour = job.getClient().getMinimumPaymentHour();
@@ -596,7 +598,12 @@ public class JobServiceImp implements JobService {
         invoice.setTraveltime(0D);
         invoice.setExtraCostDescription(invoiceDto.getExtraCostDescription());
         invoice.setStartTime(invoiceDto.getStartTime());
-        invoice.setBreakMinutes(invoiceDto.getBreakMinutes());
+        if (isDurationEightHoursOrMore(invoice.getStartTime(), invoice.getEndTime())) {
+            invoice.setBreakMinutes(LocalTime.of(1, 0));
+        }
+        if (invoiceDto.getBreakMinutes() != null && !invoiceDto.getBreakMinutes().equals(LocalTime.MIDNIGHT)) {
+            invoice.setBreakMinutes(invoiceDto.getBreakMinutes());
+        }
         invoice.setEndTime(invoiceDto.getEndTime());
         invoice.setExtraCost(invoiceDto.getExtraCost());
 
@@ -693,7 +700,19 @@ public class JobServiceImp implements JobService {
         invoice.getInvoiceLines().forEach(line -> {
             line.setInvoice(invoice);
         });
+        if (invoice.getBreakMinutes() == null && isDurationEightHoursOrMore(invoice.getStartTime(), invoice.getEndTime())) {
+            invoice.setBreakMinutes(LocalTime.of(1, 0));
+        }
         return invoiceRepo.save(invoice);
+    }
+
+    public boolean isDurationEightHoursOrMore(LocalTime startTime, LocalTime endTime) {
+        if (startTime == null || endTime == null) {
+            return false;
+        }
+
+        Duration duration = Duration.between(startTime, endTime);
+        return duration.toHours() >= 8;
     }
 
     @Transactional
@@ -817,10 +836,10 @@ public class JobServiceImp implements JobService {
 //        document.add(title);
 //        document.add(Chunk.NEWLINE);
 
-        Paragraph add1 = new Paragraph("         Eventico B.V.", boldFont);
+        Paragraph add1 = new Paragraph("    Eventico B.V.", boldFont);
         add1.setSpacingBefore(20);
-        Paragraph add2 = new Paragraph("   Romeinenweg 110-E", boldFont);
-        Paragraph add3 = new Paragraph("          5349AL Oss", boldFont);
+        Paragraph add2 = new Paragraph("    Voorburcht 15", boldFont);
+        Paragraph add3 = new Paragraph("    5346XA Oss", boldFont);
 
 //        title.setSpacingBefore(26);
 //        title.setAlignment(1);
@@ -835,13 +854,22 @@ public class JobServiceImp implements JobService {
         infoTable.setSpacingAfter(8);
         infoTable.setHorizontalAlignment(Element.ALIGN_RIGHT);
         infoTable.addCell(getLeftCell("Crediteurnummer", boldFont));
-        infoTable.addCell(getLeftCell("0", regularFont));
+        infoTable.addCell(getLeftCell(""+invoice.getServiceProvider().getId(), regularFont));
         infoTable.addCell(getLeftCell("Inkoopopdracht", boldFont));
-        infoTable.addCell(getLeftCell("0", regularFont));
+        int year = Year.now().getValue();
+        String prefix = String.valueOf(year).substring(2);
+        String code = prefix + "INK" + invoice.getId();
+        infoTable.addCell(getLeftCell(code, regularFont));
         infoTable.addCell(getLeftCell("Datum", boldFont));
-        infoTable.addCell(getLeftCell(invoice.getInvoiceDate() + "", regularFont));
+        infoTable.addCell(getLeftCell(LocalDate.now() + "", regularFont));
         infoTable.addCell(getLeftCell("Weeknummer", boldFont));
-        infoTable.addCell(getLeftCell("Inkooporder week 2025-05\nWeek 20", regularFont));
+//        infoTable.addCell(getLeftCell("Inkooporder week 2025-05\nWeek 20", regularFont));
+        LocalDate today = LocalDate.now();
+        String yearMonth = today.format(DateTimeFormatter.ofPattern("yyyy-MM"));
+        int weekNumber = today.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear());
+        String monthWeekText = String.format("Inkooporder week %s%nWeek %d", yearMonth, weekNumber);
+        infoTable.addCell(getLeftCell(monthWeekText, regularFont));
+
 
         document.add(infoTable);
 
@@ -859,14 +887,23 @@ public class JobServiceImp implements JobService {
         items.addCell(getHeaderCell("Projectnr."));
         items.addCell(getHeaderCell("Totaal ex BTW"));
 
+        Double spRate = invoice.getSpRate();
+        if (spRate == null) {
+            spRate = 0.0;
+        }
+
         items.addCell(getBodyCell("" + invoice.getInvoiceDate()));
         items.addCell(getBodyCell("" + invoice.getHoursWorked()));
-        String formattedRate = "€" + String.valueOf(invoice.getSpRate()).replace('.', ',');
+//        String formattedRate = "€" + String.valueOf(spRate).replace('.', ',');
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.GERMANY);
+        symbols.setDecimalSeparator(',');
+        DecimalFormat df = new DecimalFormat("€0.00", symbols);
+        String formattedRate = df.format(spRate);
         items.addCell(getBodyCell(formattedRate));
 //        items.addCell(getBodyCell(""+invoice.getJob().getRequiredSkills().stream().findFirst().map(Skill::getName).orElse("")));
         items.addCell(getBodyCell("" + invoice.getServiceProvider().getFirstName() + " " + invoice.getServiceProvider().getLastName()));
         items.addCell(getBodyCell("INF" + invoice.getJob().getId()));
-        double total = invoice.getHoursWorked() * invoice.getSpRate();
+        double total = invoice.getHoursWorked() * spRate;
         items.addCell(getBodyCell("€ " + String.format("%.2f", total).replace('.', ',')));
 
         document.add(items);
@@ -883,7 +920,7 @@ public class JobServiceImp implements JobService {
         totals.addCell(getLeftCell("Valuta", regularFont));
         totals.addCell(getRightCell("Euro", regularFont));
         totals.addCell(getLeftCell("Subtotaal", regularFont));
-        double employeeTotal = ((invoice.getHoursWorked() * invoice.getSpRate()) + invoice.getExtraCost());
+        double employeeTotal = ((invoice.getHoursWorked() * spRate) + invoice.getExtraCost());
         double btwAmount = employeeTotal * 0.21;
         totals.addCell(getRightCell("€ " + String.format("%.2f", employeeTotal).replace('.', ','), regularFont));
         totals.addCell(getLeftCell("21% BTW bedrag", regularFont));
@@ -919,6 +956,7 @@ public class JobServiceImp implements JobService {
                 .mapToDouble(i -> i.getPrice() * i.getAantal())
                 .sum();
         double invTotalTax = invTotal * 0.21;
+        invTotalTax = Math.round(invTotalTax * 100.0) / 100.0;
 
         Document document = new Document(PageSize.A4, 40, 40, 40, 40);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -956,7 +994,7 @@ public class JobServiceImp implements JobService {
         companyCell.setBorder(Rectangle.NO_BORDER);
         companyCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
         Paragraph companyInfo1 = new Paragraph("Eventico B.V.", bold);
-        Paragraph companyInfo2 = new Paragraph("Gewandeweg 39\n5345HM Oss\nT: 0648908818\nE: administratie@eventico.nl\nI: eventico.nl", normal);
+        Paragraph companyInfo2 = new Paragraph("Voorburcht 15\n5346XA Oss\nT:+31648908818\nE: administratie@eventico.nl\nI: eventico.nl", normal);
         companyInfo1.setAlignment(Element.ALIGN_LEFT);
         companyInfo2.setAlignment(Element.ALIGN_LEFT);
         companyCell.addElement(companyInfo1);
@@ -982,9 +1020,23 @@ public class JobServiceImp implements JobService {
         detailsCell.setBorder(Rectangle.NO_BORDER);
 //        detailsCell.setHorizontalAlignment(Element.ALIGN_LEFT);
 
+        String street = "";
+        String zip = "";
+        String city = "";
+
+        if (invoice.getJob().getClient().getStreet() != null) {
+            street = invoice.getJob().getClient().getStreet();
+        }
+        if (invoice.getJob().getClient().getZip() != null) {
+            zip = invoice.getJob().getClient().getZip();
+        }
+        if (invoice.getJob().getClient().getCity() != null) {
+            city = invoice.getJob().getClient().getCity();
+        }
+
         Paragraph details1 = new Paragraph("Story Event Engineering", bold);
-        Paragraph details2 = new Paragraph("Zandkamp", normal);
-        Paragraph details3 = new Paragraph("6626KV Alphen", normal);
+        Paragraph details2 = new Paragraph(street, normal);
+        Paragraph details3 = new Paragraph(zip + " " + city, normal);
 
         details1.setAlignment(Element.ALIGN_LEFT);
         details2.setAlignment(Element.ALIGN_LEFT);
@@ -999,7 +1051,7 @@ public class JobServiceImp implements JobService {
         detailsCel2.setBorder(Rectangle.NO_BORDER);
 //        detailsCel2.setHorizontalAlignment(Element.ALIGN_RIGHT);
 
-        Paragraph detailsC1 = new Paragraph("IBAN:    NL90 KNAB 0510 4223 73", normal);
+        Paragraph detailsC1 = new Paragraph("IBAN:    NL23 RBRB 8842 4516 22", normal);
         Paragraph detailsC2 = new Paragraph("Btw-nr:  NL865707753801", normal);
         Paragraph detailsC3 = new Paragraph("KvK:      91567870", normal);
 
@@ -1030,9 +1082,11 @@ public class JobServiceImp implements JobService {
         paymentTable.setWidthPercentage(5);
         paymentTable.setHorizontalAlignment(Element.ALIGN_RIGHT);
         paymentTable.addCell(getLeftCell("Te betalen:", normal));
-        paymentTable.addCell(getLeftCell("€ " + (invTotal + invTotalTax) + " (voor " + invoice.getInvoiceDate() + ")", bold));
+        double total = invTotal + invTotalTax;
+        total = Math.round(total * 100.0) / 100.0;
+        paymentTable.addCell(getLeftCell("€ " + total + " (voor " + invoice.getInvoiceDate() + ")", bold));
         paymentTable.addCell(getLeftCell("Naar IBAN:", normal));
-        paymentTable.addCell(getLeftCell("NL90 KNAB 0510 4223 73", bold));
+        paymentTable.addCell(getLeftCell("NL23 RBRB 8842 4516 22", bold));
         paymentTable.addCell(getLeftCell("Op naam van:", normal));
         paymentTable.addCell(getLeftCell("Eventico B.V.", bold));
         paymentTable.addCell(getLeftCell("Omschrijving:", normal));
@@ -1113,7 +1167,9 @@ public class JobServiceImp implements JobService {
         btwTable.addCell(getRightCell("21% Btw:", smallBold));
         btwTable.addCell(getRightCell("€ " + invTotalTax, normal));
         btwTable.addCell(getRightCell("Totaal inclusief btw:", smallBold));
-        btwTable.addCell(getRightCell("€ " + (invTotal + invTotalTax), smallBold));
+        double totalIncTax = invTotal + invTotalTax;
+        totalIncTax = Math.round(total * 100.0) / 100.0;
+        btwTable.addCell(getRightCell("€ " + totalIncTax, smallBold));
         document.add(btwTable);
 
         document.close();
@@ -1289,14 +1345,17 @@ public class JobServiceImp implements JobService {
                 invoice.setId(spInvoice.get().getId());
                 invoice.setInvoiceLines(spInvoice.get().getInvoiceLines());
             }
+            if (invoiceDto != null && invoiceDto.getBreakMinutes() == null && isDurationEightHoursOrMore(invoice.getStartTime(), invoice.getEndTime())) {
+                invoice.setBreakMinutes(LocalTime.of(1, 0));
+            }
             return this.invoiceRepo.save(invoice);
         } else {
             return null;
         }
     }
 
-    public List<PunchesDetails> getPunchedDetailsByJobIds(List<Long> jobIds){
-        return punchesDetailsRepo.findAllByJobIdIn(jobIds);
+    public List<PunchesDetails> getPunchedDetailsByJobIds(List<Long> projectIds) {
+        return punchesDetailsRepo.findAllByProjectIdIn(projectIds);
     }
 
     public void processFormFiles(Long jobId, Long serviceProviderId, Long poId) {
@@ -1313,14 +1372,26 @@ public class JobServiceImp implements JobService {
     @Override
     public void savePunchDetails(PunchesDetails punchesDetails) {
         PunchesDetails pd = punchesDetailsRepo.save(punchesDetails);
-        jobPunchedServiceProvider(pd);
-        this.createPurchaseOrder(pd.getJobId(), pd.getSpId(), null, false, punchesDetails);
+
+        List<Job> jobs = jobRepo.findByProjectId(punchesDetails.getProjectId());
+
+        ZoneId serverZone = ZoneId.systemDefault();
+        LocalDate punchDate = punchesDetails.getTimestamp()
+                .atZone(serverZone)
+                .toLocalDate();
+
+        Job matchingJob = jobs.stream()
+                .filter(job -> punchDate.equals(job.getEndDate()))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("No matching job found for punch date " + punchDate));
+
+        jobPunchedServiceProvider(pd, matchingJob);
+        this.createPurchaseOrder(matchingJob.getId(), pd.getSpId(), null, false, punchesDetails);
     }
 
     @Transactional
-    public void jobPunchedServiceProvider(PunchesDetails punchesDetails) {
-        Job job = jobRepo.findById(punchesDetails.getJobId())
-                .orElseThrow(() -> new ResourceNotFoundException("Job", "id", punchesDetails.getJobId()));
+    public void jobPunchedServiceProvider(PunchesDetails punchesDetails, Job job) {
+
         ServiceProvider serviceProvider = serviceProviderRepo.findById(punchesDetails.getSpId())
                 .orElseThrow(() -> new ResourceNotFoundException("ServiceProvider", "id", punchesDetails.getSpId()));
 
@@ -1405,6 +1476,17 @@ public class JobServiceImp implements JobService {
         GeneratedInvoiceDto generatedInvoiceDto = new GeneratedInvoiceDto(invoiceListDto, extraCost, kilometer, cost,
                 totalCost, totalCostTax);
         return generatedInvoiceDto;
+    }
+
+    @Override
+    public Boolean sendManualMessageToSP(Long jobId) {
+        Job job = jobRepo.findById(jobId).orElseThrow(() -> new ResourceNotFoundException("Job", "id", jobId));
+        try {
+            messageService.sendMessageToSp(job);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public Double getJobCost(Job job) {
