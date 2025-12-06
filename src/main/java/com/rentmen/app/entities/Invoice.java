@@ -102,6 +102,9 @@ public class Invoice {
     @Column(name = "invoice_status")
     private InvoiceStatus status;
 
+    @JsonProperty("own_car")
+    private Boolean ownCar;
+
     @Column(name = "over_time")
     private Double overtime;
 
@@ -320,6 +323,14 @@ public class Invoice {
 
     public void setStatus(InvoiceStatus status) {
         this.status = status;
+    }
+
+    public Boolean getOwnCar() {
+        return ownCar;
+    }
+
+    public void setOwnCar(Boolean ownCar) {
+        this.ownCar = ownCar;
     }
 
     public Boolean getAttention() {

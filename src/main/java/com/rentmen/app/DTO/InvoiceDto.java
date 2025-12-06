@@ -53,6 +53,9 @@ public class InvoiceDto {
 
     private Boolean attention;
 
+    @JsonProperty("own_car")
+    private Boolean ownCar;
+
     @JsonProperty("created_date")
     private LocalDateTime createdDate;
 
@@ -211,6 +214,14 @@ public class InvoiceDto {
 
     public void setStatus(InvoiceStatus status) {
         this.status = status;
+    }
+
+    public Boolean getOwnCar() {
+        return ownCar;
+    }
+
+    public void setOwnCar(Boolean ownCar) {
+        this.ownCar = ownCar;
     }
 
     public Double getWorkedtime() {

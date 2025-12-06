@@ -75,6 +75,10 @@ public class ArchiveJob {
 	private String title;
 	private String destination;
 	private String role;
+	@Column(
+			name = "description",
+			columnDefinition = "LONGTEXT"
+	)
 	private String description;
 	private String status;
 	private Integer moderatorApproval;

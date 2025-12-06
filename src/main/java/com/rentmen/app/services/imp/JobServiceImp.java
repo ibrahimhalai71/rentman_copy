@@ -854,7 +854,7 @@ public class JobServiceImp implements JobService {
         infoTable.setSpacingAfter(8);
         infoTable.setHorizontalAlignment(Element.ALIGN_RIGHT);
         infoTable.addCell(getLeftCell("Crediteurnummer", boldFont));
-        infoTable.addCell(getLeftCell(""+invoice.getServiceProvider().getId(), regularFont));
+        infoTable.addCell(getLeftCell("" + invoice.getServiceProvider().getId(), regularFont));
         infoTable.addCell(getLeftCell("Inkoopopdracht", boldFont));
         int year = Year.now().getValue();
         String prefix = String.valueOf(year).substring(2);
@@ -873,16 +873,26 @@ public class JobServiceImp implements JobService {
 
         document.add(infoTable);
 
+        PdfPTable items;
         // Items table
-        PdfPTable items = new PdfPTable(6);
+        if (invoice.getOwnCar() != null && invoice.getOwnCar()) {
+            items = new PdfPTable(7);
+        } else{
+            items = new PdfPTable(6);
+        }
         items.setWidthPercentage(100);
-//        items.setWidths(new float[]{2, 1.2f, 1.2f, 2.2f, 2.5f, 1.5f, 1.8f});
-        items.setWidths(new float[]{2, 1.2f, 1.2f, 2.5f, 1.5f, 1.8f});
+        if (invoice.getOwnCar() != null && invoice.getOwnCar()) {
+            items.setWidths(new float[]{2, 1.2f, 1.2f, 2.2f, 2.5f, 1.5f, 1.8f});
+        } else {
+            items.setWidths(new float[]{2, 1.2f, 1.2f, 2.5f, 1.5f, 1.8f});
+        }
 
         items.addCell(getHeaderCell("Leverdatum"));
         items.addCell(getHeaderCell("Aantal"));
         items.addCell(getHeaderCell("Tarief"));
-//        items.addCell(getHeaderCell("Artikel Omschr."));
+        if (invoice.getOwnCar() != null && invoice.getOwnCar()) {
+            items.addCell(getHeaderCell("kilometer"));
+        }
         items.addCell(getHeaderCell("Omschrijving"));
         items.addCell(getHeaderCell("Projectnr."));
         items.addCell(getHeaderCell("Totaal ex BTW"));
@@ -900,6 +910,9 @@ public class JobServiceImp implements JobService {
         DecimalFormat df = new DecimalFormat("€0.00", symbols);
         String formattedRate = df.format(spRate);
         items.addCell(getBodyCell(formattedRate));
+        if (invoice.getOwnCar() != null && invoice.getOwnCar()) {
+            items.addCell(getBodyCell("" + invoice.getKilometer()));
+        }
 //        items.addCell(getBodyCell(""+invoice.getJob().getRequiredSkills().stream().findFirst().map(Skill::getName).orElse("")));
         items.addCell(getBodyCell("" + invoice.getServiceProvider().getFirstName() + " " + invoice.getServiceProvider().getLastName()));
         items.addCell(getBodyCell("INF" + invoice.getJob().getId()));
@@ -938,9 +951,8 @@ public class JobServiceImp implements JobService {
                 "De factuur dient uitsluitend te worden aangeleverd in PDF-formaat en mag alleen op deze inkoopopdracht betrekking hebben. " +
                         "Facturen moeten worden gestuurd naar ap-nl@eventico.nl met vermelding van het inkoopopdrachtnummer. Zonder dit nummer kan de factuur niet in behandeling worden genomen.\n\n",
                 regularFont));
-//        footer.add(new Chunk("ATR Infra-Services | KVK: 82017455 | BTW: NL862354562B01 | IBAN: NL94 ABNA 0838 8774 76 | BIC: ABNANL2A", regularFont));
-        footer.add(new Chunk("ATR Infra-Services | KVK: 0 | BTW: 0 | IBAN: 0 | BIC: 0", regularFont));
-
+        footer.add(new Chunk("ATR Infra-Services | KVK: 91597870 | BTW: NL865707753801 | IBAN: NL23 RBRB 8842 4516 22 | BIC: RBRBNL21", regularFont));
+//        footer.add(new Chunk("ATR Infra-Services | KVK: 0 | BTW: 0 | IBAN: 0 | BIC: 0", regularFont));
 
         document.add(footer);
 
