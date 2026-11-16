@@ -1,74 +1,80 @@
+
 package com.rentmen.app.DTO;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.rentmen.app.entities.User;
 import com.rentmen.app.utils.AvailabilityOptions;
+import com.rentmen.app.utils.ClientEventRateType;
 import com.rentmen.app.utils.DriversLicense;
 
-import javax.persistence.Column;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
-
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class UserDto {
 	private long id;
-
 	@JsonProperty("first_name")
 	private String firstName;
-
 	@JsonProperty("last_name")
 	private String lastName;
 	@JsonProperty("business_registration")
 	private String businessRegistration;
-	@NotEmpty
-	@Size(min = 3, message = "Username must be at least 3 characters")
-	private String email;
-
+	private @NotEmpty @Size(
+			min = 3,
+			message = "Username must be at least 3 characters"
+	) String email;
 	private String VAT;
-	@JsonProperty("discussed_rate")
-	private Double discussedRate;
-	@NotEmpty
-	@Size(min = 4, max = 16, message = "Password should be between 4-16 characters")
-	private String password;
-
+	private @NotEmpty @Size(
+			min = 4,
+			max = 16,
+			message = "Password should be between 4-16 characters"
+	) String password;
 	private String about;
 	private Integer depId;
 	private Boolean active;
-
 	private Boolean status;
 	@JsonProperty("profile_image")
 	private String profileImage;
-	
-	//Client Attributes
 	private String address;
 	@JsonProperty("contact_person")
 	private String contactPerson;
 	@JsonProperty("phone_number")
 	private String phoneNumber;
-	@JsonProperty( "phone_number_planning")
+	@JsonProperty("phone_number_planning")
 	private String phoneNumberPlanning;
 	@JsonProperty("invoice_mail")
 	private String invoiceMail;
-	@JsonProperty( "sector")
+	@JsonProperty("sector")
 	private String sector;
-	@JsonProperty( "kilometer_rate")
+	@JsonProperty("kilometer_rate")
 	private Double kilometerRate;
-	
-	//Moderator Attributes
-	private String accessLevel;
 
-	//Service Provider Attributes
-	private Boolean availabilityStatus;	
+	private Boolean timeBasedRate;
+	@JsonProperty("discussed_rate_type")
+	private User.RateType rateType;
+	private String accessLevel;
+	private Boolean availabilityStatus;
 	private Integer rating;
 	private String contact;
-	private Set<SkillDto> skills = new HashSet<>(); 
+	private Set<SkillDto> skills = new HashSet();
 	@JsonProperty("availability_start_date")
 	private LocalDate availabilityStartDate;
 	@JsonProperty("availability_end_date")
 	private LocalDate availabilityEndDate;
+	@JsonProperty("unavailable_start_date")
+	private LocalDate unavailableStartDate;
+	@JsonProperty("unavailable_end_date")
+	private LocalDate unavailableEndDate;
+	@JsonProperty("unknown_start_date")
+	private LocalDate unknownStartDate;
+	@JsonProperty("unknown_end_date")
+	private LocalDate unknownEndDate;
 	@JsonProperty("availability_options")
 	private AvailabilityOptions availabilityOptions;
 	@JsonProperty("drivers_license")
@@ -76,7 +82,41 @@ public class UserDto {
 	private String agreement;
 	@JsonProperty("date_of_birth")
 	private LocalDate dateOfBirth;
-	
+	@JsonProperty("availability_dates")
+	private List<LocalDate> availabilityDates;
+	@JsonProperty("unavailability_dates")
+	private List<LocalDate> unavailabilityDates;
+	@JsonProperty("unknown_dates")
+	private List<LocalDate> unknownDates;
+
+	@JsonProperty("minimum_payment_hour")
+	private Double minimumPaymentHour;
+	@JsonProperty("client_event_rate_type")
+	@Enumerated(EnumType.STRING)
+	private ClientEventRateType clientEventRateType;
+	@JsonProperty("discussed_rate")
+	private Double discussedRate;
+	@JsonProperty("discussed_rate_rw")
+	private Double discussedRateRW;
+	@JsonProperty("hour_rate")
+	private Double hourRate;
+	@JsonProperty("hour_rate_rw")
+	private Double hourRateRW;
+	@JsonProperty("night_rate")
+	private Double nightRate;
+	@JsonProperty("night_rate_rw")
+	private Double nightRateRW;
+	@JsonProperty("weekend_rate")
+	private Double weekendRate;
+	@JsonProperty("weekend_rate_rw")
+	private Double weekendRateRW;
+	@JsonProperty("day_rate")
+	private Double dayRate;
+
+
+	public UserDto() {
+	}
+
 	public long getId() {
 		return this.id;
 	}
@@ -84,7 +124,6 @@ public class UserDto {
 	public void setId(long id) {
 		this.id = id;
 	}
-
 
 	public String getEmail() {
 		return this.email;
@@ -129,15 +168,55 @@ public class UserDto {
 	}
 
 	public Boolean getStatus() {
-		return status;
+		return this.status;
 	}
 
 	public void setStatus(Boolean status) {
 		this.status = status;
 	}
 
+	public Double getDiscussedRateRW() {
+		return discussedRateRW;
+	}
+
+	public void setDiscussedRateRW(Double discussedRateRW) {
+		this.discussedRateRW = discussedRateRW;
+	}
+
+	public Double getHourRate() {
+		return hourRate;
+	}
+
+	public void setHourRate(Double hourRate) {
+		this.hourRate = hourRate;
+	}
+
+	public Double getHourRateRW() {
+		return hourRateRW;
+	}
+
+	public void setHourRateRW(Double hourRateRW) {
+		this.hourRateRW = hourRateRW;
+	}
+
+	public Double getNightRateRW() {
+		return nightRateRW;
+	}
+
+	public void setNightRateRW(Double nightRateRW) {
+		this.nightRateRW = nightRateRW;
+	}
+
+	public Double getWeekendRateRW() {
+		return weekendRateRW;
+	}
+
+	public void setWeekendRateRW(Double weekendRateRW) {
+		this.weekendRateRW = weekendRateRW;
+	}
+
 	public String getProfileImage() {
-		return profileImage;
+		return this.profileImage;
 	}
 
 	public void setProfileImage(String profileImage) {
@@ -145,7 +224,7 @@ public class UserDto {
 	}
 
 	public String getAccessLevel() {
-		return accessLevel;
+		return this.accessLevel;
 	}
 
 	public void setAccessLevel(String accessLevel) {
@@ -153,7 +232,7 @@ public class UserDto {
 	}
 
 	public Boolean getAvailabilityStatus() {
-		return availabilityStatus;
+		return this.availabilityStatus;
 	}
 
 	public void setAvailabilityStatus(Boolean availabilityStatus) {
@@ -161,7 +240,7 @@ public class UserDto {
 	}
 
 	public Integer getRating() {
-		return rating;
+		return this.rating;
 	}
 
 	public void setRating(Integer rating) {
@@ -169,7 +248,7 @@ public class UserDto {
 	}
 
 	public String getContact() {
-		return contact;
+		return this.contact;
 	}
 
 	public void setContact(String contact) {
@@ -177,7 +256,7 @@ public class UserDto {
 	}
 
 	public Set<SkillDto> getSkills() {
-		return skills;
+		return this.skills;
 	}
 
 	public void setSkills(Set<SkillDto> skills) {
@@ -185,15 +264,15 @@ public class UserDto {
 	}
 
 	public LocalDate getAvailabilityStartDate() {
-		return availabilityStartDate;
+		return this.availabilityStartDate;
 	}
 
 	public LocalDate getAvailabilityEndDate() {
-		return availabilityEndDate;
+		return this.availabilityEndDate;
 	}
 
 	public AvailabilityOptions getAvailabilityOptions() {
-		return availabilityOptions;
+		return this.availabilityOptions;
 	}
 
 	public void setAvailabilityStartDate(LocalDate availabilityStartDate) {
@@ -209,63 +288,63 @@ public class UserDto {
 	}
 
 	public String getFirstName() {
-		return firstName;
+		return this.firstName;
 	}
 
 	public String getLastName() {
-		return lastName;
+		return this.lastName;
 	}
 
 	public String getBusinessRegistration() {
-		return businessRegistration;
+		return this.businessRegistration;
 	}
 
 	public String getVAT() {
-		return VAT;
+		return this.VAT;
 	}
 
 	public Double getDiscussedRate() {
-		return discussedRate;
+		return this.discussedRate;
 	}
 
 	public String getAddress() {
-		return address;
+		return this.address;
 	}
 
 	public String getContactPerson() {
-		return contactPerson;
+		return this.contactPerson;
 	}
 
 	public String getPhoneNumber() {
-		return phoneNumber;
+		return this.phoneNumber;
 	}
 
 	public String getPhoneNumberPlanning() {
-		return phoneNumberPlanning;
+		return this.phoneNumberPlanning;
 	}
 
 	public String getInvoiceMail() {
-		return invoiceMail;
+		return this.invoiceMail;
 	}
 
 	public String getSector() {
-		return sector;
+		return this.sector;
 	}
 
 	public Double getKilometerRate() {
-		return kilometerRate;
+		return this.kilometerRate;
 	}
 
 	public DriversLicense getDriversLicense() {
-		return driversLicense;
+		return this.driversLicense;
 	}
 
 	public String getAgreement() {
-		return agreement;
+		return this.agreement;
 	}
 
 	public LocalDate getDateOfBirth() {
-		return dateOfBirth;
+		return this.dateOfBirth;
 	}
 
 	public void setFirstName(String firstName) {
@@ -281,7 +360,7 @@ public class UserDto {
 	}
 
 	public void setVAT(String vAT) {
-		VAT = vAT;
+		this.VAT = vAT;
 	}
 
 	public void setDiscussedRate(Double discussedRate) {
@@ -328,4 +407,115 @@ public class UserDto {
 		this.dateOfBirth = dateOfBirth;
 	}
 
+	public Double getDayRate() {
+		return this.dayRate;
+	}
+
+	public void setDayRate(Double dayRate) {
+		this.dayRate = dayRate;
+	}
+
+	public Double getNightRate() {
+		return this.nightRate;
+	}
+
+	public void setNightRate(Double nightRate) {
+		this.nightRate = nightRate;
+	}
+
+	public Double getWeekendRate() {
+		return this.weekendRate;
+	}
+
+	public void setWeekendRate(Double weekendRate) {
+		this.weekendRate = weekendRate;
+	}
+
+	public Boolean getTimeBasedRate() {
+		return this.timeBasedRate;
+	}
+
+	public void setTimeBasedRate(Boolean timeBasedRate) {
+		this.timeBasedRate = timeBasedRate;
+	}
+
+	public User.RateType getRateType() {
+		return this.rateType;
+	}
+
+	public void setRateType(User.RateType rateType) {
+		this.rateType = rateType;
+	}
+
+	public LocalDate getUnavailableStartDate() {
+		return unavailableStartDate;
+	}
+
+	public void setUnavailableStartDate(LocalDate unavailableStartDate) {
+		this.unavailableStartDate = unavailableStartDate;
+	}
+
+	public LocalDate getUnavailableEndDate() {
+		return unavailableEndDate;
+	}
+
+	public void setUnavailableEndDate(LocalDate unavailableEndDate) {
+		this.unavailableEndDate = unavailableEndDate;
+	}
+
+	public LocalDate getUnknownStartDate() {
+		return unknownStartDate;
+	}
+
+	public void setUnknownStartDate(LocalDate unknownStartDate) {
+		this.unknownStartDate = unknownStartDate;
+	}
+
+	public LocalDate getUnknownEndDate() {
+		return unknownEndDate;
+	}
+
+	public void setUnknownEndDate(LocalDate unknownEndDate) {
+		this.unknownEndDate = unknownEndDate;
+	}
+
+	public List<LocalDate> getAvailabilityDates() {
+		return availabilityDates;
+	}
+
+	public void setAvailabilityDates(List<LocalDate> availabilityDates) {
+		this.availabilityDates = availabilityDates;
+	}
+
+	public List<LocalDate> getUnavailabilityDates() {
+		return unavailabilityDates;
+	}
+
+	public void setUnavailabilityDates(List<LocalDate> unavailabilityDates) {
+		this.unavailabilityDates = unavailabilityDates;
+	}
+
+	public Double getMinimumPaymentHour() {
+		return minimumPaymentHour;
+	}
+
+	public void setMinimumPaymentHour(Double minimumPaymentHour) {
+		this.minimumPaymentHour = minimumPaymentHour;
+	}
+
+	public ClientEventRateType getClientEventRateType() {
+		return clientEventRateType;
+	}
+
+	public void setClientEventRateType(ClientEventRateType clientEventRateType) {
+		this.clientEventRateType = clientEventRateType;
+	}
+
+	public List<LocalDate> getUnknownDates() {
+		return unknownDates;
+	}
+
+	public void setUnknownDates(List<LocalDate> unknownDates) {
+		this.unknownDates = unknownDates;
+	}
 }

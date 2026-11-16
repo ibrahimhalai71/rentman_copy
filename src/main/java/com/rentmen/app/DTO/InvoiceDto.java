@@ -1,29 +1,45 @@
+
 package com.rentmen.app.DTO;
 
-import javax.validation.constraints.NotEmpty;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.rentmen.app.utils.InvoiceType;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.persistence.Column;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.validation.constraints.NotEmpty;
+import java.time.LocalDate;
+import java.util.List;
 
 public class InvoiceDto {
 	private int id;
-	
-	@NotEmpty
-	private JobDto job;
-	
-	@NotEmpty
+	private @NotEmpty JobDto job;
 	@JsonProperty("service_provider")
-	private UserDto serviceProvider;
-	
+	private @NotEmpty UserDto serviceProvider;
 	private Double kilometer;
-
 	@JsonProperty("extra_cost")
 	private Double extraCost;
-
 	@JsonProperty("extra_cost_description")
 	private String extraCostDescription;
+	private Boolean reviewedBySp;
+	private Boolean reviewedByClient;
+	@JsonProperty("invoice_type")
+	private InvoiceType invoiceType;
+	List<MultipartFile> files;
+	private LocalDate jobDate;
+
+	private String dagen;
+	@JsonProperty("percentage_switch")
+	private Boolean percentageSwitch;
+	@JsonProperty("percentage_number")
+	private Long percentageNumber;
+
+	public InvoiceDto() {
+	}
 
 	public int getId() {
-		return id;
+		return this.id;
 	}
 
 	public void setId(int id) {
@@ -31,7 +47,7 @@ public class InvoiceDto {
 	}
 
 	public JobDto getJob() {
-		return job;
+		return this.job;
 	}
 
 	public void setJob(JobDto job) {
@@ -39,7 +55,7 @@ public class InvoiceDto {
 	}
 
 	public UserDto getServiceProvider() {
-		return serviceProvider;
+		return this.serviceProvider;
 	}
 
 	public void setServiceProvider(UserDto serviceProvider) {
@@ -47,15 +63,39 @@ public class InvoiceDto {
 	}
 
 	public Double getKilometer() {
-		return kilometer;
+		return this.kilometer;
 	}
 
 	public void setKilometer(Double kilometer) {
 		this.kilometer = kilometer;
 	}
 
+	public List<MultipartFile> getFiles() {
+		return files;
+	}
+
+	public void setFiles(List<MultipartFile> files) {
+		this.files = files;
+	}
+
+	public InvoiceType getInvoiceType() {
+		return invoiceType;
+	}
+
+	public LocalDate getJobDate() {
+		return jobDate;
+	}
+
+	public void setJobDate(LocalDate jobDate) {
+		this.jobDate = jobDate;
+	}
+
+	public void setInvoiceType(InvoiceType invoiceType) {
+		this.invoiceType = invoiceType;
+	}
+
 	public Double getExtraCost() {
-		return extraCost;
+		return this.extraCost;
 	}
 
 	public void setExtraCost(Double extraCost) {
@@ -63,11 +103,50 @@ public class InvoiceDto {
 	}
 
 	public String getExtraCostDescription() {
-		return extraCostDescription;
+		return this.extraCostDescription;
 	}
 
 	public void setExtraCostDescription(String extraCostDescription) {
 		this.extraCostDescription = extraCostDescription;
-	} 
+	}
 
+	public Boolean getReviewedBySp() {
+		return this.reviewedBySp;
+	}
+
+	public void setReviewedBySp(Boolean reviewedBySp) {
+		this.reviewedBySp = reviewedBySp;
+	}
+
+	public Boolean getReviewedByClient() {
+		return this.reviewedByClient;
+	}
+
+	public void setReviewedByClient(Boolean reviewedByClient) {
+		this.reviewedByClient = reviewedByClient;
+	}
+
+	public String getDagen() {
+		return dagen;
+	}
+
+	public void setDagen(String dagen) {
+		this.dagen = dagen;
+	}
+
+	public Boolean getPercentageSwitch() {
+		return percentageSwitch;
+	}
+
+	public void setPercentageSwitch(Boolean percentageSwitch) {
+		this.percentageSwitch = percentageSwitch;
+	}
+
+	public Long getPercentageNumber() {
+		return percentageNumber;
+	}
+
+	public void setPercentageNumber(Long percentageNumber) {
+		this.percentageNumber = percentageNumber;
+	}
 }
