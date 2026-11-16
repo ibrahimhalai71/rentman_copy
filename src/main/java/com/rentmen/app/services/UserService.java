@@ -1,11 +1,10 @@
 package com.rentmen.app.services;
 
 import com.rentmen.app.DTO.UserDto;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.List;
-
-import org.springframework.web.multipart.MultipartFile;
 
 public interface UserService {
   UserDto createUser(UserDto paramUserDto);

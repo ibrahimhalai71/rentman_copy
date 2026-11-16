@@ -1,13 +1,12 @@
 package com.rentmen.app.utils;
 
+import com.rentmen.app.DTO.Response;
+import com.rentmen.app.services.MessageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-
-import com.rentmen.app.DTO.Response;
-import com.rentmen.app.services.MessageService;
 
 @Component
 public class GenerateResponse {
@@ -22,9 +21,9 @@ public class GenerateResponse {
     public static ResponseEntity<?> ok(String message, Object data) {
         try {
             return ResponseEntity.ok(Response.getInstance(messageService.getMessage(message), data));
-        } catch (Exception e) {
+        } catch (Exception var3) {
             logger.warn(String.format("Message not set for %s", message));
-            message = message.replaceAll("_"," ").replaceAll("message","");
+            message = message.replaceAll("_", " ").replaceAll("message", "");
             return ResponseEntity.ok(Response.getInstance(message, data));
         }
     }
@@ -32,33 +31,29 @@ public class GenerateResponse {
     public static ResponseEntity<?> ok(String message) {
         try {
             return ResponseEntity.ok(Response.getInstance(messageService.getMessage(message)));
-        } catch (Exception e) {
+        } catch (Exception var2) {
             logger.warn(String.format("Message not set for %s", message));
             return ResponseEntity.ok(Response.getInstance(message));
         }
     }
 
     public static ResponseEntity<?> ok(String message, Long unreadCounter) {
-        if (message.contains("_")) {
-            return ResponseEntity.ok(Response.getInstance(messageService.getMessage(message), unreadCounter));
-        } else
-            return ResponseEntity.ok(Response.getInstance(message, unreadCounter));
+        return message.contains("_") ? ResponseEntity.ok(Response.getInstance(messageService.getMessage(message), unreadCounter)) : ResponseEntity.ok(Response.getInstance(message, unreadCounter));
     }
 
     public static ResponseEntity<?> ok(String message, Long count, Object data) {
         try {
             return ResponseEntity.ok(Response.getInstance(messageService.getMessage(message), count, data));
-        } catch (Exception e) {
+        } catch (Exception var4) {
             logger.warn(String.format("Message not set for %s", message));
             return ResponseEntity.ok(Response.getInstance(message));
         }
     }
 
-
     public static ResponseEntity<?> badRequest(String message) {
         try {
             return ResponseEntity.badRequest().body(Response.getInstance(messageService.getMessage(message)));
-        } catch (Exception e) {
+        } catch (Exception var2) {
             logger.warn(String.format("Message not set for %s", message));
             return ResponseEntity.badRequest().body(Response.getInstance(message));
         }
