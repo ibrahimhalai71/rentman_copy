@@ -1,11 +1,10 @@
 package com.rentmen.app.services;
 
 import com.rentmen.app.DTO.UserDto;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.List;
-
-import org.springframework.web.multipart.MultipartFile;
 
 public interface UserService {
   UserDto createUser(UserDto paramUserDto);
@@ -39,7 +38,10 @@ public interface UserService {
   UserDto updateServiceProvider(UserDto dto);
 
   List<UserDto> getServiceProvidersAvailableBetweenDates(LocalDate startDate, LocalDate endDate);
-  
+  List<UserDto> getServiceProvidersUnavailableBetweenDates(LocalDate startDate, LocalDate endDate);
+  List<UserDto> getServiceProvidersUnknownBetweenDates(LocalDate startDate, LocalDate endDate);
+  List<UserDto> getServiceProvidersMaybeBetweenDates(LocalDate startDate, LocalDate endDate);
+
   UserDto updateUserFile(Long userId, MultipartFile file, Integer docType) throws Exception;
   
 }

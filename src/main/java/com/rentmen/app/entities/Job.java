@@ -1,128 +1,159 @@
 package com.rentmen.app.entities;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
-import org.springframework.format.annotation.DateTimeFormat;
-
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.rentmen.app.utils.JobStatus;
 import com.rentmen.app.utils.StringListConverter;
 import com.rentmen.app.utils.StringMapConverter;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import javax.persistence.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.*;
 
 @Entity
-@Table(name = "job")
+@Table(
+		name = "job"
+)
 public class Job {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(
+			strategy = GenerationType.IDENTITY
+	)
+	private Long id;
+	@ManyToOne
+	@JoinColumn(
+			name = "client_id"
+	)
+	@JsonBackReference
+	private Client client;
+	@ManyToOne
+	@JoinColumn(
+			name = "moderator_id"
+	)
+	private Moderator moderator;
+	@ManyToMany(fetch = FetchType.EAGER)
+	@JoinTable(
+			name = "job_service_provider_ids",
+			joinColumns = {@JoinColumn(
+					name = "job_id",
+					referencedColumnName = "id"
+			)},
+			inverseJoinColumns = {@JoinColumn(
+					name = "service_provider_id",
+					referencedColumnName = "id"
+			)}
+	)
+	private List<ServiceProvider> serviceProvidersList = new ArrayList();
+	@ManyToOne
+	@JoinColumn(
+			name = "created_by"
+	)
+	private User createdBy;
+	@ManyToMany(
+			fetch = FetchType.EAGER
+	)
+	@JoinTable(
+			name = "job_required_skills",
+			joinColumns = {@JoinColumn(
+					name = "job_id",
+					referencedColumnName = "id"
+			)},
+			inverseJoinColumns = {@JoinColumn(
+					name = "skill_id",
+					referencedColumnName = "id"
+			)}
+	)
+	Set<Skill> requiredSkills = new HashSet();
+	@OneToMany(
+			mappedBy = "job",
+			cascade = {CascadeType.ALL},
+			fetch = FetchType.LAZY,
+			orphanRemoval = true
+	)
+	@JsonManagedReference
+	private List<PotentialJobOffer> potentialJobOffers;
+	private Boolean active;
+	@DateTimeFormat(
+			pattern = "yyyy-MM-dd"
+	)
+	private LocalDate creationDate;
+	@DateTimeFormat(
+			pattern = "yyyy-MM-dd"
+	)
+	private LocalDate startDate;
+	@DateTimeFormat(
+			pattern = "yyyy-MM-dd"
+	)
+	private LocalDate endDate;
+	private String title;
+	private String destination;
+	private String role;
+	@Column(
+			name = "description",
+			columnDefinition = "LONGTEXT"
+	)
+	private String description;
+	@Enumerated(EnumType.STRING)
+	private JobStatus status;
+	@Column(
+			name = "moderator_approval"
+	)
+	private Integer moderatorApproval;
+	@Column(
+			name = "start_time"
+	)
+	private LocalTime startTime;
+	@Column(
+			name = "end_time"
+	)
+	private LocalTime endTime;
+	@Column(
+			name = "number_of_people"
+	)
+	private Integer numberOfPeople;
+	@Column(
+			name = "project_lead_name"
+	)
+	private String projectLeadName;
+	@Column(
+			name = "project_lead_number"
+	)
+	private String projectLeadNumber;
 
-    @ManyToOne
-    @JoinColumn(name = "client_id")
-    private Client client;
+	@ManyToOne
+	@JoinColumn(name = "project_id", referencedColumnName = "id")
+	private Projects project;
 
-    @ManyToOne
-    @JoinColumn(name = "moderator_id")
-    private Moderator moderator;
+	@Convert(
+			converter = StringListConverter.class
+	)
+	@Column(
+			name = "job_other_skills",
+			nullable = true
+	)
+	private List<String> jobOtherSkills;
+	@Convert(
+			converter = StringMapConverter.class
+	)
+	@Column(
+			name = "reviewed_by_ServiceProvider",
+			nullable = true
+	)
+	private Map<Long, Boolean> reviewedByServiceProvider;
+	private Boolean reviewedByClient;
+	@Column(name = "invoice_number")
+	private Long invoiceNumber;
 
-    @ManyToMany
-    @JoinTable(
-            name = "job_service_provider_ids",
-            joinColumns = @JoinColumn(name = "job_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "service_provider_id", referencedColumnName = "id")
-        )
-    private List<ServiceProvider> serviceProvidersList = new ArrayList<ServiceProvider>();
-    
-    @ManyToOne
-    @JoinColumn(name = "created_by")
-    private User createdBy;
-    
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "job_required_skills",
-            joinColumns = @JoinColumn(name = "job_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "skill_id", referencedColumnName = "id")
-        )
-	Set<Skill> requiredSkills = new HashSet<>();
-    
-    @OneToMany(mappedBy = "job", cascade=CascadeType.ALL, fetch=FetchType.LAZY, orphanRemoval = true)
-    private List<PotentialJobOffer> potentialJobOffers;
-    
-    private Boolean active;
-    
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate creationDate;
+	private Boolean isExpired;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate startDate;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate endDate;
+	public Job() {
+	}
 
-    private String title;
-    private String destination;
-    private String role;
-    
-    @Column(name = "description", columnDefinition = "LONGTEXT")
-    private String description;
-    
-    @Enumerated(EnumType.STRING)
-    private JobStatus status;
-    
-    @Column(name = "moderator_approval")
-    private Integer moderatorApproval;
-    
-    @Column(name = "start_time")
-    private LocalTime startTime;
-    
-    @Column(name = "end_time")
-    private LocalTime endTime;
-    
-    @Column(name = "number_of_people")
-    private Integer numberOfPeople;
-    
-    @Column(name = "project_lead_name")
-    private String projectLeadName;
-    
-    @Column(name = "project_lead_number")
-    private String projectLeadNumber;
-
-    @Convert(converter = StringListConverter.class)
-    @Column(name = "job_other_skills", nullable = true)
-    private List<String> jobOtherSkills;
-    // Other job-related fields and methods
-    @Convert(converter = StringMapConverter.class)
-    @Column(name = "reviewed_by_ServiceProvider", nullable = true)
-    private Map<Long, Boolean> reviewedByServiceProvider;
-    
-    private Boolean reviewedByClient;
-    // Getters and setters
 	public Long getId() {
-		return id;
+		return this.id;
 	}
 
 	public void setId(Long id) {
@@ -130,7 +161,7 @@ public class Job {
 	}
 
 	public Client getClient() {
-		return client;
+		return this.client;
 	}
 
 	public void setClient(Client client) {
@@ -138,7 +169,7 @@ public class Job {
 	}
 
 	public Moderator getModerator() {
-		return moderator;
+		return this.moderator;
 	}
 
 	public void setModerator(Moderator moderator) {
@@ -146,7 +177,7 @@ public class Job {
 	}
 
 	public User getCreatedBy() {
-		return createdBy;
+		return this.createdBy;
 	}
 
 	public void setCreatedBy(User createdBy) {
@@ -154,7 +185,7 @@ public class Job {
 	}
 
 	public Set<Skill> getRequiredSkills() {
-		return requiredSkills;
+		return this.requiredSkills;
 	}
 
 	public void setRequiredSkills(Set<Skill> requiredSkills) {
@@ -162,7 +193,7 @@ public class Job {
 	}
 
 	public List<PotentialJobOffer> getPotentialJobOffers() {
-		return potentialJobOffers;
+		return this.potentialJobOffers;
 	}
 
 	public void setPotentialJobOffers(List<PotentialJobOffer> potentialJobOffers) {
@@ -170,7 +201,7 @@ public class Job {
 	}
 
 	public Boolean getActive() {
-		return active;
+		return this.active;
 	}
 
 	public void setActive(Boolean active) {
@@ -178,7 +209,7 @@ public class Job {
 	}
 
 	public LocalDate getCreationDate() {
-		return creationDate;
+		return this.creationDate;
 	}
 
 	public void setCreationDate(LocalDate creationDate) {
@@ -186,7 +217,7 @@ public class Job {
 	}
 
 	public LocalDate getStartDate() {
-		return startDate;
+		return this.startDate;
 	}
 
 	public void setStartDate(LocalDate startDate) {
@@ -194,15 +225,31 @@ public class Job {
 	}
 
 	public LocalDate getEndDate() {
-		return endDate;
+		return this.endDate;
 	}
 
 	public void setEndDate(LocalDate endDate) {
 		this.endDate = endDate;
 	}
 
+	public Long getInvoiceNumber() {
+		return invoiceNumber;
+	}
+
+	public void setInvoiceNumber(Long invoiceNumber) {
+		this.invoiceNumber = invoiceNumber;
+	}
+
+	public Boolean getExpired() {
+		return isExpired;
+	}
+
+	public void setExpired(Boolean expired) {
+		isExpired = expired;
+	}
+
 	public String getTitle() {
-		return title;
+		return this.title;
 	}
 
 	public void setTitle(String title) {
@@ -210,7 +257,7 @@ public class Job {
 	}
 
 	public String getDestination() {
-		return destination;
+		return this.destination;
 	}
 
 	public void setDestination(String destination) {
@@ -218,7 +265,7 @@ public class Job {
 	}
 
 	public String getRole() {
-		return role;
+		return this.role;
 	}
 
 	public void setRole(String role) {
@@ -226,7 +273,7 @@ public class Job {
 	}
 
 	public String getDescription() {
-		return description;
+		return this.description;
 	}
 
 	public void setDescription(String description) {
@@ -234,7 +281,7 @@ public class Job {
 	}
 
 	public JobStatus getStatus() {
-		return status;
+		return this.status;
 	}
 
 	public void setStatus(JobStatus status) {
@@ -242,31 +289,31 @@ public class Job {
 	}
 
 	public List<ServiceProvider> getServiceProvidersList() {
-		return serviceProvidersList;
+		return this.serviceProvidersList;
 	}
 
 	public Integer getModeratorApproval() {
-		return moderatorApproval;
+		return this.moderatorApproval;
 	}
 
 	public LocalTime getStartTime() {
-		return startTime;
+		return this.startTime;
 	}
 
 	public LocalTime getEndTime() {
-		return endTime;
+		return this.endTime;
 	}
 
 	public Integer getNumberOfPeople() {
-		return numberOfPeople;
+		return this.numberOfPeople;
 	}
 
 	public String getProjectLeadName() {
-		return projectLeadName;
+		return this.projectLeadName;
 	}
 
 	public String getProjectLeadNumber() {
-		return projectLeadNumber;
+		return this.projectLeadNumber;
 	}
 
 	public void setServiceProvidersList(List<ServiceProvider> serviceProvidersList) {
@@ -297,8 +344,16 @@ public class Job {
 		this.projectLeadNumber = projectLeadNumber;
 	}
 
+	public Projects getProject() {
+		return project;
+	}
+
+	public void setProject(Projects project) {
+		this.project = project;
+	}
+
 	public List<String> getJobOtherSkills() {
-		return jobOtherSkills;
+		return this.jobOtherSkills;
 	}
 
 	public void setJobOtherSkills(List<String> jobOtherSkills) {
@@ -306,14 +361,21 @@ public class Job {
 	}
 
 	public Boolean getReviewedByClient() {
-		return reviewedByClient;
+		return this.reviewedByClient;
 	}
 
 	public void setReviewedByClient(Boolean reviewedByClient) {
 		this.reviewedByClient = reviewedByClient;
 	}
 
+//	public Map<Long, Boolean> getReviewedByServiceProvider() {
+//		return this.reviewedByServiceProvider;
+//	}
+
 	public Map<Long, Boolean> getReviewedByServiceProvider() {
+		if (reviewedByServiceProvider == null) {
+			reviewedByServiceProvider = new HashMap<>();
+		}
 		return reviewedByServiceProvider;
 	}
 
@@ -321,4 +383,3 @@ public class Job {
 		this.reviewedByServiceProvider = reviewedByServiceProvider;
 	}
 }
-

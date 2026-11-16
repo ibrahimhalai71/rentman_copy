@@ -1,0 +1,13 @@
+label: `${findServiceProvider?.first_name} ${findServiceProvider?.last_name}` ?? 'Name not found.'
+to
+label: findServiceProvider ? `${findServiceProvider.first_name} ${findServiceProvider.last_name}` : 'Name not found.'
+
+
+
+<p>
+  {(selectedEvent?.client?.first_name || '') + ' ' + (selectedEvent?.client?.last_name || '') || 'Concert decoration'}
+</p>
+
+
+sp https://tinyurl.com/26yd7cbd
+cl https://tinyurl.com/2894gn9q
