@@ -1,6 +1,5 @@
 package com.rentmen.app.DTO;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class PotentialJobOfferDto {

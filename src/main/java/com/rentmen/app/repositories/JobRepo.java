@@ -1,17 +1,19 @@
 package com.rentmen.app.repositories;
 
-import java.util.List;
-import java.util.Set;
-
-import javax.transaction.Transactional;
-
+import com.rentmen.app.entities.Job;
+import com.rentmen.app.entities.PotentialJobOffer;
+import com.rentmen.app.entities.Projects;
+import com.rentmen.app.entities.ServiceProvider;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-import com.rentmen.app.entities.Job;
-import com.rentmen.app.entities.PotentialJobOffer;
-import com.rentmen.app.entities.ServiceProvider;
+import javax.transaction.Transactional;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Set;
 
 public interface JobRepo extends JpaRepository<Job, Long> {
 	
@@ -27,7 +29,12 @@ public interface JobRepo extends JpaRepository<Job, Long> {
 	List<Job> findByPotentialJobOffersIn(Set<PotentialJobOffer> potentialJobOffers);
 	
 	List<Job> findByServiceProvidersListIn(List<ServiceProvider> serviceProviders);
-	
+
+	@Query("SELECT CASE WHEN COUNT(j) > 0 THEN true ELSE false END FROM Job j JOIN j.serviceProvidersList sp WHERE j.id = :jobId AND sp.id = :serviceProviderId")
+	boolean existsJobServiceProvider(@Param("jobId") Long jobId,
+									 @Param("serviceProviderId") Long serviceProviderId);
+
+
 	@Modifying
 	@Query(value = "INSERT INTO job_service_provider_ids (job_id , service_provider_id) VALUES ( :jobId, :serviceProviderId)" , nativeQuery = true)
 	int addToServiceProvidersList(Long jobId,Long serviceProviderId);
@@ -53,6 +60,25 @@ public interface JobRepo extends JpaRepository<Job, Long> {
 	void setReviewedByServiceProviderTrue(String reviewedByServiceProvider,Long id);
 
 
+//	@Query(value = "SELECT * FROM job j " +
+//            "WHERE (j.end_date < :currentDate OR (j.end_date = :currentDate AND j.end_time < :currentTime)) " +
+//            "AND j.reviewed_by_client > 0 AND j.reviewed_by_service_provider IS NOT NULL AND j.status <> 'COMPLETED'", nativeQuery = true)
+//List<Job> findExpiredJobs(@Param("currentDate") LocalDate currentDate, @Param("currentTime") LocalTime currentTime);
+	
+//	@Query(value = "SELECT * FROM job j " +
+//            "WHERE (j.end_date < :currentDate OR (j.end_date = :currentDate AND j.end_time < :currentTime)) " +
+//            "AND j.status <> 'COMPLETED'", nativeQuery = true)
+//List<Job> findExpiredJobs(@Param("currentDate") LocalDate currentDate, @Param("currentTime") LocalTime currentTime);
 
+	@Query(value = "SELECT * FROM job j " +
+    "WHERE TIMESTAMP(j.end_date, j.end_time) < NOW() " +
+      "AND TIMESTAMP(j.end_date, j.end_time) >= NOW() - INTERVAL 14 HOUR " +
+      "AND j.status <> 'COMPLETED'", nativeQuery = true)
+	List<Job> findRecentlyExpiredJobs(@Param("currentDate") LocalDate currentDate,
+									  @Param("currentTime") LocalTime currentTime);
+
+	List<Job> findByProject(Projects project);
+
+	List<Job> findByProjectId(Long projectId);
 
 }

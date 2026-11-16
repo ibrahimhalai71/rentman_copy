@@ -1,10 +1,11 @@
 package com.rentmen.app.configurations;
 
-import java.time.LocalDate;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.time.LocalDate;
 
 public class ExpiryInterceptor implements HandlerInterceptor {
     private LocalDate allowedEndDate;

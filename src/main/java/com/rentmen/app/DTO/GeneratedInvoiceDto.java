@@ -1,8 +1,9 @@
+
 package com.rentmen.app.DTO;
 
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.List;
 
 public class GeneratedInvoiceDto {
 	@JsonProperty("invoices")
@@ -17,10 +18,8 @@ public class GeneratedInvoiceDto {
 	Double totalCost;
 	@JsonProperty("total_cost_tax")
 	Double totalCostTax;
-	
-	public GeneratedInvoiceDto(List<InvoiceDto> invoices, Double totalExtraCost, Double totalKilometer, Double cost,
-			Double totalCost, Double totalCostTax) {
-		super();
+
+	public GeneratedInvoiceDto(List<InvoiceDto> invoices, Double totalExtraCost, Double totalKilometer, Double cost, Double totalCost, Double totalCostTax) {
 		this.invoices = invoices;
 		this.totalExtraCost = totalExtraCost;
 		this.totalKilometer = totalKilometer;
@@ -30,7 +29,7 @@ public class GeneratedInvoiceDto {
 	}
 
 	public List<InvoiceDto> getInvoices() {
-		return invoices;
+		return this.invoices;
 	}
 
 	public void setInvoices(List<InvoiceDto> invoices) {
@@ -38,7 +37,7 @@ public class GeneratedInvoiceDto {
 	}
 
 	public Double getTotalExtraCost() {
-		return totalExtraCost;
+		return this.totalExtraCost;
 	}
 
 	public void setTotalExtraCost(Double totalExtraCost) {
@@ -46,7 +45,7 @@ public class GeneratedInvoiceDto {
 	}
 
 	public Double getTotalKilometer() {
-		return totalKilometer;
+		return this.totalKilometer;
 	}
 
 	public void setTotalKilometer(Double totalKilometer) {
@@ -54,7 +53,7 @@ public class GeneratedInvoiceDto {
 	}
 
 	public Double getCost() {
-		return cost;
+		return this.cost;
 	}
 
 	public void setCost(Double cost) {
@@ -62,7 +61,7 @@ public class GeneratedInvoiceDto {
 	}
 
 	public Double getTotalCost() {
-		return totalCost;
+		return this.totalCost;
 	}
 
 	public void setTotalCost(Double totalCost) {
@@ -70,11 +69,10 @@ public class GeneratedInvoiceDto {
 	}
 
 	public Double getTotalCostTax() {
-		return totalCostTax;
+		return this.totalCostTax;
 	}
 
 	public void setTotalCostTax(Double totalCostTax) {
 		this.totalCostTax = totalCostTax;
 	}
-
 }

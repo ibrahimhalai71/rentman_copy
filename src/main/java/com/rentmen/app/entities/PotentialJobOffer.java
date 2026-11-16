@@ -1,41 +1,37 @@
 package com.rentmen.app.entities;
 
-import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.IdClass;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
-@Table(name = "potential_job_offers")
+@Table(
+		name = "potential_job_offers"
+)
 @IdClass(PotentialJobOfferId.class)
-public class PotentialJobOffer{
-
-	public PotentialJobOffer() {
-		super();
-	}
-
+public class PotentialJobOffer {
 	@Id
 	@ManyToOne
+	@JsonBackReference
 	private Job job;
-	
-	
 	@Id
 	@ManyToOne
 	private ServiceProvider serviceProvider;
-	
+	private Integer accepted;
+
+	public PotentialJobOffer() {
+	}
+
 	public Job getJob() {
-		return job;
+		return this.job;
 	}
 
 	public ServiceProvider getServiceProvider() {
-		return serviceProvider;
+		return this.serviceProvider;
 	}
 
 	public Integer getAccepted() {
-		return accepted;
+		return this.accepted;
 	}
 
 	public void setJob(Job job) {
@@ -43,8 +39,12 @@ public class PotentialJobOffer{
 	}
 
 	public PotentialJobOffer(Job job, ServiceProvider serviceProvider) {
-		super();
 		this.job = job;
+		this.serviceProvider = serviceProvider;
+		this.accepted = -1;
+	}
+
+	public PotentialJobOffer(ArchiveJob archivejob, ServiceProvider serviceProvider) {
 		this.serviceProvider = serviceProvider;
 		this.accepted = -1;
 	}
@@ -56,7 +56,4 @@ public class PotentialJobOffer{
 	public void setAccepted(Integer accepted) {
 		this.accepted = accepted;
 	}
-
-	private Integer accepted;
-
 }
