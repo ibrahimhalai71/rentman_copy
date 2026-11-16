@@ -2,6 +2,6 @@ package com.rentmen.app.utils;
 
 public enum AvailabilityOptions {
 	
-	WEEK, MONTH, YEAR;
+	WEEK, MONTH, YEAR, CUSTOM;
 
 }

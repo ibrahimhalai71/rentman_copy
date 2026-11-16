@@ -69,11 +69,15 @@ public class AuthController {
 			throw new ApiException("Invalid Username or Password");
 		}
 	}
-	
+
 	@PostMapping(path = { "/register" })
 	public ResponseEntity<?> registerUser(@Valid @RequestBody UserDto userDto) {
-		UserDto registeredUser = this.userService.registerNewUser(userDto);
-		return new ResponseEntity<>(registeredUser, HttpStatus.CREATED);
+		try {
+			UserDto registeredUser = this.userService.registerNewUser(userDto);
+			return new ResponseEntity<>(registeredUser, HttpStatus.CREATED);
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
 	}
 
 	@GetMapping({ "/current-user/" })

@@ -136,7 +136,11 @@ public class UserController {
     
     @PostMapping({"/createSkill"})
 	public ResponseEntity<?> createSkill(@RequestBody SkillDto skillDto) {
-		return ResponseEntity.ok(this.skillService.createSkill(skillDto));
+		try {
+			return ResponseEntity.ok(this.skillService.createSkill(skillDto));
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
 	}
     
     @GetMapping({"/getClient/{id}"})
@@ -155,17 +159,29 @@ public class UserController {
     }
     @PostMapping(path = {"/updateClient"})
     public ResponseEntity<?> updateClient(@RequestBody UserDto dto) throws Exception {
-		return ResponseEntity.ok(this.userService.updateClient(dto));
+		try {
+			return ResponseEntity.ok(this.userService.updateClient(dto));
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
 	}
     
     @PostMapping(path = {"/updateModerator"})
     public ResponseEntity<?> updateModerator(@RequestBody UserDto dto) throws Exception {
-		return ResponseEntity.ok(this.userService.updateModerator(dto));
+		try {
+			return ResponseEntity.ok(this.userService.updateModerator(dto));
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
 	}
     
     @PostMapping(path = {"/updateServiceProvider"})
     public ResponseEntity<?> updateServiceProvider(@RequestBody UserDto dto) throws Exception {
-		return ResponseEntity.ok(this.userService.updateServiceProvider(dto));
+		try {
+			return ResponseEntity.ok(this.userService.updateServiceProvider(dto));
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
 	}
 
 	@GetMapping({ "/getServiceProvidersAvailableBetweenDates/{startDate}/{endDate}" })
@@ -190,14 +206,22 @@ public class UserController {
 
 	@PostMapping("/updateUserProfileImage")
 	public ResponseEntity<?> updateUserProfileImage(@RequestParam(value = "userId") Long userId,
-			@RequestParam(value = "profile_image") MultipartFile image) throws Exception {
-		return ResponseEntity.ok(this.userService.updateUserFile(userId, image, 1));
+			@RequestParam(value = "profile_image") MultipartFile image) {
+		try {
+			return ResponseEntity.ok(this.userService.updateUserFile(userId, image, 1));
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
 	}
 	
 	@PostMapping("/updateUserAgreement")
 	public ResponseEntity<?> updateUserAgreement(@RequestParam(value = "userId") Long userId,
-			@RequestParam(value = "file") MultipartFile file) throws Exception {
-		return ResponseEntity.ok(this.userService.updateUserFile(userId, file, 2));
+			@RequestParam(value = "file") MultipartFile file) {
+		try {
+			return ResponseEntity.ok(this.userService.updateUserFile(userId, file, 2));
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
 	}
     
     

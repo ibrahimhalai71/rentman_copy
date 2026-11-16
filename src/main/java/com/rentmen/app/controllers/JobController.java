@@ -36,14 +36,22 @@ public class JobController {
 	
 	@PostMapping({"/createJob"})
 	public ResponseEntity<?> createJob(@RequestBody JobDto job) {
-		JobDto createdJob = jobService.createJob(job);
-		return new ResponseEntity<JobDto>(createdJob, HttpStatus.CREATED);
+		try {
+			JobDto createdJob = jobService.createJob(job);
+			return new ResponseEntity<JobDto>(createdJob, HttpStatus.CREATED);
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
 	}
 	
 	@PostMapping({"/updateJob"})
 	public ResponseEntity<?> updateJob(@RequestBody JobDto job) {
-		JobDto updatedJob = jobService.updateJob(job);
-		return ResponseEntity.ok(updatedJob);
+		try {
+			JobDto updatedJob = jobService.updateJob(job);
+			return ResponseEntity.ok(updatedJob);
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
 	}
 	
 	@GetMapping({"/getJob/{jobId}"})
@@ -88,20 +96,28 @@ public class JobController {
 	
 	@PostMapping({"/acceptJobOffers"})
 	public ResponseEntity<?> acceptJobOffers(@RequestBody List<PotentialJobOfferDto> pjoDto) {
-		List<Long> jobIds = pjoDto.stream().map(PotentialJobOfferDto::getJobId) // Extract job ID from each
-																				// PotentialJobOfferDto
-				.collect(Collectors.toList());
-		jobService.acceptJobOffers(jobIds, pjoDto.get(0).getServiceProviderId());
-		return ResponseEntity.ok("Updated");
+		try {
+			List<Long> jobIds = pjoDto.stream().map(PotentialJobOfferDto::getJobId) // Extract job ID from each
+																					// PotentialJobOfferDto
+					.collect(Collectors.toList());
+			jobService.acceptJobOffers(jobIds, pjoDto.get(0).getServiceProviderId());
+			return ResponseEntity.ok("Updated");
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
 	}
 	
 	@PostMapping({"/rejectJobOffers"})
 	public ResponseEntity<?> rejectJobOffers(@RequestBody List<PotentialJobOfferDto> pjoDto) {
-		List<Long> jobIds = pjoDto.stream().map(PotentialJobOfferDto::getJobId) // Extract job ID from each
-																				// PotentialJobOfferDto
-				.collect(Collectors.toList());
-		jobService.rejectJobOffers(jobIds, pjoDto.get(0).getServiceProviderId());
-		return ResponseEntity.ok("Updated");
+		try {
+			List<Long> jobIds = pjoDto.stream().map(PotentialJobOfferDto::getJobId) // Extract job ID from each
+																					// PotentialJobOfferDto
+					.collect(Collectors.toList());
+			jobService.rejectJobOffers(jobIds, pjoDto.get(0).getServiceProviderId());
+			return ResponseEntity.ok("Updated");
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
 	}
 	
 	@GetMapping({"/review-form/client/{token}"})
