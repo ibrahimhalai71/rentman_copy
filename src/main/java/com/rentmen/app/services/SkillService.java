@@ -1,8 +1,9 @@
 package com.rentmen.app.services;
 
-import java.util.Set;
-
 import com.rentmen.app.DTO.SkillDto;
+
+import java.util.List;
+import java.util.Set;
 
 public interface SkillService {
 	SkillDto createSkill(SkillDto skillDto);
@@ -14,6 +15,8 @@ public interface SkillService {
 	SkillDto getSkill(Long id);
 	
 	Set<SkillDto> getAllSkills();
+	
+	List<SkillDto> getAllSkillsList();
 	
 	
 

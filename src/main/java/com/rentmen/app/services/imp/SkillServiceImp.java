@@ -1,19 +1,19 @@
 package com.rentmen.app.services.imp;
 
-import java.lang.reflect.Type;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import com.rentmen.app.DTO.SkillDto;
+import com.rentmen.app.entities.Skill;
+import com.rentmen.app.repositories.SkillRepo;
+import com.rentmen.app.services.SkillService;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.rentmen.app.DTO.SkillDto;
-import com.rentmen.app.entities.Skill;
-import com.rentmen.app.repositories.SkillRepo;
-import com.rentmen.app.services.SkillService;
+import java.lang.reflect.Type;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 @Service
 public class SkillServiceImp implements SkillService {
@@ -52,11 +52,17 @@ public class SkillServiceImp implements SkillService {
 
 	@Override
 	public Set<SkillDto> getAllSkills() {
-		Set<Skill> skillSet = new HashSet<Skill>();
+		Set<Skill> skillSet = new TreeSet<Skill>();
 		Type setType = new TypeToken<Set<Skill>>() {}.getType();
 		List<Skill> skillList = skillRepo.findAll();
-		skillSet = new HashSet<>(skillList);
+		skillSet = new TreeSet<>(skillList);
 		return modelMapper.map(skillSet, setType);
+	}
+	
+	@Override
+	public List<SkillDto> getAllSkillsList() {
+		List<Skill> skillList = skillRepo.findAll();
+		return skillList.stream().map(skills -> modelMapper.map(skills, SkillDto.class)).collect(Collectors.toList());
 	}
 
 }

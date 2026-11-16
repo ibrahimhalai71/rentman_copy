@@ -1,7 +1,9 @@
+
 package com.rentmen.app.configurations;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -11,6 +13,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,36 +27,27 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @Configuration
 @EnableWebSecurity
 @EnableWebMvc
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableGlobalMethodSecurity(
+        prePostEnabled = true
+)
 public class SecurityConfig {
-    public static final String[] PUBLIC_URLS = new String[] { "/api/v1/auth/**", "/webjars/**" };
-
+    public static final String[] PUBLIC_URLS = new String[]{"/api/v1/auth/**", "/webjars/**", "/api/job/**"};
     @Autowired
     private CustomUserDetailService custUserDetailsService;
-
     @Autowired
     private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    public SecurityConfig() {
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf().disable()
-            .authorizeHttpRequests()
-                .antMatchers(PUBLIC_URLS).permitAll()
-                .antMatchers(HttpMethod.GET).permitAll()
-                .anyRequest().authenticated()
-                .and().exceptionHandling()
-                .authenticationEntryPoint(this.jwtAuthenticationEntryPoint)
-                .and()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-
+        ((HttpSecurity)((HttpSecurity)((AuthorizeHttpRequestsConfigurer.AuthorizedUrl)((AuthorizeHttpRequestsConfigurer.AuthorizedUrl)((AuthorizeHttpRequestsConfigurer.AuthorizedUrl)((HttpSecurity)http.csrf().disable()).authorizeHttpRequests().antMatchers(PUBLIC_URLS)).permitAll().antMatchers(HttpMethod.GET)).permitAll().anyRequest()).authenticated().and()).exceptionHandling().authenticationEntryPoint(this.jwtAuthenticationEntryPoint).and()).sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.addFilterBefore(this.jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
-        http.authenticationProvider(daoAuthenticationProvider());
-        return http.build();
+        http.authenticationProvider(this.daoAuthenticationProvider());
+        return (SecurityFilterChain)http.build();
     }
 
     @Bean
@@ -65,7 +59,7 @@ public class SecurityConfig {
     public DaoAuthenticationProvider daoAuthenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(this.custUserDetailsService);
-        provider.setPasswordEncoder(passwordEncode());
+        provider.setPasswordEncoder(this.passwordEncode());
         return provider;
     }
 
@@ -77,7 +71,6 @@ public class SecurityConfig {
     @Bean
     public FilterRegistrationBean<CorsFilter> corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowCredentials(true);
         corsConfiguration.addAllowedOriginPattern("*");
@@ -89,15 +82,13 @@ public class SecurityConfig {
         corsConfiguration.addAllowedMethod("DELETE");
         corsConfiguration.addAllowedMethod("PUT");
         corsConfiguration.addAllowedMethod("OPTIONS");
-        
         corsConfiguration.addAllowedHeader("Sec-WebSocket-Key");
         corsConfiguration.addAllowedHeader("Sec-WebSocket-Version");
         corsConfiguration.addAllowedMethod("CONNECT");
         corsConfiguration.addAllowedMethod("UPGRADE");
         corsConfiguration.setMaxAge(3600L);
-
         source.registerCorsConfiguration("/**", corsConfiguration);
-        FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<>(new CorsFilter(source));
+        FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean(new CorsFilter(source), new ServletRegistrationBean[0]);
         bean.setOrder(-110);
         return bean;
     }
