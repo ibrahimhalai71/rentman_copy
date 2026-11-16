@@ -1,16 +1,14 @@
 package com.rentmen.app.configurations;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
-
 import com.rentmen.app.exceptions.ResourceNotFoundException;
 import com.rentmen.app.repositories.JobRepo;
 import com.rentmen.app.repositories.UserRepo;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -66,7 +64,8 @@ public class JwtTokenHelper {
 
     public Boolean validateToken(String token, UserDetails userDetails) {
         String username = getUsernameFromToken(token);
-        return Boolean.valueOf((username.equals(getEmailFromUserDetails(userDetails)) && !isTokenExpired(token).booleanValue()));
+        //&& !isTokenExpired(token).booleanValue()
+        return Boolean.valueOf((username.equals(getEmailFromUserDetails(userDetails))));
     }
     
     private String getEmailFromUserDetails(UserDetails userDetails) {

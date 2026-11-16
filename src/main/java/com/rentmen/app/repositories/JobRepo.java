@@ -1,17 +1,18 @@
 package com.rentmen.app.repositories;
 
-import java.util.List;
-import java.util.Set;
-
-import javax.transaction.Transactional;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-
 import com.rentmen.app.entities.Job;
 import com.rentmen.app.entities.PotentialJobOffer;
 import com.rentmen.app.entities.ServiceProvider;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import javax.transaction.Transactional;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Set;
 
 public interface JobRepo extends JpaRepository<Job, Long> {
 	
@@ -53,6 +54,15 @@ public interface JobRepo extends JpaRepository<Job, Long> {
 	void setReviewedByServiceProviderTrue(String reviewedByServiceProvider,Long id);
 
 
+//	@Query(value = "SELECT * FROM job j " +
+//            "WHERE (j.end_date < :currentDate OR (j.end_date = :currentDate AND j.end_time < :currentTime)) " +
+//            "AND j.reviewed_by_client > 0 AND j.reviewed_by_service_provider IS NOT NULL AND j.status <> 'COMPLETED'", nativeQuery = true)
+//List<Job> findExpiredJobs(@Param("currentDate") LocalDate currentDate, @Param("currentTime") LocalTime currentTime);
+	
+	@Query(value = "SELECT * FROM job j " +
+            "WHERE (j.end_date < :currentDate OR (j.end_date = :currentDate AND j.end_time < :currentTime)) " +
+            "AND j.status <> 'COMPLETED'", nativeQuery = true)
+List<Job> findExpiredJobs(@Param("currentDate") LocalDate currentDate, @Param("currentTime") LocalTime currentTime);
 
 
 }
